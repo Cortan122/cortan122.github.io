@@ -1,0 +1,240 @@
+#hdr
+#include <iostream>
+#include <math.h>
+#include <cstdint>
+#include <sys/ioctl.h>
+#include <stdio.h>
+#end
+using namespace std;
+
+const bool FORCE_SQUARE_FRAMEBUFFER = true;
+const int FOREGROUND = 38;
+const int BACKGROUND = 48;
+
+struct Vector2{
+  int x;
+  int y;
+  Vector2(int _x, int _y){
+    x = _x;
+    y = _y;
+  }
+  Vector2(int a[2]){
+    x = a[0];
+    y = a[1];
+  }
+  Vector2(){} 
+};
+
+Vector2 operator+(Vector2 a, Vector2 b){
+  Vector2 r;
+  r.x = a.x+b.x;
+  r.y = a.y+b.y;
+  return r;
+}
+
+struct colorRGB{
+  uint8_t R; 
+  uint8_t G;
+  uint8_t B;
+  colorRGB(uint8_t _R, uint8_t _G, uint8_t _B){
+    R = _R;
+    G = _G;
+    B = _B;
+  }
+  /*colorRGB(array<uint8_t,3> a){
+    R = a[0];
+    G = a[1];
+    B = a[2];
+  }*/
+  colorRGB(){}  
+};
+
+bool operator==(colorRGB & a, colorRGB & b){
+  return (a.R==b.R)&&(a.G==b.G)&&(a.B==b.B);
+}
+
+void gotoxy(int x,int y){
+  printf("%c[%d;%df",0x1B,y,x);
+}
+
+uint8_t parseColor(uint8_t c){
+  uint8_t r = 0;
+  r = (c&0b1000)?90:30;
+  c =  c&0b0111;
+  r += c;
+  return r;
+}
+
+void setColor(uint8_t c){
+  uint8_t f = parseColor(c&0xf);
+  uint8_t b = parseColor((c&0xf0)>>4)+10;
+  printf("%c[%d;%dm",0x1B,unsigned(f),unsigned(b) );
+}
+
+void setColorRGB(int mode,uint8_t r,uint8_t g,uint8_t b){
+  printf("%c[%d;2;%d;%d;%dm",0x1B,mode,unsigned(r),unsigned(g),unsigned(b));
+}
+
+void setColorRGB(int mode,colorRGB & c){
+  setColorRGB(mode,c.R,c.G,c.B);
+}
+
+Vector2 GetConsoleSize(){
+  struct winsize size;
+  ioctl(0,TIOCGWINSZ,&size);
+  return Vector2(size.ws_col,size.ws_row);
+}
+
+class FrameBuffer{
+  protected:
+  colorRGB *arr;
+  bool *bits;
+  int len;
+  int w;
+  int w1;
+  int h;
+  public:
+  Vector2 size;
+  Vector2 offset;
+
+  void resize(int x,int y){
+    if(FORCE_SQUARE_FRAMEBUFFER){
+      x = y = min(x,y);
+    }
+    w = x;
+    h = y;
+    w1 = (int)ceil(x*3.0/2.0);
+    len = x*y;
+    delete arr;
+    delete bits;
+    arr = new colorRGB[len];
+    bits = new bool[len];
+  }
+
+  FrameBuffer(int x,int y){
+    arr = NULL;
+    bits = NULL;
+    size = GetConsoleSize();
+    offset = Vector2(0,0);
+    resize(x,y);
+  }
+
+  /*void randomize(){
+    for (int i = 0; i < len; i++){
+      arr[i] = rand()&0xff;
+      bits[i] = true;
+    }
+  }*/
+
+  void forceRedraw(){
+    for (int i = 0; i < len; i++){
+      /*if(force||arr[i])*/bits[i] = true;
+    }
+  }
+
+  /*void drawold(bool fast=false){
+    uint8_t prevc = arr[0];
+    int prevposx = -1;
+    int prevposy = -1;  
+    setColor(prevc);
+    if(fast)gotoxy(-offset.x+1,-offset.y+1);
+    for (int j = max(offset.y,0); j < h; j++){
+      if(j>size.y+offset.y)break;
+      for (int i = max(offset.x,0); i < w1; i++){
+        int index = i+j*w1;
+        if(i<size.x+offset.x&&index<len&&bits[index] == true){
+          bits[index] = false;
+          if( (prevposx+1!=i||prevposy!=j)&&!fast ){
+            prevposx = i;
+            prevposy = j;
+            gotoxy(i+1-offset.x,j+1-offset.y);
+          }
+          if(prevc!=arr[index]){
+            setColor(arr[index]);
+            prevc = arr[index];
+          }
+          cout<<"\u258C";//"\xdd";
+        }
+      }
+      if(fast)gotoxy(-offset.x+1,j-offset.y+1);
+    }
+    gotoxy(1,1);
+  }*/
+
+  void draw(){
+    for (int j = 0; j < h; j++){
+      for (int i = 0; i < w1; i++){
+        if(i%3==1){
+          int index1 = 2*(i/3)+j*w;
+          int index2 = index1+1;
+          if(index2<len&&(bits[index1]||bits[index2])){
+            //bits[index2] = bits[index1] = false;
+            gotoxy(i+1,j+1);
+            setColorRGB(FOREGROUND,arr[index1]);
+            setColorRGB(BACKGROUND,arr[index2]);
+            cout<<"\u258C";
+          }
+        }else{
+          int index = 2*(i/3)+(i%3)/2+j*w;
+          if(index<len&&bits[index] == true){
+            //bits[index] = false;
+            gotoxy(i+1,j+1);
+            setColorRGB(FOREGROUND,arr[index]);
+            setColorRGB(BACKGROUND,arr[index]);
+            cout<<"\u258C";//"\xdd";
+          }
+        }
+      }
+    }
+    for (int i = 0; i < len; i++){
+      bits[i] = false;
+    }
+  }
+
+  void setPixel(int x,int y,uint8_t r,uint8_t g,uint8_t b){
+    //c = c&0xf;
+    //x = x%w;
+    //y = y%h;
+    //int offset = x%2;
+    //int pos = x/2;
+    int index = x+y*w;
+    if(index>=len)throw "overflow";
+    colorRGB res = colorRGB(r,g,b);
+    if(!(arr[index] == res))bits[index] = true;
+    arr[index] = res;
+  }
+
+  void setPixel(int x,int y,uint8_t gray){
+    setPixel(x,y,gray,gray,gray);
+  }
+
+  /*void setPixel(int x,int y,uint8_t c){
+    _setPixel(x*3,y,c);
+    _setPixel(x*3+1,y,c);
+    _setPixel(x*3+2,y,c);
+  }*/
+
+  /*void fill(uint8_t c){
+    c = c&0xf;
+    uint8_t v = c|(c<<4);
+    for (int i = 0; i < len; i++){
+      arr[i] = v;
+      bits[i] = true;
+    }
+  }
+
+  //maybe this sould not belong to the FrameBuffer
+  void checkerboard(uint8_t a,uint8_t b){
+    a = a&0xf;
+    b = b&0xf;
+    uint8_t v = a|(b<<4);
+    uint8_t u = b|(a<<4);
+    for (int i = 0; i < len; i++){
+      arr[i] = (i/w1)%2?u:v;
+      bits[i] = true;
+    }
+  }*/
+
+  int getW()const{return w;}
+  int getH()const{return h;}
+};

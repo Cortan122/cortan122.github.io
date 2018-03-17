@@ -1,0 +1,16 @@
+﻿<Properties StartupItem="flow\flow.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.flow PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="flow\Main.cs">
+    <Files>
+      <File FileName="flow\Program.cs" Line="18" Column="6" />
+      <File FileName="flow\Main.cs" Line="68" Column="8" />
+      <File FileName="flow\Tile.cs" Line="11" Column="44" />
+      <File FileName="flow\vector.cs" Line="107" Column="33" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+</Properties>

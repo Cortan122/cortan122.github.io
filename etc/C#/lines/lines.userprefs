@@ -1,0 +1,15 @@
+﻿<Properties StartupItem="lines\lines.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="lines\vector.cs">
+    <Files>
+      <File FileName="lines\vector.cs" Line="107" Column="8" />
+      <File FileName="lines\Main.cs" Line="37" Column="18" />
+      <File FileName="lines\FrameBuffer.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.lines PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>

@@ -1,0 +1,42 @@
+<html>
+ <head> 
+  <meta charset="UTF-8" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script language="javascript" type="text/javascript" src="../libraries/p5.js"></script> 
+  <script language="javascript" src="../libraries/p5.dom.js"></script> 
+  <!--<script language="javascript" src="libraries/p5.sound.js"></script>-->
+  <style> 
+  body {padding: 0; margin: 0;}
+  li {margin-bottom: 5px;}
+  canvas {position: absolute;left: 0px;top: 0px;}
+  .container {position: absolute;left: 0px;top: 0px;width: 600px;height: 500px;outline: 1px solid #000;user-select: none;}
+  .tooltip {position: absolute;z-index: 999}
+  .tweakables {display: inline-block; *display: inline; zoom: 1; vertical-align: top;margin: 0;}
+  /*div {display: inline-block; *display: inline; zoom: 1; vertical-align: top;margin: 0;}*/
+  .input {width: 50;}
+  .checkbox {position: relative;margin: 0;top: 5px;}
+  @font-face {
+    font-family: lcd_solid;
+    src: url(lcd_solid.ttf);
+  }
+  div{
+    white-space:pre; /* or pre-wrap if you want wrapping to still work. */
+  }
+  </style> 
+  <script language="javascript" type="text/javascript" src="../libraries/library.js"></script>  
+  <script language="javascript" type="text/javascript" src="pathfinder.js"></script>
+  <script language="javascript" type="text/javascript" src="tweakables.js"></script> 
+  <script language="javascript" type="text/javascript" src="input.js"></script> 
+  <script language="javascript" type="text/javascript" src="draw.js"></script>  
+  <script language="javascript" type="text/javascript" src="main.js"></script>
+  <script language="javascript" type="text/javascript" src="particle.js"></script> 
+  <script language="javascript" type="text/javascript" src="tower.js"></script> 
+  <script language="javascript" type="text/javascript" src="button.js"></script> 
+ </head> 
+ <body>
+  <ul id="pDiv" style="list-style-type:none;font-size: 20;text-decoration:;position: absolute;left: -500px;overflow-y: scroll;resize: vertical;height: 95%;margin-top: 0px;"><li style="margin-top: 20px;"></li></ul>
+  <div id="canvasContainer" class="container">
+    <div id="tooltipContainer" class="container" ></div>
+  </div>
+ </body>
+</html>

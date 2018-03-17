@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Home</title>
+    <meta name="theme-color" content="#E8EDF4">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="sketchs/libraries/p5.js"></script>
+    <!-- <script src="sketchs/libraries/library.js"></script>  -->
+    <script src="namePlate.js"></script>  
+    <style>
+      *{
+        margin:0;
+        padding:0;
+      }
+      html{
+        background-color:#E8EDF4;
+        font-family: consolas;
+        text-align: center;
+        height: 100%;
+      }
+      body{
+        max-width:875px;
+        /*min-height:900px;*/
+        margin:0 auto 0 auto;
+        position:relative;
+        height: 100%;
+      }
+      canvas{
+        /*width: 100%;*/
+        /*letter-spacing:1px;*/
+        border-radius:10px 10px 0 0;
+        display:block;
+      }
+      img{
+        display:block;
+      }
+      li {
+        float: left;
+      }
+      ul {
+        list-style-type: none;
+      }
+      #container{
+        width:100%;
+        /*margin-top:-450px;*/
+        position:absolute;
+        /*top:50%;*/
+        overflow: hidden;
+        
+        background-color: #666;
+        border-radius:12px;
+        box-shadow: 0 0 20px 0 rgba(0,0,0,0.3);
+      }
+      #footer{
+        padding: 10px 0 10px;
+        background: #5269A0 /*url("footer.png") no-repeat center top*/;
+        background-size: 100% auto;
+        color: #BAC5DC;
+        clear: both;
+        border-radius: 0 0 10px 10px;
+        width: 100%;
+        transition: border-radius 0.2s ease;
+      }
+      #footer a{
+        color:white;
+      }
+      #shadow{
+        pointer-events: none;
+        width:100%;
+        position: absolute;
+        box-shadow: 0 0 20px 0 rgba(0,0,0,1);
+      }
+      #gitImg{
+        width: 125px
+      }
+      #mores{
+        display: none;
+      }
+      @media only screen and (max-width: 891px){
+        body {
+          max-width: 750px;
+          /*min-height: 1000px;*/
+        }
+        #gitArrow{
+          display: none;
+        }
+        #gitImg{
+          width: 250px;
+        }
+        #mores{
+          display: block;
+        }
+        #more{
+          display: none;
+        }
+      }
+      @media only screen and (max-width: 766px){
+        body {
+          max-width: 500px;
+          /*min-height: 1000px;*/
+        }
+      }
+      @media only screen and (max-width: 516px){
+        body {
+          max-width: 250px;
+          /*min-height: 1000px;*/
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <!-- canvas goes here -->
+      <div id="container2">
+        <ul>
+          <li><a href="sketchs/tetris"><img src="img/T.png" style="width: 250px"></a></li>
+          <li><a href="sketchs/projection"><img src="img/C.png" style="width: 250px"></a></li>
+          <li><a href="sketchs/graphing"><img src="img/G.png" style="width: 250px"></a></li>
+          <li id="gitArrow"><a href="http://github.com/Cortan122/cortan122.github.io"><img src="img/gitArrow1.png" style="width: 125px"></a></li>
+          <li><a href="http://github.com/Cortan122/cortan122.github.io"><img id="gitImg" src="img/git.png"></a></li>
+          <li id="more"><a href="sketchs/categories.html"><img src="img/more.png" style="width: 625px"></a></li>
+          <li id="mores"><a href="sketchs/categories.html"><img src="img/mores.png" style="width: 250px"></a></li>
+        </ul>
+        
+      </div>
+      <div id="shadow"></div>
+      <div id="footer">
+        <a href="mailto:cortan122@gmail.com">cortan122@gmail.com</a>
+      </div>
+    </div>
+  </body>
+</html>

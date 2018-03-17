@@ -1,0 +1,17 @@
+﻿<Properties StartupItem="flow\connect4.csproj">
+  <MonoDevelop.Ide.ItemProperties.connect4 PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="flow\Main.cs">
+    <Files>
+      <File FileName="flow\Main.cs" Line="181" Column="8" />
+      <File FileName="flow\Tile.cs" Line="63" Column="4" />
+      <File FileName="flow\Node.cs" Line="39" Column="23" />
+      <File FileName="flow\Layer.cs" Line="31" Column="1" />
+      <File FileName="flow\Network.cs" Line="11" Column="25" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+</Properties>

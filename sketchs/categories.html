@@ -1,0 +1,73 @@
+
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">-->
+<html>
+<head><TITLE>Tree Example</TITLE>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+var isDropdownAnimated = true; 
+function tree_toggle(event) {
+  event = event || window.event;
+  var clickedElem = event.target || event.srcElement;
+
+  if (!hasClass(clickedElem, 'Expand'))return;
+
+  var node = clickedElem.parentNode;
+  if (hasClass(node, 'ExpandLeaf'))return;
+
+  var newClass = hasClass(node, 'ExpandOpen') ? 'ExpandClosed' : 'ExpandOpen';
+  var re =  /(^|\s)(ExpandOpen|ExpandClosed)(\s|$)/;
+  node.className = node.className.replace(re, '$1'+newClass+'$3');
+
+  if(isDropdownAnimated){
+    if(hasClass(node, 'ExpandOpen'))
+      $(node).children().filter('.Container').slideDown("fast");
+    else
+      $(node).children().filter('.Container').slideUp("fast");
+  }
+}
+
+function hasClass(elem, className) {
+  return new RegExp("(^|\\s)"+className+"(\\s|$)").test(elem.className)
+}
+</script>
+<script language="javascript" type="text/javascript" src="libraries/p5.js"></script> 
+<script language="javascript" type="text/javascript" src="libraries/p5.dom.js"></script>
+<script language="javascript" type="text/javascript" src="categories.js"></script> 
+<style type="text/css">
+.Container {    padding: 0;    margin: 0;}
+.Container li {    list-style-type: none;}
+/* indent for all tree children excepts root */
+.Node {    background-image : url(../img/i.gif);    background-position : top left;    background-repeat : repeat-y;    margin-left: 18px;    zoom: 1;}
+.IsRoot {    margin-left: 0;}
+/* left vertical line (grid) for all nodes */
+.IsLast {    background-image: url(../img/i_half.gif);    background-repeat : no-repeat;}
+.ExpandOpen .Expand {    background-image: url(../img/expand_minus.gif);}
+/* closed is higher priority than open */
+.ExpandClosed .Expand {    background-image: url(../img/expand_plus.gif);}
+/* highest priority */
+.ExpandLeaf .Expand {    background-image: url(../img/expand_leaf.gif);}
+.Content {    min-height: 18px;    margin-left:18px;}* html .Content {    height: 18px;}
+.Expand {    width: 18px;    height: 18px;    float: left;}
+.ExpandOpen .Container {        display: block;}
+.ExpandClosed .Container {        display: none;}
+.ExpandOpen .Expand, .ExpandClosed .Expand {        cursor: pointer;}
+.ExpandLeaf .Expand {        cursor: auto;}
+a {color: #000; text-decoration: none;}
+/*i am not sure about how the links sould look*/
+a.ContentL:hover {color: #0000ee /*-webkit-link*/; text-decoration: underline;}
+</style>
+</head>
+<body>
+  <a id="latest" aling="right" style="
+  position: fixed;
+  right: -100;
+  margin-right: 8px;
+  box-shadow: 0px 0px 7px 3px #00ff06;
+  background-color: #00ff06;
+  padding-right: 100px;
+"></a>
+<div id="tree" onclick="tree_toggle(arguments[0])">
+<div>Tree</div>
+</div>
+</body>
+</html>

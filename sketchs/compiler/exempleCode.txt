@@ -1,0 +1,77 @@
+/*run(`
+var a %0xff
+var b %0xfe
+var jump jmp
+
+mov a $1
+mov b $1
+var start this
+add a b
+swp a b
+shw b
+jump %start
+`)*/
+
+
+var p %0xef
+var placeHolder 0xcc
+
+jmp %this+15
+var func this
+shw %0xf0
+mov %this+7 p
+add p $0xff //decrement p
+mov %this+4 %placeHolder 
+jmp %placeHolder
+
+inc p
+mov %this+5 p
+mov %placeHolder $this+5
+jmp %func
+
+inc p
+mov %this+5 p
+mov %placeHolder $this+5
+jmp %func
+
+
+# 00
+//<call>
+inc p
+mov %this+5 p
+mov %placeHolder $this+5
+jmp %func
+//</call>
+//<return>
+mov %this+7 p
+add p $0xff //decrement p
+mov %this+4 %placeHolder 
+jmp %placeHolder
+//</return>
+//<multiply>
+add b $0xff
+var m %this
+add c a
+add b $0xff
+jc m
+shw c
+//</multiply>
+
+//<multiply2>
+mov {2} $0 
+mov {3} {1} 
+add {3} ${4} 
+var m +this 
+add {2} {0} 
+add {3} ${4} 
+jc %m
+shw {2}
+//</multiply2>
+
+//<a >= b>
+mov %0xee b
+xor %0xee $0xff
+inc %0xee
+add %0xee a
+jc  //%this+4
+//</a >= b>

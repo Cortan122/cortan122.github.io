@@ -1,0 +1,6 @@
+fixed:if you press H while gameover , you can move again;
+was not real:if you press H while gameover , the screen goes black;
+fixed:if you press H twice , the screen goes black;
+if you mute while a sound is playing it dosent work;
+?:when you clear rows the block falls;
+pressing T some times dosent draw imges; 

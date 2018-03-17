@@ -1,0 +1,4 @@
+C:\костя\R\C\2048\flow\bin\Debug\flow.exe
+C:\костя\R\C\2048\flow\bin\Debug\flow.pdb
+C:\костя\R\C\2048\flow\obj\x86\Debug\flow.exe
+C:\костя\R\C\2048\flow\obj\x86\Debug\flow.pdb

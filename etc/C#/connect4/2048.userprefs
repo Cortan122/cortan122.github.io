@@ -1,0 +1,17 @@
+﻿<Properties StartupItem="flow\2048.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="flow\Main.cs">
+    <Files>
+      <File FileName="flow\Main.cs" Line="123" Column="4" />
+      <File FileName="flow\Tile.cs" Line="52" Column="4" />
+      <File FileName="flow\Node.cs" Line="39" Column="23" />
+      <File FileName="flow\Layer.cs" Line="35" Column="23" />
+      <File FileName="flow\Network.cs" Line="39" Column="70" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.2048 PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>

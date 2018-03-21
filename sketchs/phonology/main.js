@@ -160,7 +160,11 @@ var writer = function(){
       t = converter.syllables(data);
     }catch(e){return;}
     stroke(0);
+    push();
+    noStroke();
+    fill(0);
     text(t,a.initOffset[0],height-a.initOffset[1]);
+    pop();
     if(t != '')a.write(data);
   };
   a.writeSpace = function(){
@@ -284,6 +288,8 @@ function setup() {
   background(200);
   noFill();
   //strokeCap(SQUARE);
+  textStyle(BOLD);
+  strokeWeight(2);
   rectMode(CORNERS);
 
   $('body').append('<input type="text" id="mainInput" style="width: {0}px;display: block;margin: 0;" autofocus >'

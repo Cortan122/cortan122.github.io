@@ -142,12 +142,12 @@ function runCFromFile(b){
 }
 
 function displaySearchResults(data){
-  var s = data.split("\n");
+  var s = data.replace(/\r\n/g,'\n').split("\n");
   s.pop();
   s.shift();
   s.shift();
   for(i = 0;i < s.length;i++){
-    s[i] = s[i].slice(0,s[i].length-1);
+    s[i] = s[i].slice(0,s[i].length);
     var link = createA("#",s[i]);
     var li = createElement('li','');
     li.child(link);

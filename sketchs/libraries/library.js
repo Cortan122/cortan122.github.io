@@ -197,9 +197,12 @@
     if(b === undefined){b = true;}
     if(type === undefined){type = "GET";data = undefined;}
     url = url.replace('https://','http://');
-    if(data === undefined && url.startsWith('http://')){
+    if(data === undefined && url.startsWith('http://') && !window.location.href.includes("cortan122.github.io")){
       sendRequest('../../mirror.php',func,"POST",b,cache,url);
       return;
+    }
+    if(url.endsWith('.php')&&window.location.href.includes("cortan122.github.io")){
+      url = url.substring(0,url.length-4)+'.txt';
     }
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open(type,url,b);

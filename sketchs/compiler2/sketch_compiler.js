@@ -190,6 +190,9 @@ function sendRequest(fn,f,t,b){
   if(b === undefined){b = true;}
   if(t === undefined){t = "GET";}
   var xmlHttp = new XMLHttpRequest();
+  if(fn.endsWith('.php')&&window.location.href.includes("cortan122.github.io")){
+    fn = fn.substring(0,fn.length-4)+'.txt';
+  }
   xmlHttp.open(t,fn,b);
   xmlHttp.setRequestHeader('Expires',' Tue, 03 Jul 2001 06:00:00 GMT');
   xmlHttp.setRequestHeader('Last-Modified','{now} GMT');
@@ -203,7 +206,7 @@ function sendRequest(fn,f,t,b){
 }
 
 function search(b){
-  sendRequest("../compiler/search.php",displaySearchResults,"GET",b);
+  sendRequest('../compiler/search.php',displaySearchResults,"GET",b);
 }
 
 function runCFromFile(b){

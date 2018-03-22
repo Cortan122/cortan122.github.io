@@ -26,6 +26,22 @@
             "js": 198
         }
     },
+    "2048": {
+        "categories": [
+            "Unfinished",
+            "Games"
+        ],
+        "name": "2048",
+        "time": 1521731700,
+        "jsfiles": [
+            "main.js",
+            "logic.js"
+        ],
+        "lines": {
+            "html": 17,
+            "js": 135
+        }
+    },
     "circuit": {
         "categories": [
             "Simulations",
@@ -57,8 +73,8 @@
             "Compiler.js"
         ],
         "lines": {
-            "html": 29,
-            "js": 1044
+            "html": 26,
+            "js": 1047
         }
     },
     "compiler2": {
@@ -81,7 +97,7 @@
         ],
         "lines": {
             "html": 27,
-            "js": 1332
+            "js": 1335
         }
     },
     "crypto": {
@@ -318,7 +334,7 @@
         ],
         "lines": {
             "html": 15,
-            "js": 233
+            "js": 301
         }
     },
     "pinball": {
@@ -388,7 +404,7 @@
             "mesh.js"
         ],
         "lines": {
-            "html": 46,
+            "html": 47,
             "js": 2095
         }
     },
@@ -431,7 +447,7 @@
         "time": 1520106900,
         "lines": {
             "html": 29,
-            "js": 188
+            "js": 203
         },
         "jsfiles": [
             "main.js"

@@ -1,6 +1,6 @@
 const TABLE_ALIGN = "left";//"center"
 const TABLE_STYLE = 1;
-const FILE_PATH = "../categories.txt";
+const FILE_PATH = "../categories.php";
 const FIRST_HEADER_NAME = "path";
 const HIDDEN_COLS = ["category","categories",'jsfiles'];
 const COL_FORMAT = ["link","text","time",".js num4"];
@@ -11,9 +11,12 @@ var totalLinesOfJavascript = 0;//temp
 function setup() {
   //noCanvas();
   //noLoop();
-  $.ajax(FILE_PATH).done(callback).fail(function() {
+  /*$.ajax(FILE_PATH).done(callback).fail(function() {
     alert( "error" );
-  });
+  });*/
+
+  sendRequest(FILE_PATH,callback);
+
   $('head').append('<link rel="stylesheet" type="text/css" href="t{0}.css">'.format(TABLE_STYLE));
 }
 window.addEventListener('load',setup);

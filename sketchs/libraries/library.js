@@ -413,6 +413,8 @@
 
       //setTimeout(twr.initTweakables, 1);
       twr.initTweakables();
+    }else if(window.tweakables && !(window.createElement && window.$)){
+      console.warn('you need p5.dom and jquery for tweakables');
     }
 
     if(window.inputRom && !window.parseInputRom){

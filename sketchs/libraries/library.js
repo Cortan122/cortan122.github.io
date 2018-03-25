@@ -224,6 +224,7 @@
     for (var i = 0; i < a.length; i++) {
       var b = a[i].rules;
       for (var j = 0; j < b.length; j++) {
+        if(b[j].selectorText == undefined)continue;
         if(!(string instanceof RegExp)){
           if(b[j].selectorText == string)return b[j];
         }else{
@@ -309,6 +310,8 @@
       s = s.substr(s.lastIndexOf('/')+1,999);
       twr.name = s+"_tweakables";
 
+      twr.events = [];
+
       twr.initTweakables = (function (){
         try{
           if(localStorage[this.name]){
@@ -359,15 +362,15 @@
           li.class('tweakables');
           if(typeof tweakables[name] == 'number'){
             var inp = createInput(tweakables[name]);
-            inp.input(new Function('tweakables["'+name+'"] = parseFloat(this.value());lib.tweaker.onChangeTweakable()'));
+            inp.input(new Function('tweakables["{0}"] = parseFloat(this.value());lib.tweaker.onChangeTweakable("{0}")'.format(name)));
             inp.class('input');
           }else if(typeof tweakables[name] == 'string'){
             var inp = createInput(tweakables[name]);
-            inp.input(new Function('tweakables["'+name+'"] = this.value();lib.tweaker.onChangeTweakable()'));
+            inp.input(new Function('tweakables["{0}"] = this.value();lib.tweaker.onChangeTweakable("{0}")'.format(name)));
             inp.class('input');
           }else if(typeof tweakables[name] == 'boolean'){
             var inp = createCheckbox('',tweakables[name]);
-            inp.changed(new Function('tweakables["'+name+'"] = this.checked();lib.tweaker.onChangeTweakable()'));
+            inp.changed(new Function('tweakables["{0}"] = this.checked();lib.tweaker.onChangeTweakable("{0}")'.format(name)));
             inp.class('checkbox');
           }else{
             localStorage[this.name] = undefined;
@@ -396,7 +399,8 @@
           });
       }).bind(twr);
 
-      twr.onChangeTweakable = (function () {
+      twr.onChangeTweakable = (function (name) {
+        this.events.forEach(e => e(name));
         var resizeTextbox = this.resizeTextbox;
         localStorage[this.name] = JSON.stringify(tweakables);
         if(tweakables.metaResize)

@@ -1,11 +1,7 @@
-var larr;
+var larr,tmparr = [],aniray = [];
 function reset(){
-  larr = [
-    0,0,0,0,
-    0,0,0,0,
-    0,0,0,0,
-    0,0,0,0
-  ];
+  larr = Array(gx*gy).fill().map(e=>0);
+  [1,2,3,4,8,7,6,5,9,10,11,12,16,15,14,13].map((e,i) => larr[i] = e);//debug
 }
 
 function larrxy(x,y){
@@ -14,19 +10,16 @@ function larrxy(x,y){
   return (x+y*gx)%(gx*gy);
 }
 
+var randIndex;
 function rand(){
-  var r = Math.floor(Math.random()*gx*gy);
-  var t;
-  for(var i = 0;i <gx*gy;i++){
-    t = larr[r];
-    if(t==0){
-      larr[r] = parseInt(random(tweakables.randomString.split('')),16);
-      return true;
-    }
-    r++;
-    r = r%(gx*gy);
-  }
-  return false;
+  isDirty = true;
+  randIndex = undefined;
+  if(!tweakables.spawnRandomTiles)return true;
+  var t = larr.map((e,i)=>[e,i]).filter(e => e[0]==0);
+  if(t.length == 0)return false;
+  randIndex = random(t)[1];
+  larr[randIndex] = parseInt(random(tweakables.randomString.split('')),16);
+  return true;
 }
 
 var dirrom=[
@@ -36,8 +29,12 @@ var dirrom=[
   [-1,0]
 ];
 
+var prevDir;
 function move(dir){
+  tmparr = Array(gx*gy).fill().map(e=>false);
+  aniray = Array(gx*gy).fill().map(e=>0);
   dir = dir%4;
+  prevDir = dir;
   var r = false;
   var dirv = dirrom[dir];
   var dx = dirv[0]==1?-1:1;
@@ -69,18 +66,28 @@ function movexy(dir,x,y,b=false){
   var nx = x+dirv[0];
   var ny = y+dirv[1];
   var ni = larrxy(nx,ny);
-  if(ni==-1)return false;
+  if(ni==-1){
+    tmparr[i] = b||tmparr[i];
+    return false;
+  }
   var nt = larr[ni];
-  if(nt==t&&!b){
+  if(nt==t&&!b&&!tmparr[i]&&!tmparr[ni]){
     larr[ni]++;
     larr[i]=0;
+    aniray[ni] = aniray[i]+1;
+    aniray[i] = 0;
     movexy(dir,nx,ny,true);
     return true;
   }
-  var res = movexy(dir,nx,ny,b);
-  if(!res)return false;
+  var res = movexy(dir,nx,ny);
+  if(!res){
+    tmparr[i] = b||tmparr[i];
+    return false;
+  }
   larr[ni]=t;
   larr[i]=0;
+  aniray[ni] = aniray[i]+1;
+  aniray[i] = 0;
   movexy(dir,nx,ny,b);
   return true;
 }

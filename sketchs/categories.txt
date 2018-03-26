@@ -38,8 +38,8 @@
             "logic.js"
         ],
         "lines": {
-            "html": 17,
-            "js": 135
+            "html": 63,
+            "js": 301
         }
     },
     "circuit": {
@@ -125,7 +125,7 @@
             "huffman.js"
         ],
         "lines": {
-            "html": 17,
+            "html": 23,
             "js": 1033
         }
     },

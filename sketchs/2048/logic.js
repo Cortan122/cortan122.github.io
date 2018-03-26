@@ -1,7 +1,7 @@
 var larr,tmparr = [],aniray = [];
 function reset(){
   larr = Array(gx*gy).fill().map(e=>0);
-  [1,2,3,4,8,7,6,5,9,10,11,12,16,15,14,13].map((e,i) => larr[i] = e);//debug
+  //[1,2,3,4,8,7,6,5,9,10,11,12,16,15,14,13].map((e,i) => larr[i] = e);//debug
 }
 
 function larrxy(x,y){

@@ -13,6 +13,7 @@ var isDirty = true;
 var tweakables = {
   animationSpeed:0.05,
   cubeSize:3,
+  dragThreshold:100,
   showFPS:true,
   metaStart:true
 };
@@ -38,6 +39,7 @@ function setup() {
   init();
   run1("fxf2xf'ulbdryzu'l'b'd'r'x'y'z'u2l2b2d2r2x2y2z2",1);
   reset();
+  pixelDensity(1);
 }
 
 function draw() {
@@ -642,7 +644,10 @@ function mousePressed(){
 
 function mouseReleased(){
   isDirty = true;
-  if(mousePressedPos.x != mouseX||mousePressedPos.y != mouseY){
+  var dx,dy;
+  dx = mouseX-mousePressedPos.x;
+  dy = mouseY-mousePressedPos.y;
+  if(dx**2+dy**2>tweakables.dragThreshold){
     drag();
   }else{
     click();

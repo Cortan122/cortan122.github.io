@@ -343,8 +343,14 @@
         var isTweakablesShown = this.isTweakablesShown;
         pdiv = $('#pDiv');
         var a = width;
-        if(isTweakablesShown){pdiv.css('left','-'+a+'px');}else{pdiv.css('left',a+'px');}
+        if(isTweakablesShown){
+          pdiv.css('left','-'+a+'px').css('display','none');
+        }else{
+          pdiv.css('left',a+'px').css('display','inline-block');
+        }
         this.isTweakablesShown = !isTweakablesShown;
+
+        this.events.forEach(e => e("isTweakablesShown"));
       }).bind(twr);
 
       twr.displayTweakables = (function () {

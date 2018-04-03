@@ -218,6 +218,13 @@
             "js": 260
         }
     },
+    "gravity3": {
+        "categories": [
+            "Unfinished",
+            "Simulations"
+        ],
+        "name": "Optimized gravity"
+    },
     "heart": {
         "category": "Images",
         "name": "Heart",

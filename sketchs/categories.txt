@@ -28,7 +28,6 @@
     },
     "2048": {
         "categories": [
-            "Unfinished",
             "Games"
         ],
         "name": "2048",
@@ -126,7 +125,7 @@
         ],
         "lines": {
             "html": 23,
-            "js": 1033
+            "js": 1038
         }
     },
     "curve": {
@@ -195,11 +194,12 @@
         "name": "Gravity",
         "time": 1492820700,
         "jsfiles": [
-            "sketch_gravity.js"
+            "main.js",
+            "Thing.js"
         ],
         "lines": {
-            "html": 17,
-            "js": 278
+            "html": 30,
+            "js": 221
         }
     },
     "gravity2": {
@@ -209,21 +209,14 @@
         "name": "Gravity 2",
         "time": 1497896760,
         "jsfiles": [
-            "sketch_gravity2.js",
             "thing.js",
-            "Wrapper.js"
+            "Wrapper.js",
+            "sketch_gravity2.js"
         ],
         "lines": {
-            "html": 19,
+            "html": 20,
             "js": 260
         }
-    },
-    "gravity3": {
-        "categories": [
-            "Unfinished",
-            "Simulations"
-        ],
-        "name": "Optimized gravity"
     },
     "heart": {
         "category": "Images",
@@ -453,10 +446,11 @@
         "name": "Sortable json table",
         "time": 1520106900,
         "lines": {
-            "html": 29,
-            "js": 203
+            "html": 42,
+            "js": 277
         },
         "jsfiles": [
+            "ping.js",
             "main.js"
         ]
     },
@@ -539,6 +533,20 @@
         "lines": {
             "html": 19,
             "js": 264
+        }
+    },
+    "webgl": {
+        "categories": [
+            "Unfinished"
+        ],
+        "name": "Template",
+        "time": 1523353980,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 16,
+            "js": 10
         }
     }
 }

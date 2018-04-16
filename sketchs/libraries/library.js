@@ -77,7 +77,7 @@
     f.apply(_this,args);//setTimeout()
   }
 
-  var keyCodeDictionary = {
+  var keyCodeDictionary = lib.keyCodeDictionary ={
     backspace:8,
     tab:9,
     enter:13,
@@ -192,16 +192,19 @@
     return keyCodeDictionary[argument];
   }
 
+  var isGithub = lib.isGithub = window.location.href.includes("cortan122.github.io");
+  var isLocalhost = lib.isLocalhost = window.location.href.includes("localhost");
+
   lib.sendRequest = function (url,func,type,b,cache,data){
     if(cache === undefined){cache = true;}
     if(b === undefined){b = true;}
     if(type === undefined){type = "GET";data = undefined;}
     url = url.replace('https://','http://');
-    if(data === undefined && url.startsWith('http://') && !window.location.href.includes("cortan122.github.io")){
+    if(data === undefined && url.startsWith('http://') && !isGithub){
       sendRequest('../../mirror.php',func,"POST",b,cache,url);
       return;
     }
-    if(url.endsWith('.php')&&window.location.href.includes("cortan122.github.io")){
+    if(url.endsWith('.php')&&isGithub){
       url = url.substring(0,url.length-4)+'.txt';
     }
     var xmlHttp = new XMLHttpRequest();
@@ -277,11 +280,11 @@
   }
 
   lib.init1 = function(){
-    if(lib.isInit == true){print("lib already init1alized");return;}
+    if(lib.isInit == true){console.log("lib already init1alized");return;}
     lib.isInit = true;
     //Object.assign(window,lib);
     for (var i in lib) {
-      if(window[i] === undefined)window[i] = lib[i];
+      if((window[i] === undefined)&&(lib[i] instanceof Function))window[i] = lib[i];
     }
     if(window.lib === undefined)window.lib = lib;
 
@@ -300,14 +303,19 @@
   }
 
   lib.init2 = function(){
-    if(lib.isInit2 == true){print("lib already init2alized");return;}
+    if(lib.isInit2 == true){console.log("lib already init2alized");return;}
     lib.isInit2 = true;
 
     if(window.tweakables && !window.initTweakables && window.createElement && window.$){
       var twr = lib.tweaker = {};
-      var s = window.location.toString();
-      if(s[s.length-1] == '/')s = s.substr(0,s.length-1);
-      s = s.substr(s.lastIndexOf('/')+1,999);
+      var s;
+      if(tweakables_name == undefined){
+        s = window.location.toString();
+        if(s[s.length-1] == '/')s = s.substr(0,s.length-1);
+        s = s.substr(s.lastIndexOf('/')+1,999);
+      }else{
+        s = tweakables_name;
+      }
       twr.name = s+"_tweakables";
 
       twr.events = [];
@@ -366,6 +374,7 @@
           var li = createElement('li','');
           li.child(text);
           li.class('tweakables');
+          li.id('tw_'+name);
           if(typeof tweakables[name] == 'number'){
             var inp = createInput(tweakables[name]);
             inp.input(new Function('tweakables["{0}"] = parseFloat(this.value());lib.tweaker.onChangeTweakable("{0}")'.format(name)));
@@ -527,7 +536,7 @@
   }
 
   lib.init3 = function(){
-    if(lib.isInit3 == true){print("lib already init3alized");return;}
+    if(lib.isInit3 == true){console.log("lib already init3alized");return;}
     lib.isInit3 = true;
 
     if(window.tweakables && window.tweakables.showFPS !== undefined && window.$){
@@ -551,6 +560,15 @@ Array.prototype.remove || (Array.prototype.remove = function(e) {
   var index = this.indexOf(e);
   if (index > -1) {
     this.splice(index, 1);
+  }
+});
+
+Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e) {
+  var index = this.indexOf(e);
+  if(index == this.length-1){
+    this.pop();
+  }else if(index > -1){
+    this[index] = this.pop();
   }
 });
 
@@ -599,6 +617,15 @@ String.prototype.format || (String.prototype.format = function() {
 });
 
 if(window.p5){
+  p5.Vector.angleBetween || (p5.Vector.angleBetween = function (v1, v2) {
+    var angle = Math.acos(v1.dot(v2) / (v1.mag() * v2.mag()));
+    return angle;
+  });
+
+  p5.Vector.prototype.distSq = function(v){
+    return v.copy().sub(this).magSq();
+  };
+
   p5.Vector.prototype.floor = function() {
     this.x = floor(this.x);
     this.y = floor(this.y);

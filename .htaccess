@@ -2,6 +2,7 @@ Options +Indexes +Includes +FollowSymLinks +MultiViews
 #AllowOverride All
 Require all granted
 Header set Access-Control-Allow-Origin *
+RewriteEngine On
 
 #<Location / > 
   #AddOutputFilterByType SUBSTITUTE text/html 

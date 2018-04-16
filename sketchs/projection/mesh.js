@@ -19,15 +19,23 @@ function edgeSplit(e,recursive){
 
 function _edgeSplit(edge,ratio){
   if(ratio == 1||ratio == 0)return;
-  var fs = arrTF.filter( e => (e.includes(edge[0]) && e.includes(edge[1])) );
-  if(fs.length == 0)return;
+  var fs;// = edge._faces;
+  if(fs == undefined){
+    fs = arrTF.filter( e => (e.includes(edge[0]) && e.includes(edge[1])) );
+  }
+  if(fs.length != 2)throw 'edgeSplit';
   var e = edge;
   var v = p5.Vector.lerp(p5.Vector.convert(e[0]),p5.Vector.convert(e[1]),ratio);
   arrP.push(v);
-  arrE.remove(e);
+  arrE.remove_fast(e);
   var e1;var e2;
   arrE.push(e1 = [e[0],v]);
   arrE.push(e2 = [e[1],v]);
+  /*e[0]._edges.push(e1);
+  e[1]._edges.push(e2);
+  e[0]._edges.remove(e);
+  e[1]._edges.remove(e);
+  v._edges = [e1,e2];*/
   for (var i = 0; i < fs.length; i++) {
     var i1 = fs[i].indexOf(e[0]);var i2 = fs[i].indexOf(e[1]);
     if(i1 + 1 == i2){
@@ -43,11 +51,21 @@ function _edgeSplit(edge,ratio){
 
 function truncate(ratio){
   if(!arrTF.length)findTrueFaces();
+  //arrP.forEach(e => {e._edges=e._faces=undefined;});
+  /*arrP.forEach(e => {e._faces=[];});
+  for (var j = 0; j < arrTF.length; j++) {
+    var face = arrTF[j];
+    face.forEach(e=>e._faces.push(face));
+  }
+  for (var i = 0; i < arrE.length; i++) {
+    var edge = arrE[i];
+    edge._faces = edge[0]._faces.filter(e => edge[1]._faces.includes(e));
+  }*/
   var oldEdges = arrE.slice();//.map(getFaceId);
   var oldVerts = arrP.slice();
   for (var j = 0; j < oldVerts.length; j++) {
     var vert = oldVerts[j];
-    var es = arrE.filter( e => e.includes(vert) );
+    var es = /*vert._edges;//*/arrE.filter( e => e.includes(vert) );
     if(ratio == undefined){
       var as = [];
       for (var i = 0; i < es.length; i++) {
@@ -102,25 +120,33 @@ function polygon(n){
 
 function snub(vert){
   if(!arrTF.length)findTrueFaces();
-  var es = arrE.filter( e => e.includes(vert) );
-  var fs = arrTF.filter( e => e.includes(vert) );
+  var es;// = vert._edges;
+  if(es == undefined){
+    es = arrE.filter( e => e.includes(vert) );
+  }
+  var fs;// = vert._faces;
+  if(fs == undefined){
+    fs = arrTF.filter( e => e.includes(vert) );
+  }
   var face = [];
   targetRotation(vert);
   es = es.sort(function(a,b){return edgeAngle(a,vert)-edgeAngle(b,vert);});
   for (var i = 0; i < es.length; i++) {
-    arrE.remove(es[i]);
-    face.push((es[i][0] == vert)?es[i][1]:es[i][0]);//fixed:makes self intersecting faces
+    arrE.remove_fast(es[i]);
+    face.push((es[i][0] == vert)?es[i][1]:es[i][0]);
+    //fixme:makes self intersecting faces
+    //depends on tweakables.isometric (not anymore)
   }
   for (var i = 0; i < fs.length; i++) {
     fs[i].remove(vert);
-    if(fs[i].length <= 2)arrTF.remove(fs[i]);
+    if(fs[i].length <= 2)arrTF.remove_fast(fs[i]);
   }
   for (var i = 0; i < face.length; i++) {
     arrE.push([face[i],face[(i+1)%face.length]])
   }
-  fixNormal(face);
+  //fixNormal(face);
   arrTF.push(face);
-  arrP.remove(vert);
+  arrP.remove_fast(vert);
 }
 
 function snubAll(dir){
@@ -135,7 +161,7 @@ function snubAll(dir){
   return a;
 }
 
-function labelVert(vert,c){
+function labelVert(vert,c){//very slow
   if(vert.c == c)return;
   if(vert.c != c && vert.c !== undefined)throw 'unable to snub';
   vert.c = c;
@@ -148,6 +174,7 @@ function labelVert(vert,c){
 var dualCoplanarity = true;
 function dual(){
   var newVerts = [];
+  arrP.forEach(e => {e._faces=[];e._edges = [];});
   for (var i = 0; i < arrTF.length; i++) {
     var f = arrTF[i];
     var r = createVector(0,0,0);
@@ -156,26 +183,34 @@ function dual(){
     }
     if(!dualCoplanarity)r.mult(1/f.length);
     newVerts.push(r);
+    f.forEach(e => e._faces.push(f));
     f.dualVert = r;
   }
   var newEdges = [];
   for (var i = 0; i < arrE.length; i++) {
     var edge = arrE[i];
-    var fs = arrTF.filter( e => (e.includes(edge[0]) && e.includes(edge[1])) );
+    //var fs = arrTF.filter( e => (e.includes(edge[0]) && e.includes(edge[1])) );
+    var fs = edge[0]._faces.filter(e => edge[1]._faces.includes(e));
     var e = [];
-    for (var j = 0; j < fs.length; j++) {
+    if(fs.length != 2){
+      fs = arrTF.filter( e => (e.includes(edge[0]) && e.includes(edge[1])) );
+    }
+    if(fs.length != 2)throw 'edge dual error';
+    for (var j = 0; j < 2; j++) {
       e.push(fs[j].dualVert);
+      edge[j]._edges.push(e);
     }
     newEdges.push(e);
   }
   var newFaces = [];
   for (var i = 0; i < arrP.length; i++) {
     var vert = arrP[i];
-    var fs = arrTF.filter( e => (e.includes(vert)) );
+    var fs = vert._faces;//arrTF.filter( e => (e.includes(vert)) );
     var f = [];
     for (var j = 0; j < fs.length; j++) {
       f.push(fs[j].dualVert);
     }
+    f._edges = vert._edges;
     newFaces.push(f);
   }
   resetMesh();
@@ -184,8 +219,8 @@ function dual(){
   arrTF = newFaces;
   //makeFaces();
   sortFaces();
-  arrTF.forEach(fixNormal);
-  standardizeEdgeLengths(true);
+  //arrTF.forEach(fixNormal);
+  //standardizeEdgeLengths(true);
 }
 
 function sortFaces(){
@@ -196,7 +231,10 @@ function sortFaces(){
 
 function sortFace1(f){
   if(f.length == 3)return;
-  var es = arrE.filter(e => f.includes(e[0])&&f.includes(e[1]));
+  var es = f._edges;
+  if(es == undefined){
+    es = arrE.filter(e => f.includes(e[0])&&f.includes(e[1]));
+  }
   var r = es[0].slice();
   var vert = es[0][1];
   var edge = es[0];
@@ -206,7 +244,7 @@ function sortFace1(f){
     r.push(vert);
   }
   arrTF[arrTF.indexOf(f)] = r;
-  fixNormal(f);
+  //fixNormal(f);
 }
 
 function sortFace(f){
@@ -245,6 +283,7 @@ function kis(height){//fixme: creates edges of length 0
   var tfs = arrTF.slice(); 
   for (var i = 0; i < tfs.length; i++) {
     var f = tfs[i];
+    fixNormal(f);
     var center = getSumOfArray(f).mult(1/f.length/**(height+1)*/);
     var normal = canonicalizer.approxNormal(f);
     center.add(normal.mult(height));
@@ -265,18 +304,38 @@ function kis(height){//fixme: creates edges of length 0
   if(tfs.length == 1)arrTF[arrTF.length-1].reverse()
 }
 
-function fixNormal(f){
-  //fixme
+function fixNormal(f,bool){
+  if(bool===undefined){
+    bool = (f.length==3);
+  }
   var normal = canonicalizer.approxNormal(f);
   var center = getSumOfArray(f).normalize();
-  var b = ((normal.z+normal.y+normal.x)>0)!=((center.z+center.y+center.x)>0);
+  if(bool){
+    var t = normal.dot(center);
+    var b = t>1||t<0;
+  }else{
+    var b = p5.Vector.angleBetween(normal,center)>PI/2;
+  }  
   if(b)f.reverse();
   return b;
 }
 
-function fixNormals(){
-  var t = arrTF.map(fixNormal).filter(e => e);
-  print("fixed {0} normals".format(t.length));
+function fixNormals(bool,bool2){
+  objString = model3D = undefined;
+  doUpdate();
+  if(bool){
+    return arrTF.map(e=>[fixNormal(e,bool2),e]).filter(e => e[0]);
+  }
+  for(var i = 0; i < arrTF.length; i++){
+    fixNormal(arrTF[i],bool2);
+  }
+}
+
+function fixNormalsI(itaranions=1){
+  for(var i = 0; i < itaranions; i++){
+    var r = fixNormals(itaranions>1,0);
+    if(r&&r.length == 0)return;
+  }
 }
 
 function extrude(height,scl){
@@ -286,6 +345,7 @@ function extrude(height,scl){
   var tfs = arrTF.slice(); 
   for (var i = 0; i < tfs.length; i++) {
     var f = tfs[i];
+    fixNormal(f);
     var normal = canonicalizer.approxNormal(f);
     var center = getSumOfArray(f).mult(1/f.length);
     normal = normal.mult(height);
@@ -324,12 +384,23 @@ function triangulate(){
   }
 }
 
-function standardizeEdgeLengths(b){
-  var t = Object.keys(meshProperties().edgeLengths);
-  var min = getMinOfArray(t/*.map(parseInt)*/);
+function standardizeEdgeLengths(b=true){
+  if(cachedMeshProperties){
+    var mp = meshProperties();
+    var t = Object.keys(mp.edgeLengths);
+    var min = getMinOfArray(t/*.map(parseInt)*/);
+  }else{
+    var min;
+    for (var i = 0; i < arrE.length; i++) {
+      var dist = p5.Vector.convert(arrE[i][0]).distSq(p5.Vector.convert(arrE[i][1]));
+      if(min == undefined||dist<min)min = dist;
+    }
+    min = sqrt(min);
+  }
   if(!b&&min<=1)return;
   if(b)min/=1;
   arrP.forEach(function(e){e.x /= min;e.y /= min;e.z /= min;});
+  cachedMeshProperties = undefined;
 }
 
 function loadMesh(data) {
@@ -355,21 +426,32 @@ function loadMesh(data) {
 function makeObj(precision){
   if(precision == undefined)precision = -8;
   resetView();
+  //fixNormals();
+  calcFaceColors(true);
   var r = 'group {0}\n#vertices\n'.format($('#mainInput').val().replace(/[0-9\,\.\-\(\)]/g,''));
   for (var i = 0; i < arrP.length; i++) {
     var v = arrP[i].map(e => round10(e,precision));
     r += 'v {0} {1} {2}\n'.format(v.x,v.y,v.z);
   }
-  r += '#face defs\n';
+  r += '#texture coordinates\n';
+  var maxHash = max(arrTF.map(e => e.paletteIndex));
+  for(var i = 0; i <= maxHash; i++){
+    r += 'vt {0} {1}\n'.format((i%10)/10,floor(i/10)/10);
+  } 
+  var normals = '#vertex normals\n';
+  var face_defs = '#face defs\n';
   for (var i = 0; i < arrTF.length; i++) {
-    r += 'f ';
+    face_defs += 'f ';
     var f = arrTF[i];
+    var normal = canonicalizer.approxNormal(f);
+    var v = normal.map(e => round10(e,precision));
+    normals += 'vn {0} {1} {2}\n'.format(v.x,v.y,v.z);
     for (var j = 0; j < f.length; j++) {
-      r += (arrP.indexOf(f[j])+1)+' ';
+      face_defs += '{0}/{2}/{1} '.format(arrP.indexOf(f[j])+1,i+1,f.paletteIndex+1);
     }
-    r += '\n';
+    face_defs += '\n';
   }
-  return r;
+  return r+normals+face_defs;
 }
 
 function resetMesh(){
@@ -384,7 +466,11 @@ function loadMeshUrl(url){
   sendRequest(url,loadMesh);
 }
 
-function meshProperties(){
+var cachedMeshProperties;
+function meshProperties(bool){
+  if(!bool&&cachedMeshProperties != undefined){
+    return cachedMeshProperties;
+  }
   var r = {numVerts:arrP.length,numEdges:arrE.length,numFaces:arrTF.length};
   var edgeLengths = {};
   for (var i = 0; i < arrE.length; i++) {
@@ -402,7 +488,7 @@ function meshProperties(){
   r.faceLengths = faceLengths;
   r.maxRadius = getMaxOfArray(arrP.map(e => e.dist(createVector(0,0,0))));
   r.maxEdgeLength = getMaxOfArray(Object.keys(edgeLengths).map(parseFloat));
-  return r;
+  return cachedMeshProperties = r;
 }
 
 function findTrueFaces(bool) {
@@ -548,7 +634,8 @@ function checkFaceEdge(vert,edge){
 
 function edgeAngle(e,v){
   var v1 = (e[1] == v)?e[0]:e[1];
-  return atan2(_perspective(v1).y-_perspective(v).y,_perspective(v1).x-_perspective(v).x);
+  var f = e=>e;//_perspective;
+  return atan2(f(v1).y-f(v).y,f(v1).x-f(v).x);
   //return atan2(v1.y-v.y,v1.x-v.x);//fixme
   //return atan2(sqrt((v1.y-v.y)**2+(v1.z-v.z)**2),v1.x-v.x);
 }
@@ -590,14 +677,17 @@ function intoUnitSphere(){
 
 function ontoUnitSphere(){
   arrP.map(e => e.normalize());
+  cachedMeshProperties = undefined;
 }
 
 var isPlanarView = false;
 function planarView(i){//planarView() changes the mesh
+  objString = model3D = undefined;
   ontoUnitSphere();
   var p = faceOnRotation(i);
   zoom = p;
   isPlanarView = true;
+  doUpdate();
 }
 
 var canonicalizer = {
@@ -617,7 +707,11 @@ var canonicalizer = {
   },
   tangentify:function(vs,es) {
     vs.forEach(v => v.index = vs.indexOf(v));
-    var oldes = es.map(e => e.map(e1 => e1.copy()));
+    var oldes = es.map(e => e.map(e1 => {
+      var t = e1.copy();
+      t.index = e1.index;
+      return t;
+    }));
     oldes.forEach(function(e){
       var t = canonicalizer.closest(e);
       var c = t.mult(canonicalizer.const1*(1 - sqrt(t.dot(t))));
@@ -627,22 +721,26 @@ var canonicalizer = {
     return vs;
   },
   approxNormal:function(face) {
-    var f2 = face.slice();
+    /*var f2 = face.slice();
     var f0 = f2.slice();
     f2.unshift(f2.pop());
     var f1 = f2.slice();
-    f2.unshift(f2.pop());
+    f2.unshift(f2.pop());*/
     var r = createVector(0,0,0);
     var f = function(a,b,c){return p5.Vector.sub(a,b).cross(p5.Vector.sub(b,c)).normalize();};
     for (var i = 0; i < face.length; i++) {
-      r.add(f(f0[i],f1[i],f2[i]));
+      r.add(f(face[i],face[(i+1)%face.length],face[(i+2)%face.length]));
     }
     return r.normalize();
   },
   planarize:function(vs,fs) {
     vs.forEach(v => v.index = vs.indexOf(v));
     var oldvs = vs.map(e => e.copy());
-    var oldfs = fs.map(e => e.map(e1 => e1.copy()));
+    var oldfs = fs.map(e => e.map(e1 => {
+      var t = e1.copy();
+      t.index = e1.index;
+      return t;
+    }));
     oldfs.forEach(function(f){
       var n = canonicalizer.approxNormal(f);
       var centroid = getSumOfArray(f).mult(1/f.length);

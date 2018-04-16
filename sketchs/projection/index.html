@@ -1,9 +1,10 @@
 <html>
  <head> 
   <meta charset="UTF-8" /> 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="http://danml.com/js/download.js"></script>
-  <script src="../libraries/p5.js"></script>   
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
+  <script src="../libraries/jquery-3.3.1.js"></script>
+  <!-- <script src="http://danml.com/js/download.js"></script> -->
+  <script src="../libraries/p5.new.js"></script>   
   <!--<script src="../libraries/p5.sound.js"></script>--> 
   <script src="../libraries/p5.dom.js"></script>
   <script src="../libraries/library.js"></script> 
@@ -11,9 +12,10 @@
   <script src="main.js"></script> 
   <script src="rotator.js"></script>
   <script src="templates.js"></script>
-  <script src="tweakables.js"></script>
+  <!-- <script src="tweakables.js"></script> -->
   <script src="input.js"></script>
   <script src="draw.js"></script>
+  <script src="webgl.js"></script>
   <script src="mesh.js"></script>
   <style>
     body {padding: 0; margin: 0;}
@@ -24,6 +26,7 @@
     }
     a:hover {text-decoration: underline;}
     canvas{touch-action: pinch-zoom;}
+    p {text-decoration: inherit;}
     #errorIcon {
       user-select: none;
       -moz-user-select: none;
@@ -38,6 +41,11 @@
     .statList {
       display: none;
       white-space: pre-line;
+    }
+    .deprecated {
+      /*display: none;*/
+      text-decoration: line-through;
+      /*text-decoration-color: red;*/
     }  
   </style>
  </head> 

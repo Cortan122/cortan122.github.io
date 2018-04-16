@@ -8,7 +8,7 @@ var inputRom = [
   {keys:['Q','home'],action:'rotator.applyDir(4)',repeatable:true},//4
   {keys:['E','pgup'],action:'rotator.applyDir(5)',repeatable:true},//5
   {keys:['R'],action:'resetView()'},//6
-  {keys:['O','T'],action:'toggleTweakables()'},//7
+  {keys:['O','T'],action:'lib.tweaker.toggleTweakables()'},//7
   {keys:['enter'],action:'readRecipe()'}//8s
 ];
 
@@ -105,6 +105,7 @@ function mouseDragged(){
   if(!isDraggable)return; 
   var currentMousePos = createVector(mouseX,mouseY);
   var mouseMovement = createVector(currentMousePos.x - lastMousePos.x,currentMousePos.y - lastMousePos.y,0);
+  if(mouseMovement.equals(0,0,0))return;
   rotator.applyQuaternion(
     rotator.makeQuaternion(
       createVector(-mouseMovement.y,mouseMovement.x,0).normalize(),
@@ -130,10 +131,12 @@ function mouseWheel(event) {
 }
 
 function resetView(){
+  var mp = meshProperties();
   doUpdate();
   isPlanarView = false;
   rotator.returnToInit();
-  var mr = meshProperties().maxRadius;
+  rotator.history2 = rotator.identityMatrix;
+  var mr = mp.maxRadius;
   scl = tweakables.defaultZoom/(2*mr);
   zoom = mr+3;
 }

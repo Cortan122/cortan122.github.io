@@ -13,6 +13,32 @@ var renderer3D;
 var colorF = 1;
 var zoom = 5;
 
+var tweakables = {
+  vertexLabels:-1,
+  vertexSize:-1,
+  edgeThickness:2,
+  transparency:255,
+  accentColor:'black',
+  backgroundColor:'#666',
+  shader:'texture',
+  mouseSensitivity:1,
+  scrollSpeed:1,
+  rotationSpeed:9,
+  inputRepeatDelay:5,
+  inputRepeatSpeed:-1,
+  defaultZoom:400,
+  hashSensitivity:10,
+  cacheFrames:true,
+  isometric:true,
+  drawInvisibleLines:false,
+  useWebGL:true,
+  /*usePalette:true,*/
+  enableLighting:true,
+  metaStart:true
+};
+
+var tweakables_name = 'polygon';
+
 Object.defineProperty(this, "accentColor", {
   get: function() {
     if(tweakables.accentColor != 'auto')
@@ -29,19 +55,22 @@ Object.defineProperty(this, "transparency", {
 });
 
 function setup() {
-  initTweakables();
   parseInputRom();
   createCanvas(500, 500);
   renderer3D = createGraphics(500,500, WEBGL);
+  paletteimg = loadImage('palette.png',doUpdate);
   angleMode(DEGREES);
   background(tweakables.backgroundColor);
   lightSorce = createVector(10,10,0);
+
+  lib.tweaker.events.push(onChangeDrawMode);
+  lib.tweaker.events.push(doUpdate);
+  onChangeDrawMode();
 
   initDOM();
 
   var t = getQueryParameterByName("s");
   if(t){template(t);$('#mainInput').val(t);}else{template('cube');}
-  
 } 
 
 function initDOM(){
@@ -68,7 +97,7 @@ function initDOM(){
 
   $('body').append(
     $('<div>Export:</div>')
-      .append($('<a>OBJ</a>').click(saveObj) )
+      .append($('<a>OBJ</a>').click(()=>saveObj()) )
       .append('<b>&nbsp;&#09;</b>')
       .append($('<a>PNG</a>').click(savePng) )
       .append('<b>&nbsp;&#09;</b>')
@@ -83,11 +112,13 @@ function initDOM(){
       .append($('<a>Vetr</a>').click(vertOnRotation) )
       .append('<b>&nbsp;&#09;</b>')
       .append($('<a>Planar</a>').click(planarView) )  
-    );
+  );
 }
 
-function updateStats(){
-  var data = meshProperties();
+function updateStats(data){
+  if(data == undefined){
+    data = meshProperties();
+  }
   $('#faces')[0].firstChild.data = '{0} faces'.format(data.numFaces);
   $('#edges')[0].firstChild.data = '{0} edges'.format(data.numEdges);
   $('#vertices')[0].firstChild.data = '{0} vertices'.format(data.numVerts);
@@ -125,7 +156,17 @@ function getFaceHash(f) {
   return round(r*es.length);
 }
 
-function targetRotation(pos){
+function getFaceHashStr(f) {
+  var r = [];//f.length-1;
+  f = f.map(p5.Vector.convert);
+  for (var i = 0; i < f.length; i++) {
+    var t = round(p5.Vector.angleBetween(f[i],f[(i+1)%f.length])/PI*tweakables.hashSensitivity).toString(36);
+    r.push(t);
+  }
+  return (f.length-1).toString(36)+r.sort().join();
+}
+
+function _targetRotation(pos){
   for (var i = 1; i < 100; i++) {
     var mouseMovement = createVector(-pos.x,-pos.y);
     if(mouseMovement.mag()<0.01)break;
@@ -136,6 +177,17 @@ function targetRotation(pos){
       )
     );
   }
+  doUpdate();
+}
+
+function targetRotation(pos){
+  var target = createVector(0,0,1);
+  rotator.applyQuaternion(
+    rotator.makeQuaternion(
+      target.cross(pos).normalize(),
+      -p5.Vector.angleBetween(target,pos)*180/PI
+    )
+  );
   doUpdate();
 }
 
@@ -186,8 +238,8 @@ function randomRotation(){
 }
 
 function saveObj(precision){
-  var s = makeObj(precision);
-  download(s, '{0}.obj'.format($('#mainInput').val().replace(/[0-9\,\.\-\(\)]/g,'')),"text/plain");
+  if(objString == undefined)objString = makeObj();
+  saveStrings(objString.split('\n'), $('#mainInput').val().replace(/[0-9\,\.\-\(\)]/g,''),'obj');
 }
 
 function savePng(){

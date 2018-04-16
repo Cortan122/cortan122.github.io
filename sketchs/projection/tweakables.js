@@ -1,4 +1,4 @@
-console.log('tweakables.js');
+//console.log('tweakables.js');
 var tweakables = {
   vertexLabels:-1,
   vertexSize:-1,
@@ -12,6 +12,7 @@ var tweakables = {
   inputRepeatDelay:5,
   inputRepeatSpeed:-1,
   defaultZoom:400,
+  hashSensitivity:10,
   cacheFrames:true,
   isometric:true,
   drawInvisibleLines:false,

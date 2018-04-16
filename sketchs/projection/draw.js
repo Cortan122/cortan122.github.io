@@ -12,7 +12,7 @@ function draw() {
   updateKeyboard();
   if(tweakables.useWebGL && doUpdateT){
     doUpdateT = !tweakables.cacheFrames;
-    calcFaceColors();
+    //calcFaceColors();
     trueDraw3D();
     image(renderer3D,0,0,width,height);
     return;
@@ -22,7 +22,7 @@ function draw() {
   if(doUpdateT){trueDraw(); doUpdateT = !tweakables.cacheFrames; }
 }
 
-var test = 1;
+/*var test = 1;
 function trueDraw3D() {
   var a = renderer3D;
   a.background(100);
@@ -57,7 +57,7 @@ function trueDraw3D() {
     a.endShape(CLOSE);
   }
   a.pop();
-}
+}*/
 
 function trueDraw() {
   calcFaceColors();
@@ -189,15 +189,16 @@ function sortHelper(a,b){
   return getAverageOfArray(a.map(e => e.z)) - getAverageOfArray(b.map(e => e.z));
 }
 
-function calcFaceColors(){
-  if(!tweakables.usePalette){
+function calcFaceColors(bool){
+  /*if(!tweakables.usePalette&&!bool){
     arrTF.forEach(e => e.color = color('hsba({0},{1}%,{2}%,{3})'.format(
       getFaceHash(e)%360,100,100,transparency/255
     )));
     return;
-  }
-  var hash = uniq(arrTF.map(e => e.hash = getFaceHash(e))).sort();
+  }*/
+  var hash = uniq(arrTF.map(e => e.hash = getFaceHashStr(e))).sort();
   arrTF.forEach(e => {
+    e.paletteIndex = hash.indexOf(e.hash);
     e.color = color(palette[hash.indexOf(e.hash)%palette.length]);
     e.color._array[3]=transparency/255;
   });

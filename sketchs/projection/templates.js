@@ -72,6 +72,7 @@ templateStrings = {
   "meta":'d t r',
   "k":'d t d',//todo
   "kis":"k",
+  "sphere":"u",
   "canonicalized":'f',
   "canonicalize":'f',
   "canonical":'f',
@@ -98,8 +99,18 @@ templateStrings = {
   "d120":"f d t a {5,3}"
 };
 
+var isTemplating = false;
+
 function template(data){
+  isTemplating = true;
   $("#urlDispenser").attr("href","?s="+data);
+  if(data.indexOf('//') != -1){
+    data = data.split('//')[0];
+  }
+  if(data.endsWith(' ')){
+    data = data.replace(/( )*$/g,'');
+  }
+  var data0 = data;
   if(data.indexOf(' ') == -1&&templateStrings[data] === undefined&&data.match(/polygon[0-9]+$/)==null){
     data = data.match(/[^\(\)]\(?[0-9\.\-\,]*\)?/g).join(' ');
   }
@@ -107,14 +118,30 @@ function template(data){
   if(t == undefined)t = rotator.identityMatrix;
   var t1 = isPlanarView;
   isPlanarView = false;
+  cachedMeshProperties = undefined;
+
+  var time = (new Date).getTime();
   __template(data);
+  var time1 = (new Date).getTime();
+
+  model3D = undefined;
+  objString = undefined;
+  cachedMeshProperties = undefined;
   recenter();
-  standardizeEdgeLengths(1);
+  standardizeEdgeLengths();
   resetView();
-  rotator.applyMatrixG(t);
+  fixNormalsI();//fixNormals();
   updateStats();
   doUpdate();
   if(t1)planarView();
+  if(tweakables.useWebGL){
+    objString = makeObj();
+  }
+  isTemplating = false;
+  rotator.applyMatrixG(t);
+
+  var time2 = (new Date).getTime();
+  print('template({1}) took {0}+{2}={3} ms'.format(time1-time,data0,time2-time1,time2-time));
 }
 
 function __template(data0){
@@ -180,6 +207,7 @@ function compilePrefix(data){
     if(arr[i] == 'k'){kis(0.5);continue;}
     if(arr[i] == 'x'){extrude();continue;}
     if(arr[i] == 'z'){triangulate();continue;}
+    if(arr[i] == 'u'){ontoUnitSphere();continue;}
     if(arr[i] == 'i'){print(intersectionChecker.fixAll()+' intersections found');continue;}
     if(arr[i][0] == 't' && arr[i][1] == '(' && arr[i][arr[i].length-1] == ')'){
       truncate(parseFloat(arr[i].slice(2,-1)));

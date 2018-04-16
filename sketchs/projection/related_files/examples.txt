@@ -1,0 +1,8 @@
+sC
+t x k(1) polygon30
+udtdtdtdtdtT
+dtdtD
+f(1)zudakI //basically the same as dtdtD (but faster)
+dtdtI 
+f(1)zudakD //basically the same as dtdtI (but faster)
+f(2)zudakD

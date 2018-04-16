@@ -37,7 +37,12 @@ rotator.applyMatrix = function(m,v){
 
 rotator.applyMatrixG = function(m){
   if(this.history == undefined)this.history = this.identityMatrix;
+  if(this.history2 == undefined)this.history2 = this.identityMatrix;
   this.history = this.genericMatrixMult(m,this.history);
+  if(!isTemplating){
+    this.history2 = this.genericMatrixMult(this.history2,this.inverse(m));
+  }
+  if(isNaN(this.history2[0][0]))throw 11;
   for (var i = 0; i < arrP.length; i++) {
     var v = this.applyMatrix(m,arrP[i]);
     arrP[i].x = v.x;arrP[i].y = v.y;arrP[i].z = v.z;
@@ -156,4 +161,13 @@ rotator.applyQuaternion = function(q){
 
 rotator.applyDir = function(d,a){
   this.applyMatrixG(this.dirToMatrix(d,a));
+}
+
+rotator.matrixToP5 = function(_m){
+  var m = _m;
+  m = m.map((e,i) => m[i].concat([0]));
+  var arr = new Float32Array(m.flatten().concat([0,0,0,1]));
+  var r = new p5.Matrix();
+  r.mat4 = arr;
+  return r;
 }

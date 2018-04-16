@@ -3,24 +3,38 @@ const TABLE_STYLE = 1;
 const FILE_PATH = "../categories.php";
 const FIRST_HEADER_NAME = "path";
 const HIDDEN_COLS = ["category","categories",'jsfiles'];
-const COL_FORMAT = ["link","text","time",".js num4"];
-const ARROWS = "\u25BC\u25B2";
+var   COL_FORMAT = ["link","text","time",".js num4"];
+const ARROWS = "\u25E4\u25E3";//"\u25BC\u25B2";
+const MAX_PING_TIME = 5000;
 
 var totalLinesOfJavascript = 0;//temp
 
-function setup() {
-  //noCanvas();
-  //noLoop();
-  /*$.ajax(FILE_PATH).done(callback).fail(function() {
-    alert( "error" );
-  });*/
+function syncajax(remote_url) {
+  return $.ajax({
+    type: "GET",
+    url: remote_url,
+    async: false
+  }).responseText;
+}
 
-  sendRequest(FILE_PATH,callback);
+function setup() {
+  if(getQueryParameterByName('a')=="true"){
+    COL_FORMAT = ["link","text","text","ping"];
+    var r = {};
+    var ip = syncajax("https://cortan122.000webhostapp.com/data/home/ip.txt");
+    r[ip+':27001'] = {name:"my pc",note:"up to date"};
+    r[ip+':31415'] = {name:"raspberry pi",note:"never used"};
+    r["https://cortan122.github.io"] = {name:"github page",note:"reliable"};
+    r["https://github.com/Cortan122/cortan122.github.io"] = {name:"github repository",note:""};
+    r["https://cortan122.000webhostapp.com"] = {name:"database",note:"slow"};
+    callback(r);
+  }else{
+    sendRequest(FILE_PATH,callback);
+  }
 
   $('head').append('<link rel="stylesheet" type="text/css" href="t{0}.css">'.format(TABLE_STYLE));
 }
 window.addEventListener('load',setup);
-//function draw() {}
 
 function callback(obj){
   var arr = makeTable(obj);
@@ -35,7 +49,6 @@ function callback(obj){
     format = COL_FORMAT;
   }
   displayTable(arr,format);
-
 }
 
 function makeTable(obj){
@@ -61,7 +74,7 @@ function displayTable(arr,format){
   for (i = 0; i < arr.length; i++) {
     var row = $('<tr></tr>');
     table.append(row);
-    for (j = 0; j < arr[0].length; j++) {
+    for (j = 0; j < arr[i].length; j++) {
       var t;
       if(i == 0){
         t = $("<th></th>");
@@ -70,18 +83,37 @@ function displayTable(arr,format){
         t.html(arr[i][j]);
       }else{
         t = $("<td></td>");
-        t.html( applyFormat(arr[i][j],format[j]) );
-      } 
+        t.html( applyFormat(arr[i][j],format[j],t) );
+      }
       row.append(t);
     }
+    if(format.length>arr[i].length){
+      for (j = arr[i].length; j < format.length; j++) {
+        var t;
+        if(i == 0){
+          t = $("<th></th>");
+          let _j = j;
+          t.click(() => sortTable(_j));
+          t.html(format[j]);
+        }else{
+          t = $("<td></td>");
+          t.html( applyFormat(arr[i][j%arr[i].length],format[j],t) );
+        }
+        row.append(t);
+      }
+    } 
   }
   $('body').append(table);
   table.find('th').eq(0).click().click();
 }
 
+function intFormat(int,len){
+  return ('0'.repeat(len)+int.toString()).substr(-len);
+}
+
 var linkOffset = FILE_PATH.substr(0,FILE_PATH.lastIndexOf('/')+1);
 const formatFunctionRom = {
-  "link":a => "<a href="+linkOffset+a+">"+a+"</a>",
+  "link":a => "<a href="+(a.startsWith("http")?"":linkOffset)+a+">"+a+"</a>",
   "time":e => {
     var d = new Date(parseInt(e)*1000);//.toISOString()
     return d.toISOString().replace(/[TZ]/g,' ').substr(0,16);
@@ -92,10 +124,25 @@ const formatFunctionRom = {
   },
   "num4":t => {
     totalLinesOfJavascript += t;//temp
-    return ('0000'+t.toString()).substr(-4);
+    return intFormat(t,4);
+  },
+  "ping":(t,cell) => {
+    setTimeout(()=>{ping(cell.parent().children().eq(0).children().attr('href')).then(function(delta) {
+      if(delta<1000){
+        cell.html(intFormat(delta,3)+'ms');
+      }else{
+        cell.html("\u2063"+(delta/1000)+'s');
+      }
+      cell.removeClass('ping_checking').addClass("ping_ok");
+    }).catch(function(error) {
+      cell.html('timeout');
+      cell.removeClass('ping_checking').addClass("ping_error");
+    });}, 10); 
+    cell.addClass('ping_checking ping');
+    return 'checking';
   }
 };
-function applyFormat(text,format){
+function applyFormat(text,format,cell){
   if(text == undefined)return "\u2063__UNDEFINED__";
   if(format[0] == '.'){
     var t = text[format.substr(1).split(' ')[0]];
@@ -104,15 +151,16 @@ function applyFormat(text,format){
   }
   var func = formatFunctionRom[format];
   if(func == undefined)return text;
-  return func(text);
+  return func(text,cell);
 }
 
 function updateArrows(n,dir){
   var headers = $("#myTable").children('tr').eq(0).children('th');
+  var l = headers.length;
+  for(var i = 1; i < l; i++){
+    updateArrowsh2(headers.eq((n+i)%l));
+  }
   updateArrowsh1(headers.eq(n),dir);
-  updateArrowsh2(headers.eq((n+1)%4));
-  updateArrowsh2(headers.eq((n-1)%4));
-  updateArrowsh2(headers.eq((n-2)%4));
 }
 
 function updateArrowsh2(jq){

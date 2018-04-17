@@ -187,6 +187,13 @@ function onChangeDrawMode(name){
       b.removeClass('deprecated');
     }
   }
+  if(name==undefined||name=="showFPS"){
+    if(tw.showFPS){
+      $("#frDiv").css('display','inline');
+    }else{
+      $("#frDiv").css('display','none');
+    }
+  }
   if(!tw.useWebGL)return;
   var a = renderer3D;
   if(name==undefined||name=="shader"||name=="useWebGL"){

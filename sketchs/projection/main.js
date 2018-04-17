@@ -16,7 +16,7 @@ var zoom = 5;
 var tweakables = {
   vertexLabels:-1,
   vertexSize:-1,
-  edgeThickness:2,
+  edgeThickness:-2,
   transparency:255,
   accentColor:'black',
   backgroundColor:'#666',
@@ -34,6 +34,7 @@ var tweakables = {
   useWebGL:true,
   /*usePalette:true,*/
   enableLighting:true,
+  showFPS:false,
   metaStart:true
 };
 
@@ -57,6 +58,7 @@ Object.defineProperty(this, "transparency", {
 function setup() {
   parseInputRom();
   createCanvas(500, 500);
+  pixelDensity(1);
   renderer3D = createGraphics(500,500, WEBGL);
   paletteimg = loadImage('palette.png',doUpdate);
   angleMode(DEGREES);
@@ -96,7 +98,7 @@ function initDOM(){
   });
 
   $('body').append(
-    $('<div>Export:</div>')
+    $('<div id="export_links">Export:</div>')
       .append($('<a>OBJ</a>').click(()=>saveObj()) )
       .append('<b>&nbsp;&#09;</b>')
       .append($('<a>PNG</a>').click(savePng) )
@@ -104,7 +106,7 @@ function initDOM(){
       .append($('<a id="urlDispenser">URL</a>') )  
     );
   $('body').append(
-    $('<div>View: &nbsp;</div>')
+    $('<div id="view_links">View: &nbsp;</div>')
       .append($('<a>Front</a>').click(resetView) )
       .append('<b>&nbsp;&#09;</b>')
       .append($('<a>Face</a>').click(faceOnRotation) )
@@ -243,6 +245,6 @@ function saveObj(precision){
 }
 
 function savePng(){
-  var name = $('#mainInput').val().replace(/[0-9\,\.\-\(\)]/g,'')+".png";
-  saveCanvas(name);
+  var name = $('#mainInput').val().replace(/[0-9\,\.\-\(\)]/g,'');//+".png";
+  saveCanvas(canvas,name,"png");
 }

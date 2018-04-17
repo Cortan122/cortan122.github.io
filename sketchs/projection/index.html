@@ -34,6 +34,17 @@
       -webkit-user-select: none;
       -o-user-select: none;
     }
+    #frDiv {
+      position: absolute;
+      top:0;
+      color: white;
+      white-space: pre-wrap;
+      text-shadow:
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+    }
     .stats {
       display: inline-block;
       vertical-align: top;
@@ -47,6 +58,9 @@
       text-decoration: line-through;
       /*text-decoration-color: red;*/
     }  
+    #mainInputText,#stats,#export_links,#view_links {
+      user-select: none;
+    }
   </style>
  </head> 
  <body>  

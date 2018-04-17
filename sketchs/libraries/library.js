@@ -309,7 +309,7 @@
     if(window.tweakables && !window.initTweakables && window.createElement && window.$){
       var twr = lib.tweaker = {};
       var s;
-      if(tweakables_name == undefined){
+      if(window.tweakables_name == undefined){
         s = window.location.toString();
         if(s[s.length-1] == '/')s = s.substr(0,s.length-1);
         s = s.substr(s.lastIndexOf('/')+1,999);

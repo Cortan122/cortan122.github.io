@@ -1,1 +1,14 @@
-{"categories":["Failures"],"name":"Unicode Diacritics Experement","time":1503314100,"jsfiles":["main.js"],"lines":{"html":15,"js":301}}
+{
+  "categories": [
+    "Failures"
+  ],
+  "name": "Unicode Diacritics Experement",
+  "time": 1503314100,
+  "jsfiles": [
+    "main.js"
+  ],
+  "lines": {
+    "html": 15,
+    "js": 301
+  }
+}

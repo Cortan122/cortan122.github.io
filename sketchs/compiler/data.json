@@ -1,1 +1,19 @@
-{"categories":["Simulations","Toys","Games"],"name":"Compiler","time":1494014820,"jsfiles":["sketch_compiler.js","Assembler.js","emulator.js","Compiler.js"],"lines":{"html":26,"js":1047}}
+{
+  "categories": [
+    "Simulations",
+    "Toys",
+    "Games"
+  ],
+  "name": "Compiler",
+  "time": 1494014820,
+  "jsfiles": [
+    "sketch_compiler.js",
+    "Assembler.js",
+    "emulator.js",
+    "Compiler.js"
+  ],
+  "lines": {
+    "html": 26,
+    "js": 1047
+  }
+}

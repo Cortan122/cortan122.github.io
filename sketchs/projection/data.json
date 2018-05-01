@@ -1,1 +1,25 @@
-{"categories":["Images","Simulations","Toys"],"name":"Polyhedrons","time":1488581760,"jsfiles":["sketch_projection.backup.js","main.js","rotator.js","templates.js","tweakables.js","input.js","draw.js","webgl.js","mesh.js"],"lines":{"html":55,"js":2492}}
+{
+  "categories": [
+    "Images",
+    "Simulations",
+    "Toys"
+  ],
+  "name": "Polyhedrons",
+  "time": 1488581760,
+  "jsfiles": [
+    "sketch_projection.backup.js",
+    "main.js",
+    "rotator.js",
+    "templates.js",
+    "tweakables.js",
+    "input.js",
+    "draw.js",
+    "webgl.js",
+    "mesh.js",
+    "operators.js"
+  ],
+  "lines": {
+    "html": 77,
+    "js": 2576
+  }
+}

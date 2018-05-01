@@ -1,1 +1,17 @@
-{"categories":["Unfinished","Simulations","Games"],"name":"Bouncy ball","time":1517261160,"jsfiles":["main.js","objects.js"],"lines":{"html":22,"js":800}}
+{
+  "categories": [
+    "Unfinished",
+    "Simulations",
+    "Games"
+  ],
+  "name": "Bouncy ball",
+  "time": 1517261160,
+  "jsfiles": [
+    "main.js",
+    "objects.js"
+  ],
+  "lines": {
+    "html": 22,
+    "js": 800
+  }
+}

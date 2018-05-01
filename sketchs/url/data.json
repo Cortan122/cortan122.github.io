@@ -1,1 +1,14 @@
-{"categories":["Failures"],"name":"Token test","time":1483723500,"jsfiles":["sketch_url.js"],"lines":{"html":20,"js":84}}
+{
+  "categories": [
+    "Failures"
+  ],
+  "name": "Token test",
+  "time": 1483723500,
+  "jsfiles": [
+    "sketch_url.js"
+  ],
+  "lines": {
+    "html": 20,
+    "js": 84
+  }
+}

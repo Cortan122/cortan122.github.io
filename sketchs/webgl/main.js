@@ -34,7 +34,7 @@ var inputRom = [
 ];
 
 var shaderRom = {
-  none:[''],
+  none:['stroke(0);strokeWeight(2.001);'],
   normal:['normalMaterial()'],
   texture_u:['texture(img)',resetLights],
   texture:['texture(img)',setupLights],
@@ -54,7 +54,10 @@ function setup() {
 
   img = loadImage('palette.png');
 
-  //p5obj._renderer._defaultLightShader = new p5.Shader(p5obj._renderer,LightVertShaderSrc,LightFragShaderSrc);
+  var rend = p5obj._renderer;
+  //rend._defaultLightShader = new p5.Shader(rend,LightVertShaderSrc,LightFragShaderSrc);
+  rend._defaultLineShader = new p5.Shader(rend,LineVertShaderSrc,LineFragShaderSrc);
+  rend.setStrokeShader(rend._getLineShader());
 
   rotator.applyMatrixG = function(m){
     if(this.history == undefined)this.history = this.identityMatrix;

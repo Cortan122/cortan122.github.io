@@ -1,1 +1,15 @@
-{"categories":["Simulations"],"name":"Gravity","time":1492820700,"jsfiles":["main.js","Thing.js"],"lines":{"html":30,"js":221}}
+{
+  "categories": [
+    "Simulations"
+  ],
+  "name": "Gravity",
+  "time": 1492820700,
+  "jsfiles": [
+    "main.js",
+    "Thing.js"
+  ],
+  "lines": {
+    "html": 30,
+    "js": 221
+  }
+}

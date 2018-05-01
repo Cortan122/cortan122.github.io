@@ -1,1 +1,16 @@
-{"categories":["Simulations","Failures"],"name":"Raycasting 2.5d","time":1491430920,"jsfiles":["sketch_lines.js","Pointer_Lock.js"],"lines":{"html":17,"js":280}}
+{
+  "categories": [
+    "Simulations",
+    "Failures"
+  ],
+  "name": "Raycasting 2.5d",
+  "time": 1491430920,
+  "jsfiles": [
+    "sketch_lines.js",
+    "Pointer_Lock.js"
+  ],
+  "lines": {
+    "html": 17,
+    "js": 280
+  }
+}

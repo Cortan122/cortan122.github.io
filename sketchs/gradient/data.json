@@ -1,1 +1,15 @@
-{"categories":["Images","Simulations"],"name":"Gradient Descent","time":1493420040,"jsfiles":["sketch_gradient.js"],"lines":{"html":17,"js":176}}
+{
+  "categories": [
+    "Images",
+    "Simulations"
+  ],
+  "name": "Gradient Descent",
+  "time": 1493420040,
+  "jsfiles": [
+    "sketch_gradient.js"
+  ],
+  "lines": {
+    "html": 17,
+    "js": 176
+  }
+}

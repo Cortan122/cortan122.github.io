@@ -1,1 +1,16 @@
-{"categories":["Simulations","Failures"],"name":"Spherical navigation","time":1500248880,"jsfiles":["sketch_sphere.js","rotator.js"],"lines":{"html":18,"js":241}}
+{
+  "categories": [
+    "Simulations",
+    "Failures"
+  ],
+  "name": "Spherical navigation",
+  "time": 1500248880,
+  "jsfiles": [
+    "sketch_sphere.js",
+    "rotator.js"
+  ],
+  "lines": {
+    "html": 18,
+    "js": 241
+  }
+}

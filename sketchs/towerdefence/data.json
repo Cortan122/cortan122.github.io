@@ -1,1 +1,22 @@
-{"categories":["Games","Unfinished"],"name":"Tower Defence","time":1505919720,"jsfiles":["pathfinder.js","tweakables.js","input.js","draw.js","main.js","particle.js","tower.js","button.js"],"lines":{"html":43,"js":2436}}
+{
+  "categories": [
+    "Games",
+    "Unfinished"
+  ],
+  "name": "Tower Defence",
+  "time": 1505919720,
+  "jsfiles": [
+    "pathfinder.js",
+    "tweakables.js",
+    "input.js",
+    "draw.js",
+    "main.js",
+    "particle.js",
+    "tower.js",
+    "button.js"
+  ],
+  "lines": {
+    "html": 43,
+    "js": 2436
+  }
+}

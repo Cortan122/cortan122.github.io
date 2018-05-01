@@ -1,1 +1,14 @@
-{"categories":["Images"],"name":"Basic clock","time":1514751780,"lines":{"html":16,"js":25},"jsfiles":["main.js"]}
+{
+  "categories": [
+    "Images"
+  ],
+  "name": "Basic clock",
+  "time": 1514751780,
+  "lines": {
+    "html": 16,
+    "js": 25
+  },
+  "jsfiles": [
+    "main.js"
+  ]
+}

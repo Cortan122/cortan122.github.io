@@ -1,1 +1,15 @@
-{"categories":["Failures","Simulations"],"name":"Neural network","time":1496063580,"jsfiles":["sketch_network.js"],"lines":{"html":17,"js":257}}
+{
+  "categories": [
+    "Failures",
+    "Simulations"
+  ],
+  "name": "Neural network",
+  "time": 1496063580,
+  "jsfiles": [
+    "sketch_network.js"
+  ],
+  "lines": {
+    "html": 17,
+    "js": 257
+  }
+}

@@ -402,11 +402,12 @@
             "input.js",
             "draw.js",
             "webgl.js",
-            "mesh.js"
+            "mesh.js",
+            "operators.js"
         ],
         "lines": {
-            "html": 55,
-            "js": 2492
+            "html": 77,
+            "js": 2576
         }
     },
     "sphere": {
@@ -549,7 +550,7 @@
         ],
         "lines": {
             "html": 41,
-            "js": 574
+            "js": 680
         }
     }
 }

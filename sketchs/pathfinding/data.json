@@ -1,1 +1,18 @@
-{"categories":["Toys"],"name":"Pathfinding","time":1498514460,"jsfiles":["plane.js","pathfinder.js","sketch_pathfinding.js","main.js","particle.js"],"lines":{"html":21,"js":746}}
+{
+  "categories": [
+    "Toys"
+  ],
+  "name": "Pathfinding",
+  "time": 1498514460,
+  "jsfiles": [
+    "plane.js",
+    "pathfinder.js",
+    "sketch_pathfinding.js",
+    "main.js",
+    "particle.js"
+  ],
+  "lines": {
+    "html": 21,
+    "js": 746
+  }
+}

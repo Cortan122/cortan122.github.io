@@ -1,1 +1,16 @@
-{"categories":["Failures"],"name":"Gravity 2","time":1497896760,"jsfiles":["thing.js","Wrapper.js","sketch_gravity2.js"],"lines":{"html":20,"js":260}}
+{
+  "categories": [
+    "Failures"
+  ],
+  "name": "Gravity 2",
+  "time": 1497896760,
+  "jsfiles": [
+    "thing.js",
+    "Wrapper.js",
+    "sketch_gravity2.js"
+  ],
+  "lines": {
+    "html": 20,
+    "js": 260
+  }
+}

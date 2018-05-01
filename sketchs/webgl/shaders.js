@@ -214,7 +214,7 @@ LightFragShaderSrc = `
   }
 `;
 
-LineFragShaderSrc = `
+LineVertShaderSrc = `
   /*
   Part of the Processing project - http://processing.org
   Copyright (c) 2012-15 The Processing Foundation
@@ -240,7 +240,7 @@ LineFragShaderSrc = `
   uniform float uStrokeWeight;
 
   uniform vec4 uViewport;
-  vec3 scale = vec3(1.0);
+  vec3 scale = vec3(0.9999);
 
   attribute vec4 aPosition;
   attribute vec4 aDirection;
@@ -259,29 +259,8 @@ LineFragShaderSrc = `
     vec4 p = uProjectionMatrix * posp;
     vec4 q = uProjectionMatrix * posq;
 
-    // formula to convert from clip space (range -1..1) to screen space (range 0..[width or height])
-    // screen_p = (p.xy/p.w + <1,1>) * 0.5 * uViewport.zw
-
-    // prevent division by W by transforming the tangent formula (div by 0 causes
-    // the line to disappear, see https://github.com/processing/processing/issues/5183)
-    // t = screen_q - screen_p
-    //
-    // tangent is normalized and we don't care which aDirection it points to (+-)
-    // t = +- normalize( screen_q - screen_p )
-    // t = +- normalize( (q.xy/q.w+<1,1>)*0.5*uViewport.zw - (p.xy/p.w+<1,1>)*0.5*uViewport.zw )
-    //
-    // extract common factor, <1,1> - <1,1> cancels out
-    // t = +- normalize( (q.xy/q.w - p.xy/p.w) * 0.5 * uViewport.zw )
-    //
-    // convert to common divisor
-    // t = +- normalize( ((q.xy*p.w - p.xy*q.w) / (p.w*q.w)) * 0.5 * uViewport.zw )
-    //
-    // remove the common scalar divisor/factor, not needed due to normalize and +-
-    // (keep uViewport - can't remove because it has different components for x and y
-    //  and corrects for aspect ratio, see https://github.com/processing/processing/issues/5181)
-    // t = +- normalize( (q.xy*p.w - p.xy*q.w) * uViewport.zw )
-
-    vec2 tangent = normalize((q.xy*p.w - p.xy*q.w) * uViewport.zw);
+    vec2 tangent = normalize((q.xy - p.xy) * uViewport.zw);
+    //vec2 tangent = normalize((q.xy*p.w - p.xy*q.w) * uViewport.zw);
 
     // flip tangent to normal (it's already normalized)
     vec2 normal = vec2(-tangent.y, tangent.x);
@@ -304,4 +283,15 @@ LineFragShaderSrc = `
     gl_Position.xy = p.xy + offset.xy * perspScale;
     gl_Position.zw = p.zw;
   }
-`
+`;
+
+LineFragShaderSrc = `
+  precision mediump float;
+  precision mediump int;
+
+  uniform vec4 uMaterialColor;
+
+  void main() {
+    gl_FragColor = uMaterialColor;
+  }
+`;

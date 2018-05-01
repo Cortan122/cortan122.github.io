@@ -37,7 +37,7 @@ fs.readFile('dir.txt', 'utf8', function(err, contents) {
         }
       }
       j.lines = arr;
-      fs.writeFile(arrN[t]+'/data.json', JSON.stringify(j), function(err) {if(err)throw err;});
+      fs.writeFile(arrN[t]+'/data.json', JSON.stringify(j,undefined,2), function(err) {if(err)throw err;});
     });
   }
 

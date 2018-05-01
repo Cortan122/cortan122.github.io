@@ -1,1 +1,14 @@
-{"categories":["Toys"],"name":"Graphing Functions","time":1483199640,"jsfiles":["sketch_grafing.js"],"lines":{"html":29,"js":129}}
+{
+  "categories": [
+    "Toys"
+  ],
+  "name": "Graphing Functions",
+  "time": 1483199640,
+  "jsfiles": [
+    "sketch_grafing.js"
+  ],
+  "lines": {
+    "html": 29,
+    "js": 129
+  }
+}

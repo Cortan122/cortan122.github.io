@@ -112,6 +112,27 @@ rotator.isCoplanar = function(p0,p1,p2,p3){
   return round10(this.determinant(m),-10)==0;//floating point errors
 }
 
+rotator.save = function(bool=true){
+  if(this.stack == undefined)this.stack = [];
+  var t = arrayDeepCopy(this.history);
+  if(t == undefined)t = this.identityMatrix;
+  var t2 = scl;
+  if(!bool)t2 = undefined;
+  var r = [t,isPlanarView,t2,zoom];
+  this.stack.push(r);
+  return r;
+}
+
+rotator.restore = function(){
+  resetView();
+  var r = this.stack.pop();
+  if(r[1])planarView();
+  this.applyMatrixG(r[0]);
+  if(r[2] !== undefined)scl = r[2];
+  if(r[3] !== undefined)zoom = r[3];
+  return r;
+}
+
 //Quaternion
 rotator.quaternionToMatrix = function(q){
   var m = [[],[],[]];

@@ -76,6 +76,7 @@ function draw1E(e){
   line(x*scl,y*scl,x1*scl,y1*scl);
 }
 function draw1P(p){
+  if(tweakables.vertexSize<=0&&tweakables.vertexLabels<=0)return;
   strokeWeight(tweakables.vertexSize);
   stroke(accentColor);
   var x = _perspective(p).x;var y = _perspective(p).y;
@@ -196,10 +197,11 @@ function calcFaceColors(bool){
     )));
     return;
   }*/
+  var cpalette = palette.map(e => color(e));
   var hash = uniq(arrTF.map(e => e.hash = getFaceHashStr(e))).sort();
   arrTF.forEach(e => {
     e.paletteIndex = hash.indexOf(e.hash);
-    e.color = color(palette[hash.indexOf(e.hash)%palette.length]);
+    e.color = cpalette[e.paletteIndex%palette.length];//color(palette[hash.indexOf(e.hash)%palette.length]);
     e.color._array[3]=transparency/255;
   });
 }

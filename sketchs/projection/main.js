@@ -15,7 +15,7 @@ var zoom = 5;
 
 var tweakables = {
   vertexLabels:-1,
-  vertexSize:-1,
+  vertexSize:-10,
   edgeThickness:-2,
   transparency:255,
   accentColor:'black',
@@ -76,7 +76,7 @@ function setup() {
 } 
 
 function initDOM(){
-  $('body').append('<div id="mainInputText" style="margin-top:0px;width: fit-content;">Recipe:</div>');
+  $('body').append('<div id="mainInputText" style="margin-top:0px;width: fit-content;width: -moz-fit-content;">Recipe:</div>');
   $('#mainInputText').append('<input type="text" id="mainInput" style="width: {0}px;display: inline-block;margin: 0;">'
     .format(round(width-$('#mainInputText').width())))
     .append($('<div id="errorIconAnchor" style="display: inline-block;margin: 0;"></div>')

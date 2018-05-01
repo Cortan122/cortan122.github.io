@@ -45,31 +45,31 @@ templateStrings = {
   "antitruncate":'t(-1)',
   "bitruncated":"t d",
   "bitruncate":"t d",
-  "rectified":'r',
-  "rectify":'r',
-  "ambo":'r',
-  "a":'r',
+  "rectified":'a',
+  "rectify":'a',
+  "ambo":'a',
+  //"r":'a',
   "birectified":'d',
   "birectify":'d',
   "dual":'d',
   "2r":'d',
   "2t":"t d",
-  "cantellated":"r r",
-  "exploded":"r r",
-  "expanded":"r r",
-  "explode":"r r",
-  "expand":"r r",
+  "cantellated":"a a",
+  "exploded":"a a",
+  "expanded":"a a",
+  "explode":"a a",
+  "expand":"a a",
   "alternated":'h',
   "half":'h',
-  "snub":'h t r',
-  "s":'h t r',
+  "snub":'h t a',
+  "s":'h t a',
   "zip":'t d',
-  "bevel":'t r',
-  "ortho":'d r r',
-  "gyro":'d h t r',
+  "bevel":'t a',
+  "ortho":'d a',
+  "gyro":'d h t a',
   "needle":'d t',
-  "join":'d r',
-  "meta":'d t r',
+  "join":'d a',
+  "meta":'d t a',
   "k":'d t d',//todo
   "kis":"k",
   "sphere":"u",
@@ -80,13 +80,13 @@ templateStrings = {
   "canonize":'f',
   "canon":'f',
   "fix":'f',
-  "cuboctahedron":"r {4,3}",
-  "rhombic dodecahedron":"d r{4,3}",
+  "cuboctahedron":"a {4,3}",
+  "rhombic dodecahedron":"d a{4,3}",
   /*"snub cube":"snub cuboctahedron",*/
-  "icosidodecahedron":"r {5,3}",
-  "rhombic triacontahedron":"d r {5,3}",
-  "triacontahedron":"d r {5,3}",
-  "rhombicosidodecahedron":"r r {5,3}",
+  "icosidodecahedron":"a {5,3}",
+  "rhombic triacontahedron":"d a {5,3}",
+  "triacontahedron":"d a {5,3}",
+  "rhombicosidodecahedron":"a a {5,3}",
   "disdyakis triacontahedron":"d120",
   "hexakis icosahedron":"d120",
   "decakis dodecahedron":"d120",
@@ -96,10 +96,13 @@ templateStrings = {
   "d8":"octahedron",
   "d12":"{5,3}",
   "d20":"{3,5}",
-  "d120":"f d t a {5,3}"
+  "d120":"u d t a {5,3}", //"f d t a {5,3}"
+  "football":"t icosahedron",
+  "ball":"football"
 };
 
 var isTemplating = false;
+var prevTemplateStr = undefined;
 
 function template(data){
   isTemplating = true;
@@ -114,9 +117,7 @@ function template(data){
   if(data.indexOf(' ') == -1&&templateStrings[data] === undefined&&data.match(/polygon[0-9]+$/)==null){
     data = data.match(/[^\(\)]\(?[0-9\.\-\,]*\)?/g).join(' ');
   }
-  var t = arrayDeepCopy(rotator.history);
-  if(t == undefined)t = rotator.identityMatrix;
-  var t1 = isPlanarView;
+  rotator.save(prevTemplateStr==data0);
   isPlanarView = false;
   cachedMeshProperties = undefined;
 
@@ -130,15 +131,15 @@ function template(data){
   recenter();
   standardizeEdgeLengths();
   resetView();
-  fixNormalsI();//fixNormals();
+  fixNormalsI(10,true);//fixNormals();
   updateStats();
   doUpdate();
-  if(t1)planarView();
   if(tweakables.useWebGL){
     objString = makeObj();
   }
   isTemplating = false;
-  rotator.applyMatrixG(t);
+  rotator.restore();
+  prevTemplateStr = data0;
 
   var time2 = (new Date).getTime();
   print('template({1}) took {0}+{2}={3} ms'.format(time1-time,data0,time2-time1,time2-time));
@@ -200,7 +201,7 @@ function compilePrefix(data){
   for (var i = 0; i < arr.length; i++) {
     if(arr[i] == ' '||arr[i] == '')continue;
     if(arr[i] == 't'){truncate(/*1/(sqrt(2)+2)*/);continue;}
-    if(arr[i] == 'r'){truncate(0.5);continue;}
+    if(arr[i] == 'a'){truncate(0.5);continue;}
     if(arr[i] == 'd'){dual();continue;}
     if(arr[i] == 'h'){snubAll();continue;}
     if(arr[i] == 'f'){canonicalizer.canonicalize(100);continue;}

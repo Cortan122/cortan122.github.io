@@ -17,6 +17,7 @@
   <script src="draw.js"></script>
   <script src="webgl.js"></script>
   <script src="mesh.js"></script>
+  <script src="operators.js"></script>
   <style>
     body {padding: 0; margin: 0;}
     a {
@@ -25,7 +26,10 @@
       text-decoration: none;
     }
     a:hover {text-decoration: underline;}
-    canvas{touch-action: pinch-zoom;}
+    canvas{
+      touch-action: pinch-zoom;
+      -ms-touch-action: pinch-zoom;
+    }
     p {text-decoration: inherit;}
     #errorIcon {
       user-select: none;
@@ -60,6 +64,10 @@
     }  
     #mainInputText,#stats,#export_links,#view_links {
       user-select: none;
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      -o-user-select: none;
     }
   </style>
  </head> 

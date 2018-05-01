@@ -14,6 +14,7 @@ function __parseObj(model, lines) {
     vn: []
   };
   var indexedVerts = {};
+  model.strokeIndices = [];
 
   for (var line = 0; line < lines.length; ++line) {
     // Each line is a separate object (vertex, face, vertex normal, etc)
@@ -37,6 +38,7 @@ function __parseObj(model, lines) {
         var texVertex = [parseFloat(tokens[1]), parseFloat(tokens[2])];
         loadedVerts[tokens[0]].push(texVertex);
       } else if (tokens[0] === 'f') {
+        var originalFace = [];
         // Check if this line describes a face.
         // OBJ faces can have more than three points. Triangulate points.
         for (var tri = 3; tri < tokens.length; ++tri) {
@@ -72,6 +74,7 @@ function __parseObj(model, lines) {
               if (loadedVerts.vn[vertParts[2]]) {
                 model.vertexNormals.push(loadedVerts.vn[vertParts[2]].copy());
               }
+              originalFace.push(vertIndex);
             }
 
             face.push(vertIndex);
@@ -84,6 +87,10 @@ function __parseObj(model, lines) {
           ) {
             model.faces.push(face);
           }
+        }
+
+        for(var i = 0,max = originalFace.length;i<max;i++){
+          model.strokeIndices.push([originalFace[i],originalFace[(i+1)%max]])
         }
       }
     }

@@ -3,7 +3,7 @@
 
   lib.sleep = function (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+  };
 
   lib.clone = function (obj) {
     if (null == obj || "object" != typeof obj) return obj;
@@ -12,7 +12,7 @@
       if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
     return copy;
-  }
+  };
 
   lib.arrayDeepCopy = function (a){
     if(a == undefined)return undefined;
@@ -25,20 +25,22 @@
       }
     }
     return r;
-  }
+  };
 
   lib.getRandomInt = function (min, max) {
     return Math.floor(random(0,1) * (max - min)) + min;
-  }
+  };
 
   lib.round10 = function (value,exp){
-    value = +value;
+    exp = Math.pow(10,exp);//(10**exp);
+    return floor(value/exp)*exp;
+    /*value = +value;
     exp = +exp;
     value = value.toString().split('e');
     value = round(+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
     value = value.toString().split('e');
-    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
-  }
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));*/
+  };
 
   lib.getSumOfArray = function (numArray) {
     if(numArray[0] instanceof p5.Vector){
@@ -49,33 +51,33 @@
     var r = 0;
     numArray.map(e => r+=e);
     return r;
-  }
+  };
 
   lib.getAverageOfArray = function (numArray) {
     return getSumOfArray(numArray)/numArray.length;
-  }
+  };
 
   lib.getMaxOfArray = function (numArray) {
     return Math.max.apply(null, numArray);
-  }
+  };
 
   lib.getMinOfArray = function (numArray) {
     return Math.min.apply(null, numArray);
-  }
+  };
 
   lib.modulo = function (a,b){
     return a - b * floor(a/b);
-  }
+  };
 
   lib.delayEval = async function (ms,str) {
     await sleep(ms);
     eval(str);//setTimeout()
-  }
+  };
 
   lib.delayApply = async function (ms,f,_this,args) {
     await sleep(ms);
     f.apply(_this,args);//setTimeout()
-  }
+  };
 
   var keyCodeDictionary = lib.keyCodeDictionary ={
     backspace:8,
@@ -190,7 +192,7 @@
     }
     argument = argument.toLowerCase();
     return keyCodeDictionary[argument];
-  }
+  };
 
   var isGithub = lib.isGithub = window.location.href.includes("cortan122.github.io");
   var isLocalhost = lib.isLocalhost = window.location.href.includes("localhost");
@@ -220,12 +222,15 @@
       }
     }
     xmlHttp.send(data);
-  }
+  };
 
   lib.styleExists = function (string) {
     var a = document.styleSheets;
     for (var i = 0; i < a.length; i++) {
-      var b = a[i].rules;
+      var b;
+      //chrome: .rules
+      //firefox: .cssRules
+      (b = a[i].rules)||(b = a[i].cssRules);
       for (var j = 0; j < b.length; j++) {
         if(b[j].selectorText == undefined)continue;
         if(!(string instanceof RegExp)){
@@ -237,18 +242,18 @@
       }
     }
     return undefined;
-  }
+  };
 
   lib.isMouseOverCanvas = function (c) {
     //if(document.activeElement != document.body)return false;//fixme:unclear function name
     if(c == undefined)c = window.canvas;
     var box = c.getBoundingClientRect();
     return (mouseX>=0 && mouseX<=box.width && mouseY<=box.height && mouseY>=0);
-  }
+  };
 
   lib.isFocusedOnCanvas = function (){
     return document.activeElement == document.body;
-  }
+  };
 
   lib.getQueryParameterByName = function(name, url) {
     if (!url) {
@@ -260,7 +265,7 @@
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
-  }
+  };
 
   lib.addDrawEvent = function (event){
     //var p5.instance._draw = p5.instance._draw;
@@ -277,7 +282,7 @@
       p5.instance._drawEvents = [];  
     }
     p5.instance._drawEvents.push(event);
-  }
+  };
 
   lib.init1 = function(){
     if(lib.isInit == true){console.log("lib already init1alized");return;}
@@ -300,7 +305,7 @@
         }
       })();
     }
-  }
+  };
 
   lib.init2 = function(){
     if(lib.isInit2 == true){console.log("lib already init2alized");return;}
@@ -533,7 +538,7 @@
       mgr.parseInputRom();
 
     }
-  }
+  };
 
   lib.init3 = function(){
     if(lib.isInit3 == true){console.log("lib already init3alized");return;}
@@ -545,7 +550,7 @@
         if(tweakables.showFPS)$("#frDiv").html('FPS: '+floor(frameRate()));
       });
     }
-  }
+  };
 
   lib.isInit = false;
   lib.isInit2 = false;

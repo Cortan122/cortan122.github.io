@@ -1,8 +1,12 @@
 sC
-t x k(1) polygon30
+tI
+u t x k(1) polygon30
 udtdtdtdtdtT
 dtdtD
 f(1)zudakI //basically the same as dtdtD (but faster)
 dtdtI 
 f(1)zudakD //basically the same as dtdtI (but faster)
 f(2)zudakD
+itt(-1.6)D
+x(.25,.75)C //.25+.75=1
+x(-1,2)C //Escher solid

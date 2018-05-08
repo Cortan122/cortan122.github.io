@@ -5,3 +5,11 @@ C:\wamp64\www\etc\C#\snake\snake\bin\Debug\snake.pdb
 C:\wamp64\www\etc\C#\snake\snake\obj\Debug\snake.csprojResolveAssemblyReference.cache
 C:\wamp64\www\etc\C#\snake\snake\obj\Debug\snake.exe
 C:\wamp64\www\etc\C#\snake\snake\obj\Debug\snake.pdb
+C:\wamp64\www\etc\C#\snake\snake\bin\Debug\Newtonsoft.Json.dll
+C:\wamp64\www\etc\C#\snake\snake\bin\Debug\Newtonsoft.Json.xml
+C:\wamp64\www\etc\C#\snake\snake\obj\Debug\snake.Properties.Resources.resources
+C:\wamp64\www\etc\C#\snake\snake\obj\Debug\snake.csproj.GenerateResource.Cache
+C:\wamp64\www\etc\C#\snake\snake\obj\Debug\Interop.WMPLib.dll
+C:\wamp64\www\etc\C#\snake\snake\obj\Debug\snake.csproj.ResolveComReference.cache
+C:\wamp64\www\etc\C#\snake\snake\bin\Debug\NAudio.dll
+C:\wamp64\www\etc\C#\snake\snake\bin\Debug\NAudio.xml

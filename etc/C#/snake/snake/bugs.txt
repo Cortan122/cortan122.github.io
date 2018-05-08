@@ -1,0 +1,7 @@
+2: music jumps a bit when restarting 
+
+3: resizing the window causes the cursor to reappear
+
+3.5: game over sound is too loud
+
+4: when closing notepad the tail is not drawn

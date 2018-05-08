@@ -1,4 +1,0 @@
-C:\костя\R\C\lines\lines\bin\Debug\lines.exe
-C:\костя\R\C\lines\lines\bin\Debug\lines.pdb
-C:\костя\R\C\lines\lines\obj\x86\Debug\lines.exe
-C:\костя\R\C\lines\lines\obj\x86\Debug\lines.pdb

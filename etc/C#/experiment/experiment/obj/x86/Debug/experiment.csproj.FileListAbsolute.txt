@@ -1,4 +1,0 @@
-C:\костя\R\C\experiment\experiment\bin\Debug\experiment.exe
-C:\костя\R\C\experiment\experiment\bin\Debug\experiment.pdb
-C:\костя\R\C\experiment\experiment\obj\x86\Debug\experiment.exe
-C:\костя\R\C\experiment\experiment\obj\x86\Debug\experiment.pdb

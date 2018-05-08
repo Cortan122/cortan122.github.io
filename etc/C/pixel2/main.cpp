@@ -18,7 +18,7 @@ enum bMode { NONE, INNER, OUTER, LEFT, RIGHT };
 const bMode BOUNDARY_MODE = RIGHT;
 const uint8_t COLOR_PALETTE[] = {7,15,11,10};//{boundary,zero,negative,positive}
 
-const char * IMAGE_FILE_PATH = "spiral.png";//"instagram.png";
+const char * IMAGE_FILE_PATH = "instagram.png";//"spiral.png";
 void decodeOneStep(FrameBuffer &fb,const char* filename){
   std::vector<unsigned char> image; //the raw pixels
   unsigned width, height;

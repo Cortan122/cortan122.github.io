@@ -4,12 +4,12 @@
     "Toys"
   ],
   "name": "Faster Graphing",
-  "time": 0,
+  "time": 1526050200,
   "jsfiles": [
     "main.js"
   ],
   "lines": {
-    "html": 16,
-    "js": 2
+    "html": 37,
+    "js": 135
   }
 }

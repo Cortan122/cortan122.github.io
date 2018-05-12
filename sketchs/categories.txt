@@ -187,6 +187,21 @@
             "js": 129
         }
     },
+    "graphing_webgl": {
+        "categories": [
+            "Unfinished",
+            "Toys"
+        ],
+        "name": "Faster Graphing",
+        "time": 1526050200,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 37,
+            "js": 135
+        }
+    },
     "gravity": {
         "categories": [
             "Simulations"
@@ -286,7 +301,7 @@
             "main.js"
         ],
         "lines": {
-            "html": 18,
+            "html": 12,
             "js": 122
         }
     },

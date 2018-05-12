@@ -69,17 +69,21 @@
     return a - b * floor(a/b);
   };
 
-  lib.delayEval = async function (ms,str) {
-    await sleep(ms);
-    eval(str);//setTimeout()
-  };
+  try{
+    lib.delayEval = async function (ms,str) {
+      await sleep(ms);
+      eval(str);//setTimeout()
+    };
 
-  lib.delayApply = async function (ms,f,_this,args) {
-    await sleep(ms);
-    f.apply(_this,args);//setTimeout()
-  };
+    lib.delayApply = async function (ms,f,_this,args) {
+      await sleep(ms);
+      f.apply(_this,args);//setTimeout()
+    };
+  }catch(e){
+    Console.log(e);
+  }
 
-  var keyCodeDictionary = lib.keyCodeDictionary ={
+  var keyCodeDictionary = lib.keyCodeDictionary = {
     backspace:8,
     tab:9,
     enter:13,
@@ -193,6 +197,16 @@
     argument = argument.toLowerCase();
     return keyCodeDictionary[argument];
   };
+
+  var dirToVectorRom = [{x:0,y:-1},{x:1,y:0},{x:0,y:1},{x:-1,y:0}];
+  lib.dirToVector = function(dir){
+    var v = dirToVectorRom[dir];
+    if(window.p5&&window.p5.Vector.convert){
+      return window.p5.Vector.convert(v);
+    }else{
+      return v;
+    }
+  }
 
   var isGithub = lib.isGithub = window.location.href.includes("cortan122.github.io");
   var isLocalhost = lib.isLocalhost = window.location.href.includes("localhost");
@@ -311,7 +325,7 @@
     if(lib.isInit2 == true){console.log("lib already init2alized");return;}
     lib.isInit2 = true;
 
-    if(window.tweakables && !window.initTweakables && window.createElement && window.$){
+    if(window.tweakables && !window.initTweakables && window.$){
       var twr = lib.tweaker = {};
       var s;
       if(window.tweakables_name == undefined){
@@ -334,7 +348,7 @@
           }
           localStorage[this.name] = JSON.stringify(tweakables);
         }catch(e){localStorage[this.name] = '';}
-        if(!select('#pDiv')){
+        if(!$('#pDiv').length){
           $('body').append('<ul id="pDiv" style="display: inline-block;list-style-type:none;font-size: 20;text-decoration:;position: absolute;left: -500px;overflow-y: scroll;resize: vertical;height: 95%;margin-top: 0px;"><li style="margin-top: 20px;" class="tweakables"></li></ul>');
         }
         if(!styleExists(/.*\.tweakables/)){
@@ -368,44 +382,46 @@
 
       twr.displayTweakables = (function () {
         var onChangeTweakable = this.onChangeTweakable;
-        pdiv = select('#pDiv');
-        //for(var name in tweakables){
+        pdiv = $('#pDiv');
         var keys = Object.keys(tweakables);
         if(tweakables.metaSort)keys = keys.sort();
         for (var i = 0; i < keys.length; i++) {
           var name = keys[i];
-          var text = createP(name+':');
-          text.class('tweakables');
-          var li = createElement('li','');
-          li.child(text);
-          li.class('tweakables');
-          li.id('tw_'+name);
+          var text = $('<p>'+name+':'+'</p>');
+          text.addClass('tweakables');
+          var li = $("<li></li>");
+          li.append(text);
+          li.addClass('tweakables');
+          li.attr('id','tw_'+name);
           if(typeof tweakables[name] == 'number'){
-            var inp = createInput(tweakables[name]);
-            inp.input(new Function('tweakables["{0}"] = parseFloat(this.value());lib.tweaker.onChangeTweakable("{0}")'.format(name)));
-            inp.class('input');
+            var inp = $('<input type="text">');
+            inp.val(tweakables[name]);
+            inp.on('input',new Function('tweakables["{0}"] = parseFloat(this.value);lib.tweaker.onChangeTweakable("{0}")'.format(name)));
+            inp.addClass('input');
           }else if(typeof tweakables[name] == 'string'){
-            var inp = createInput(tweakables[name]);
-            inp.input(new Function('tweakables["{0}"] = this.value();lib.tweaker.onChangeTweakable("{0}")'.format(name)));
-            inp.class('input');
+            var inp = $('<input type="text">');
+            inp.val(tweakables[name]);
+            inp.on('input',new Function('tweakables["{0}"] = this.value;lib.tweaker.onChangeTweakable("{0}")'.format(name)));
+            inp.addClass('input');
           }else if(typeof tweakables[name] == 'boolean'){
-            var inp = createCheckbox('',tweakables[name]);
-            inp.changed(new Function('tweakables["{0}"] = this.checked();lib.tweaker.onChangeTweakable("{0}")'.format(name)));
-            inp.class('checkbox');
+            var inp = $('<input type="checkbox">');
+            inp[0].checked = tweakables[name];
+            inp.on("change",new Function('tweakables["{0}"] = this.checked;lib.tweaker.onChangeTweakable("{0}")'.format(name)));
+            inp.addClass('checkbox');
           }else{
             localStorage[this.name] = undefined;
             throw 'invalid tweakables';
           }
-          inp.elt.className += (' tweakables');
-          li.child(inp);
-          pdiv.child(li);
+          inp.addClass('tweakables');
+          li.append(inp);
+          pdiv.append(li);
           //tweakables[name]
         }
-        var li = createElement('li','');
-        var button = createButton('reset');
-        button.mousePressed(new Function('localStorage["'+this.name+'"] = "";'));
-        li.child(button);
-        pdiv.child(li);
+        var li = $("<li></li>");
+        var button = $('<button value="undefined">reset</button>');
+        button.on('mousedown',new Function('localStorage["'+this.name+'"] = "";'));
+        li.append(button);
+        pdiv.append(li);
 
         var resizeTextbox = this.resizeTextbox;
         if(tweakables.metaResize)
@@ -438,7 +454,7 @@
       //setTimeout(twr.initTweakables, 1);
       twr.initTweakables();
     }else if(window.tweakables && !(window.createElement && window.$)){
-      console.warn('you need p5.dom and jquery for tweakables');
+      console.warn('you need jquery for tweakables');
     }
 
     if(window.inputRom && !window.parseInputRom){
@@ -546,6 +562,14 @@
 
     if(window.tweakables && window.tweakables.showFPS !== undefined && window.$){
       if($("#frDiv").length == 0)$("body").append("<div id='frDiv'></div>");
+      lib.tweaker.events.push(e=>{
+        if(e != "showFPS")return;
+        if(tweakables.showFPS){
+          $("#frDiv").css('display','inline-block');
+        }else{
+          $("#frDiv").css('display','none');
+        }
+      });
       lib.addDrawEvent(function() {
         if(tweakables.showFPS)$("#frDiv").html('FPS: '+floor(frameRate()));
       });

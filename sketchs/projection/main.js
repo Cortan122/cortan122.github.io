@@ -87,7 +87,7 @@ function initDOM(){
       readRecipe();
     }
   });
-  select('#mainInput').input(e => $('#errorIcon').css('color','white').attr('title','').html('\u2713'));
+  $('#mainInput').on("input",e => $('#errorIcon').css('color','white').attr('title','').html('\u2713'));
 
   $('body').append('<div id="stats" class="stats">Stats: &nbsp;&nbsp;<div id="faces" class="stats">{0} faces<div id="faceList" class="statList">faceList</div></div>, <div id="edges" class="stats">{0} edges<div id="edgeList" class="statList">edgeList</div></div>, <div id="vertices" class="stats">{0} vertices</div></div>');
   $("#faces").click(function() {

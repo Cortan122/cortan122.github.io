@@ -1,1 +1,14 @@
-{"categories":["Unfinished"],"name":"Template","time":0}
+{
+  "categories": [
+    "Unfinished"
+  ],
+  "name": "Template",
+  "time": 0,
+  "jsfiles": [
+    "main.js"
+  ],
+  "lines": {
+    "html": 16,
+    "js": 2
+  }
+}

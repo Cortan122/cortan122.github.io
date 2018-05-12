@@ -1,0 +1,41 @@
+﻿{
+  //Gameplay options:
+  "width": 20,
+  "height": 10,
+  "offsetX": 1,
+  "offsetY": 1,
+  "millisecondsPerTick": 250, //-1 for no time limit
+  "initialScore": 1,
+  "isReversible": false,
+  "endlessMode": false,
+  "cheatMode": false, // Удачи, братан
+  "deadlyWalls": false,
+  "inputMode": "Multithreaded_sim", //{ Multithreaded,Delay,Timer,Multithreaded_sim }
+
+  //Esthetic options:
+  "headChar": "X",
+  "bodyChar": "*",
+  "emptyChar": ".",
+  "appleChar": "0",
+  "boxDrawingCharList": "\u2502\u2500\u2510\u2514\u2518\u250C\u252C\u251C\u2524\u2534\u253C",
+  "arrowCharList": "↓←↑→",
+  "headColor": -1, // -1 is default
+  "bodyColor": "Green",
+  "emptyColor": "DarkGreen",
+  "appleColor": "Red",
+  "boxColor": -1,
+  "gameOverDelay": 500,
+  "sfx_musicFileName": -1, // -1 is default ; 0 is silence
+  "sfx_chompFileName": -1,
+  "sfx_gameoverFileName": -1,
+  "sfx_beepFileName": -1,
+  "sfx_portalFileName": -1,
+  "sfx_victoryFileName": -1,
+  "sfx_DelayedBeep": true,
+  "sfx_MasterVolume": 0.5, // form 0 to 1
+  "sfx_PauseMusicOnGameover": true,
+  "showMenu": true,
+  "showHighscore": true,
+  "openConfigInNotepad": true,
+  "directionalBody": false
+}

@@ -100,6 +100,12 @@ namespace Snake {
         } else if (cki.Key == ConsoleKey.H) {
           Util.Event_help();
           return -1;
+        } else if (cki.Key == ConsoleKey.C) {
+          game.Event_clear();
+          return -1;
+        } else if (cki.Key == ConsoleKey.V) {
+          game.Event_victory();
+          return -1;
         }
       }
       return -1;

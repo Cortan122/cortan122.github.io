@@ -24,6 +24,7 @@ namespace Snake {
       assembly = Assembly.GetExecutingAssembly();
       directory = Path.GetDirectoryName(assembly.Location);
       Console.OutputEncoding = System.Text.Encoding.UTF8;
+      Console.Title = "Snake";
       InitOptions(argv);
 
       SetColor(defaultColor);
@@ -101,9 +102,10 @@ namespace Snake {
       hasOptionFile = true;
     }
     public static Stream GetResource(string name) {
-      var t = assembly.GetManifestResourceStream("snake." + name);
+      const string location = "Snake.Resources.";
+      var t = assembly.GetManifestResourceStream(location + name);
       if (t == null) {
-        throw new Exception("ManifestResource snake." + name + " dose not exist");
+        throw new ArgumentOutOfRangeException("ManifestResource "+ location + name + " dose not exist");
       }
       return t;
     }
@@ -192,6 +194,43 @@ namespace Snake {
     }
     public static void ClearKeyBuffer() {
       while (Console.KeyAvailable) Console.ReadKey(true);
+    }
+    private static int? _highscore = null;
+    public static int Highscore {
+      get {
+        if (_highscore.HasValue) {
+          return (int)_highscore;
+        } else {
+          return Properties.Settings.Default.Highscore;
+        }
+      }
+      set {
+        _highscore = value;
+        Properties.Settings.Default.Highscore = value;
+        Properties.Settings.Default.Save();
+      }
+    }
+    private const string cheatingPassword = "ωαs_τнατ_ƒμη?";
+    public static bool CanCheat(Options o) {
+      JToken t =  o.Get("cheatMode");
+      bool requireCheatingPassword = cheatingPassword != null;
+      //if (isDebug) return true;
+      if (t.Type == JTokenType.Boolean) {
+        if((bool)t==false) return false;
+        if (requireCheatingPassword) {
+          Console.WriteLine("Warning: cheatMode requires a password");
+          Console.ReadKey();
+          Console.Clear();
+          return false;
+        } else {
+          return true;
+        }
+      }
+      if (t.Type == JTokenType.String) {
+        if (!requireCheatingPassword) return true;
+        return (string)t == cheatingPassword;
+      }
+      return false;
     }
   }
 }

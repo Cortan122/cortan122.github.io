@@ -19,6 +19,7 @@ namespace Snake {
     bool lizardTail;
     bool canCheat;
     bool showMenu;
+    bool showHighscore;
     bool delayedBeep;
     bool deadlyWalls;
     bool directionalBody;
@@ -96,9 +97,13 @@ namespace Snake {
       Console.Write(empty);
     }
     void DrawScore() {
+      if (Util.Highscore < score) Util.Highscore = score;
       Util.SetColor(boxColor);
       Util.MoveCursor(size.x + 11, 0);
-      Console.Write(score.ToString("000"));
+      Console.Write(score.ToString().PadRight(3,' '));
+      if (!showHighscore) return;
+      Util.MoveCursor(size.x + 11, 1);
+      Console.Write(Util.Highscore.ToString().PadRight(3, ' '));
     }
     void InitDraw() {
       Util.SetColor(boxColor);
@@ -127,55 +132,57 @@ namespace Snake {
       DrawScore();
     }
     void DrawMenu() {
-      const string controls = "Controls:\n[H]elp\n[M]ute";
+      const string controls = "\n_line\nControls:\n[H]elp\n[M]ute";
       const string cheats = "\n\nCheats:\n[R]estart\n[F]eed";
-      string menu = controls;
-      if (!Util.isDebug) menu += "\n[O]ptions";
-      if (canCheat) menu += cheats;
+      string menu = "    Score:";
+      if (showHighscore) menu += "\nHighscore:";
+      if (showMenu) {
+        menu += controls;
+        if (!Util.isDebug) menu += "\n[O]ptions";
+        if (canCheat) {
+          menu += cheats;
+          if (showHighscore) menu += "\n[C]lr Hiscore";//i ran out of space
+        }
+      }
 
       Util.SetColor(boxColor);
-      MoveCursor(size.x + 5, 0);
-      Console.Write("Score:   " + borders[0]);
       MoveCursor(size.x, -1);
       Console.Write(borders[6] + new String(borders[1], 13) + borders[2]);
-      MoveCursor(size.x, 1);
-      char t = showMenu ? borders[8] : borders[4];
-      char t1 = borders[7];
-      if (size.y == 1) {
-        t1 = showMenu ? borders[10] : borders[9];
-      }
-      Console.Write(t1 + new String(borders[1], 13) + t);
 
-      if (!showMenu) {
-        menuSize = 1;
-        return;
-      }
+      char t;
       string[] arr = menu.Split('\n');
       int i;
       for (i = 0; i < arr.Length; i++) {
         string line = arr[i];
-        MoveCursor(size.x + 1, 2 + i);
-        Console.Write(line.PadRight(13, ' ') + borders[0]);
-        char? temp = null;
-        if (2 + i == size.y) {
-          temp = borders[8];
-        } else if (2 + i > size.y) {
+        bool seperator = false;
+        if (line == "_line") {
+          seperator = true;
+          MoveCursor(size.x + 1, i);
+          Console.Write(new String(borders[1], 13) + borders[8]);
+        } else {
+          MoveCursor(size.x + 1, i);
+          Console.Write(line.PadRight(13, ' ') + borders[0]);
+        } 
+        char? temp = seperator ? borders[7] : (char?)null;
+        if (i == size.y) {
+          temp = seperator ? borders[10] : borders[8];
+        } else if (i > size.y && temp == null) {
           temp = borders[0];
         }
         if (temp != null) {
-          MoveCursor(size.x, 2 + i);
+          MoveCursor(size.x, i);
           Console.Write(temp);
         }
       }
-      MoveCursor(size.x, 2 + i);
+      MoveCursor(size.x, i);
       t = borders[7];
-      if (2 + i == size.y) {
+      if (i == size.y) {
         t = borders[9];
-      } else if (2 + i > size.y) {
+      } else if (i > size.y) {
         t = borders[3];
       }
 
-      menuSize = 2 + i;
+      menuSize = i;
       Console.Write(t + new String(borders[1], 13) + borders[4]);
     }
     public void UpdateOptions(Options o) {
@@ -192,8 +199,9 @@ namespace Snake {
       boxColor = Util.GetColor("box");
       isReversible = (bool)o.Get("isReversible");
       lizardTail = (bool)o.Get("endlessMode");
-      canCheat = (bool)o.Get("cheatMode");
+      canCheat = Util.CanCheat(o);//(bool)o.Get("cheatMode");
       showMenu = (bool)o.Get("showMenu");
+      showHighscore = (bool)o.Get("showHighscore");
       deadlyWalls = (bool)o.Get("deadlyWalls");
       delayedBeep = (bool)o.Get("sfx_DelayedBeep");
       directionalBody = (bool)o.Get("directionalBody");
@@ -235,6 +243,15 @@ namespace Snake {
     }
     public void Event_restart() {
       if (canCheat) GameOver();
+    }
+    public void Event_clear() {
+      if (canCheat && showHighscore) {
+        Util.Highscore = score;
+        DrawScore();
+      }
+    }
+    public void Event_victory() {
+      if (canCheat) Victory();
     }
     public bool Event_portal() {
       if (deadlyWalls) {

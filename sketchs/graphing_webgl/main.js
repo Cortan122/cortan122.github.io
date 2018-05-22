@@ -126,6 +126,7 @@ function moveB(v){
 
 function mouseWheel(event) {
   if(!isMouseOverCanvas())return;
+  if(!isFocusedOnCanvas())return;
   var t = 2**(event.delta*tweakables.scrollSpeed);
   var center = createVector(bounds[0]+bounds[2],bounds[1]+bounds[3]).mult(.5);
   moveB(center.mult(-1));

@@ -523,6 +523,21 @@
             "js": 2436
         }
     },
+    "turtle": {
+        "categories": [
+            "Unfinished",
+            "Toys"
+        ],
+        "name": "L-system",
+        "time": 0,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 16,
+            "js": 2
+        }
+    },
     "url": {
         "categories": [
             "Failures"

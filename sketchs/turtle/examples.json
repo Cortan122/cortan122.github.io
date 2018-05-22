@@ -1,0 +1,29 @@
+{
+  "dragon":{
+    "code":"start=fx\nangle=90\ndraw=f\ni=10\nx:x+yf+\ny:-fx-y"
+  },
+  "cesaro":{
+    "code":"start=f\nangle=-85\ndraw=f\ni=8\nf:f+f--f+f"
+  },
+  "sierpinski":{
+    "code":"start=f-g-g\nangle=120\ndraw=f\ndraw=g\ni=9\nf:f-g+f+g-f\ng:gg"
+  },
+  "arrowhead":{
+    "code":"start=-xf\nangle=60\ndraw=f\ni=7\nx:yf+xf+y\ny:xf-yf-x"
+  },
+  "c":{
+    "code":"start=f\nangle=45\ndraw=f\ni=15\nf:+f--f+"
+  },
+  "tree":{
+    "code":"start=--0\nangle=45\ndraw=0\ndraw=1\ni=10\n1:11\n0:1[+0]-0"
+  },
+  "sq_tree":{
+    "code":"start=-0\nangle=90\ndraw=0\ndraw=1\ni=9\n1:11\n0:1[+0][-0]0"
+  },
+  "tr_tree":{
+    "code":"start=0\nangle=120\ndraw=0\ndraw=1\ni=9\n1:11\n0:1[+0][-0]0"
+  },
+  "weed":{
+    "code":"start=x\nangle=25\ndraw=f\ni=5\nx:f-[[x]+x]+f[+fx]-x\nf:ff"
+  }
+}

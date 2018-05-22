@@ -39,17 +39,24 @@ namespace Snake {
     bool[,] map;
     InputManager inputManager;
     SoundManager soundManager;
+    #if useFConsole
+    FConsole Console = Util.Console;
+    #endif
     #endregion
     public Game(Options o) : this(new Vector2((int)o.Get("width"), (int)o.Get("height")), new Vector2((int)o.Get("offsetX"), (int)o.Get("offsetY"))) {
       UpdateOptions(o);
     }
     public Game(Vector2 size = null, Vector2 offset = null) {
       Util.game = this;
+      if (size.x < 1) Util.PrintWarning("width must be greater than 0");
+      if (size.y < 1) Util.PrintWarning("height must be greater than 0");
+      if (size.x < 1 || size.y < 1) size = null;
       if (size == null) size = new Vector2(20, 10);
       if (offset == null) offset = new Vector2(1, 1);
       this.size = size;
       this.offset = offset;
 
+      #if !useFConsole
       int t = size.x + offset.x + 15;
       if (t > Console.WindowWidth) {
         Console.BufferWidth = t;
@@ -62,6 +69,7 @@ namespace Snake {
       } else {
         Console.BufferHeight = Console.WindowHeight;
       }
+      #endif
 
       this.inputManager = new InputManager(this);
       this.soundManager = new SoundManager();
@@ -186,27 +194,29 @@ namespace Snake {
       Console.Write(t + new String(borders[1], 13) + borders[4]);
     }
     public void UpdateOptions(Options o) {
-      head = ((string)o.Get("headChar"))[0];
-      empty = ((string)o.Get("emptyChar"))[0];
-      body = ((string)o.Get("bodyChar"))[0];
-      apple = ((string)o.Get("appleChar"))[0];
-      borders = (string)o.Get("boxDrawingCharList");
-      arrows = (string)o.Get("arrowCharList");
+      head = (o.Get("headChar","X"))[0];
+      empty = (o.Get("emptyChar","."))[0];
+      body = (o.Get("bodyChar","*"))[0];
+      apple = (o.Get("appleChar","0"))[0];
+      borders = o.Get("boxDrawingCharList","");
+      if (borders.Length < 11) borders = borders.PadRight(11,'#');
+      arrows = o.Get("arrowCharList","");
+      if (arrows.Length < 4) arrows = arrows.PadRight(4, body);
       headColor = Util.GetColor("head");
       emptyColor = Util.GetColor("empty");
       bodyColor = Util.GetColor("body");
       appleColor = Util.GetColor("apple");
       boxColor = Util.GetColor("box");
-      isReversible = (bool)o.Get("isReversible");
-      lizardTail = (bool)o.Get("endlessMode");
-      canCheat = Util.CanCheat(o);//(bool)o.Get("cheatMode");
-      showMenu = (bool)o.Get("showMenu");
-      showHighscore = (bool)o.Get("showHighscore");
-      deadlyWalls = (bool)o.Get("deadlyWalls");
-      delayedBeep = (bool)o.Get("sfx_DelayedBeep");
-      directionalBody = (bool)o.Get("directionalBody");
-      gameOverDelay = (int)o.Get("gameOverDelay");
-      initialScore = (int)o.Get("initialScore");
+      isReversible = o.Get("isReversible",false);
+      lizardTail = o.Get("endlessMode", false);
+      canCheat = Util.CanCheat(o);
+      showMenu = o.Get("showMenu", true);
+      showHighscore = o.Get("showHighscore", true);
+      deadlyWalls = o.Get("deadlyWalls", false);
+      delayedBeep = o.Get("sfx_DelayedBeep", true);
+      directionalBody = o.Get("directionalBody", false);
+      gameOverDelay = o.Get("gameOverDelay",500);
+      initialScore = o.Get("initialScore",1);
     }
     public void StartInputManager() {
       Init();
@@ -246,7 +256,7 @@ namespace Snake {
     }
     public void Event_clear() {
       if (canCheat && showHighscore) {
-        Util.Highscore = score;
+        Util.Highscore = score = 122;
         DrawScore();
       }
     }
@@ -359,10 +369,10 @@ namespace Snake {
       }
     }
     void MoveCursor(int x, int y) {
-      MoveCursor(new Vector2(x, y));
+      Util.MoveCursor(x,y);
     }
     void MoveCursor(Vector2 p) {
-      Console.SetCursorPosition(p.x + offset.x, p.y + offset.y);
+      Util.MoveCursor(p);
     }
   }
 }

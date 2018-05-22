@@ -8,7 +8,7 @@
   "initialScore": 1,
   "isReversible": false,
   "endlessMode": false,
-  "cheatMode": false, // Удачи, братан
+  "cheatMode": true, // Удачи, братан
   "deadlyWalls": false,
   "inputMode": "Multithreaded_sim", //{ Multithreaded,Delay,Timer,Multithreaded_sim }
 

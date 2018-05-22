@@ -5,12 +5,16 @@ namespace Snake {
   class InputManager {
     enum Mode { Multithreaded, Delay, Timer, Multithreaded_sim };
     Game game;
-    Mode mode = Mode.Timer;
+    Mode mode = Mode.Multithreaded_sim;
     int delay = 250;
     static bool threadMarker = false;
     public InputManager(Game g) {
       this.game = g;
-      mode = (Mode)Enum.Parse(typeof(Mode), (string)Util.Options.Get("inputMode"));
+      try {
+        mode = (Mode)Enum.Parse(typeof(Mode), (string)Util.Options.Get("inputMode"));
+      } catch (ArgumentException e) {
+        Util.PrintJsonWarning("inputMode");
+      }
       delay = (int)Util.Options.Get("millisecondsPerTick");
     }
     public void Start() {

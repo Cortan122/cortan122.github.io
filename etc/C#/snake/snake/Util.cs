@@ -1,7 +1,10 @@
-﻿using System;
+﻿//#define useFConsole 
+
+using System;
 using System.IO;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
+using System.Windows.Forms;
 
 namespace Snake {
   static class Util {
@@ -15,11 +18,21 @@ namespace Snake {
     public static Options Options;
     public static Assembly assembly;
     public static bool hasOptionFile = true;
+    public static bool useFConsole = false;
+#if useFConsole
+    public static FConsole Console;
+#endif
     public static void Main(string[] argv) {
-#if DEBUG
-    isDebug = true;
-#else
-      isDebug = false;
+      //Console.WriteLine(Convert.ToBase64String(CryptoManager.GetHash("τнιs_ραssωοяδ_ιs_μηοβταιηαβℓε‽")));
+      //Console.ReadLine();
+      //#if DEBUG
+      //    isDebug = true;
+      //#else
+      //    isDebug = false;
+      //#endif
+#if useFConsole
+      useFConsole = true;
+      Console = new FConsole();
 #endif
       assembly = Assembly.GetExecutingAssembly();
       directory = Path.GetDirectoryName(assembly.Location);
@@ -30,7 +43,9 @@ namespace Snake {
       SetColor(defaultColor);
       Console.CursorVisible = false;
       game = new Game(Options);
+      Highscore += 0;
 
+      WarningPause();
       game.StartInputManager();
     }
     public static void Event_options() {
@@ -47,6 +62,7 @@ namespace Snake {
         UpdateOptions();
         ClearKeyBuffer();
         game.UpdateOptions(Options);
+        WarningPause();
         game.Redraw();
       } else {
         CreateConfigFile();
@@ -92,27 +108,32 @@ namespace Snake {
       Console.WriteLine("I am going to create a config file at " + fullFileName);
       Console.WriteLine("Press any key to continue...");
       Console.WriteLine("If you do not whish to continue press Esc");
-      ConsoleKeyInfo a = Console.ReadKey();
-      if (a.Key == ConsoleKey.Escape) {
+      Console.WriteLine("If you whish to open the file press O");
+      Keys a = FConsole.Convert( Console.ReadKey() );
+      if (a == Keys.Escape) {
         Console.Clear();
         return;
       }
       File.WriteAllText(fullFileName, defaultJson);
       Console.Clear();
       hasOptionFile = true;
+      if (a == Keys.O) {
+        Event_options();
+      }
     }
     public static Stream GetResource(string name) {
       const string location = "Snake.Resources.";
       var t = assembly.GetManifestResourceStream(location + name);
       if (t == null) {
-        throw new ArgumentOutOfRangeException("ManifestResource "+ location + name + " dose not exist");
+        throw new ArgumentOutOfRangeException("ManifestResource " + location + name + " dose not exist");
       }
       return t;
     }
     private static void PrintColorWarning(string name) {
-      Console.WriteLine("Warning: " + name + "Color is set to an invalid value");
-      Console.ReadKey();
-      Console.Clear();
+      PrintJsonWarning(name + "Color");
+    }
+    public static void PrintJsonWarning(string name) {
+      PrintWarning(name + " is set to an invalid value");
     }
     public static void SetColor(byte color) {
       int c1 = color & 0xf;
@@ -163,7 +184,11 @@ namespace Snake {
     }
     public static void MoveCursor(Vector2 p) {
       Vector2 offset = game.offset;
-      Console.SetCursorPosition(p.x + offset.x, p.y + offset.y);
+      try {
+        Console.SetCursorPosition(p.x + offset.x, p.y + offset.y);
+      } catch (ArgumentOutOfRangeException e) {
+        Console.SetCursorPosition(0,20);
+      }
     }
     public static Vector2 FixPos(Vector2 a) {
       Vector2 size = game.size;
@@ -201,26 +226,25 @@ namespace Snake {
         if (_highscore.HasValue) {
           return (int)_highscore;
         } else {
-          return Properties.Settings.Default.Highscore;
+          return CryptoManager.ReadHighscore();// Properties.Settings.Default.Highscore;
         }
       }
       set {
         _highscore = value;
-        Properties.Settings.Default.Highscore = value;
-        Properties.Settings.Default.Save();
+        CryptoManager.WriteHighscore(value);
+        //Properties.Settings.Default.Highscore = value;
+        //Properties.Settings.Default.Save();
       }
     }
-    private const string cheatingPassword = "ωαs_τнατ_ƒμη?";
+    private const bool requireCheatingPassword = false;// = "ωαs_τнατ_ƒμη?";
     public static bool CanCheat(Options o) {
-      JToken t =  o.Get("cheatMode");
-      bool requireCheatingPassword = cheatingPassword != null;
+      JToken t = o.Get("cheatMode");
+      //bool requireCheatingPassword = cheatingPassword != null;
       //if (isDebug) return true;
       if (t.Type == JTokenType.Boolean) {
-        if((bool)t==false) return false;
+        if ((bool)t == false) return false;
         if (requireCheatingPassword) {
-          Console.WriteLine("Warning: cheatMode requires a password");
-          Console.ReadKey();
-          Console.Clear();
+          PrintWarning("cheatMode requires a password");
           return false;
         } else {
           return true;
@@ -228,9 +252,23 @@ namespace Snake {
       }
       if (t.Type == JTokenType.String) {
         if (!requireCheatingPassword) return true;
-        return (string)t == cheatingPassword;
+        return CryptoManager.CheckPassword((string)t);
       }
       return false;
+    }
+    private static bool isWarning = false;
+    public static void PrintWarning(string str) {
+      if (!isWarning) Console.Clear();
+      isWarning = true;
+      Console.WriteLine("Warning: " + str);
+    }
+    private static void WarningPause() {
+      if (isWarning == true) {
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
+        Console.Clear();
+      }
+      isWarning = false;
     }
   }
 }

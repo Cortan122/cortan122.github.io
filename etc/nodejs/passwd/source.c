@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include <time.h>
+#include <stdlib.h>
+#include <Windows.h>
 
 typedef uint8_t bool;
 typedef void (*func_t)(void);
@@ -19,6 +22,7 @@ bool strcmp_static = true;
 char* arg1;
 
 void caller(int i);
+void (*callerprt)(int) = caller;
 
 void init(){
   {0}
@@ -30,7 +34,7 @@ char tobase64_static;
 uint8_t flipbits_static = 0;
 void tobase64(){
   if(flipbits_static>64){
-    printf("%s\n","something went horribly wrong");
+    printf("%s\n","something went horribly wrong (tobase64)");
   }
   tobase64_static = base64rom[flipbits_static];
 }
@@ -57,6 +61,7 @@ void hopbits(){
   flipbits_static = r;
 }
 
+//@+decode
 void decode(){
   int i = 0;
   do{
@@ -92,6 +97,32 @@ void decode(){
   base64[i] = 0x00;
   #endif
 }
+//@-decode
+
+void mixer(){
+  //this function is unpredictable
+  #if doMixer==1
+  #if doMixerRandom==1
+  srand(time(NULL));
+  int r;// = rand();
+  #endif
+  int diff = (&decode2 - &decode);
+  long unsigned int t;
+  long unsigned int * tp = &t;
+  if(VirtualProtect(&decode, diff, PAGE_EXECUTE_READWRITE, tp)){
+    #if doMixerRandom==0
+    memcpy(&decode, (const void*)&decode2, diff);
+    #else
+    for (int i = 0; i < diff; i++){
+      r = rand();
+      if(r&1)memcpy(&decode+i, (const void*)&decode2+i, 1);
+    }
+    #endif
+  }else{
+    printf("%s\n", "something went horribly wrong (mixer)");
+  }
+  #endif
+}
 
 void printHappyMessage(){
   printf("%s\n","yay");
@@ -117,6 +148,9 @@ void checkPasswd(){
   strcmp_static = strcmp(arg1,password_base64)==0;
   #else
   init();//@
+  #if doMixer==1
+  mixer();//@
+  #endif
   decode();//@
   #if doLiveStrcmp==0
   strcmp_static = strcmp(arg1,base64)==0;

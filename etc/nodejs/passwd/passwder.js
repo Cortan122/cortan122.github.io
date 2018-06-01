@@ -2,11 +2,25 @@ var fs = require('fs');
 var cp = require('child_process');
 
 const optionFilePath = "options.json";
-const awailableOptions = ["password","password_base64","doHidePassword","doShuffleInit","doSaltInit","doFlipsInit","doHopsInit","doLiveStrcmp","doStrip","doSbox","doCaller","doShuffleCaller","doMaze","doShuffleMazeInit","doShuffleMaze","doMazeOffset","doMazeVolatile","doShuffleMazeVolatile"];
+const awailableOptions = ["password","password_base64","doHidePassword","doShuffleInit","doSaltInit","doFlipsInit","doHopsInit","doLiveStrcmp","doStrip","doSbox","doCaller","doShuffleCaller","doMaze","doShuffleMazeInit","doShuffleMaze","doMazeOffset","doMazeVolatile","doShuffleMazeVolatile","doMixer","doMixerRandom"];
 const doPrintBase64 = false;
 const doCleanup = false;
+const doFormatPasswd = true;
+const saveLocationPoly = "examples/";
 
-function mono(json){
+function randomPasswd(len=20){
+  const list = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/!#$%&'()*,-.:;>=<?@\\^_`|~{}[]()";
+  var r = "";
+  for (var i = 0; i < len; i++) {
+    r += list[randomInteger(0,list.length-1)];
+  }
+  return r;
+}
+
+function mono(json,filename){
+  if(filename==undefined){
+    filename = global.filename;
+  }
   var keys = Object.keys(json);
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
@@ -26,7 +40,7 @@ function getOptions(){
     main();
     return;
   }
-  if(json == undefined||(json.mode!="mono"&&json.mode!="multi")){
+  if(json == undefined||(json.mode!="mono"&&json.mode!="poly")){
     main();
     return;
   }
@@ -34,15 +48,15 @@ function getOptions(){
     mono(json);
     return;
   }
-  if(json.mode=="multi"){
-    saveLocation = "examples/";
-    mode = "multi";
+  if(json.mode=="poly"){
+    saveLocation = saveLocationPoly;
+    mode = "poly";
     var keys = Object.keys(json);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
       if(key=="mode")continue;
       filename = key;
-      mono(json[key]);
+      mono(json[key],filename);
     }
     return;
   }
@@ -69,6 +83,8 @@ global.doShuffleMaze = true;
 global.doMazeOffset = true;
 global.doMazeVolatile = true;
 global.doShuffleMazeVolatile = true;
+global.doMixer = true;
+global.doMixerRandom = true;
 
 const base64Rom = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split('');
 
@@ -99,6 +115,10 @@ Array.prototype.shuffle || (Array.prototype.shuffle = function() {
     this[j] = x;
   }
   return this;
+});
+
+String.prototype.splice || (String.prototype.splice = function(idx, rem, str) {
+  return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 });
 
 function randomInteger(min, max) {
@@ -173,6 +193,8 @@ function define_get(caller_len){
   if(doHidePassword==false){
     f("#define password_base64 \"{0}\"".format(password_base64));
   }
+  f("#define doMixer {0}".format(doMixer));
+  f("#define doMixerRandom {0}".format(doMixerRandom));
   return r;
 }
 
@@ -191,13 +213,14 @@ function sbox_get(sbox){
 function caller_get(source_box){
   var source = source_box[0];
   var mem = [];
+  var callerstr = doMixer?"callerprt({0});":"caller({0});";
 
   source = source.replace(/(\n[ \t]*)([a-zA-Z_][a-zA-Z_0-9]*)\(\);\/\/@/g,function(a0,a1,a2){
     var i = mem.indexOf(a2);
     if(i==-1){
       i = mem.push(a2)-1;
     }
-    return a1+"caller({0});".format(i);
+    return a1+callerstr.format(i);
   });
 
   var map = [];
@@ -233,6 +256,17 @@ function maze_get(caller_len,map){
   return [a1.join('\n    '),a2.join('\n  ')];
 }
 
+function mixer_get(source){
+  const m1 = "//@+decode";
+  const m2 = "//@-decode";
+  var i1 = source.indexOf(m1);
+  var i2 = source.indexOf(m2);
+  var code = source.substring(i1+m1.length,i2).replace("decode","decode2");
+  source = source.splice(i2+m2.length+1,0,code);
+
+  return source;
+}
+
 function main(){
   var source = fs.readFileSync("source.c").toString('ascii').replace(/\r/g,"");
 
@@ -252,8 +286,18 @@ function main(){
     }
   }
 
+  if(doMixer){
+    source = mixer_get(source);
+  }
+
   if(password_base64==undefined){
-    password_base64 = tobase64(password).replace(/=/g,'');
+    var t;
+    if(doFormatPasswd){
+      t = password.format(filename.split('.')[0],randomPasswd());
+    }else{
+      t = password;
+    }
+    password_base64 = tobase64(t).replace(/=/g,'');
   }
 
   var define_str = define_get(caller_len);
@@ -271,7 +315,7 @@ function main(){
   fs.writeFileSync("passwder.c",code);
 
   var t = "if errorlevel==1 (\n  echo something went horribly wrong\n  goto end_test\n)";
-  var cmd = "@echo off\ngcc passwder.c -o {3}\n{1}\n{2}\n{3} {0}\n{1}\n:end_test";
+  var cmd = "@echo off\ngcc passwder.c -fPIC -o {3}\n{1}\n{2}\n{3} {0}\n{1}\n:end_test";
   var test = "test.bat";//.format(filename.split('.')[0]);
   var filename1 = '"'+saveLocation+filename+'"';
   fs.writeFileSync(test,cmd.format(b64,t,doStrip?"strip {0}".format(filename1):"",filename1));
@@ -303,12 +347,13 @@ function main(){
       console.log("successfully created {0}".format(filename));
     }
   }
+  password_base64 = undefined;
 }
 
 getOptions();
 
 process.on('exit', (code) => {
-  console.log(`About to exit with code: ${code}`);
+  //console.log(`About to exit with code: ${code}`);
   if(doCleanup){
     fs.unlink('passwder.c', err=>{if(err)throw err;});
     fs.unlink('test.bat', err=>{if(err)throw err;});

@@ -339,6 +339,24 @@
 
       twr.events = [];
 
+      twr.getQuery = function(){
+        var keys = Object.keys(tweakables);
+        for (var i = 0; i < keys.length; i++) {
+          var name = keys[i];
+          var t = lib.getQueryParameterByName("tw_"+name);
+          if(t){
+            if(typeof tweakables[name] == 'number'){
+              tweakables[name] = parseFloat(t); 
+            }else if(typeof tweakables[name] == 'string'){
+              tweakables[name] = t; 
+            }else if(typeof tweakables[name] == 'boolean'){
+              t = t.toLowerCase();
+              tweakables[name] = (t == 'true'||t == '1');
+            }
+          }
+        }
+      }
+
       twr.initTweakables = (function (){
         try{
           if(localStorage[this.name]){
@@ -358,6 +376,8 @@
         if(tweakables.metaResize === undefined)tweakables.metaResize = true;
         if(tweakables.metaStart === undefined)tweakables.metaStart = false;
         if(tweakables.metaSort === undefined)tweakables.metaSort = false;
+
+        this.getQuery();
 
         var displayTweakables = this.displayTweakables;
         displayTweakables();

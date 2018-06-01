@@ -4,5 +4,8 @@
   },
   "radial":{
     "code":"float i = 1.0/uTime/10.0;\nfloat n = floor(map(mod(atan(vPos.x,vPos.y)/pi/2.0,i),0.0,i,0.0,2.0));\ngl_FragColor = color(n);"
+  },
+  "color":{
+    "code":"float s = 10.0;\nfloat t = 0.5;\ngl_FragColor = vec4(x*s+t,y*s+t,0.0,1.0);"
   }
 }

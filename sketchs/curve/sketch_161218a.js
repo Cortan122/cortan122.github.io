@@ -1,3 +1,5 @@
+//Cornu spiral?
+
 var theThings = [];
 var colors = 0;
 var anglerandomization = false;

@@ -6,11 +6,13 @@ var isDirty = true;
 var examples = undefined;
 
 var tweakables = {
-  scrollSpeed:1,
+  scrollSpeed:.01,
   movementSpeed:.01,
   inputRepeatDelay:5,
   inputRepeatSpeed:-1,
   templateName:"random",
+  syntaxStyle:"rainbow",//"monokai-sublime","sunburst","rainbow"
+  syntaxHighlighting:true,
   inlineTextarea:true,
   cacheFrames:true,
   showFPS:true,
@@ -33,16 +35,55 @@ function setup(){
   $.ajax("vert.glsl").done(e => {VertShaderSource = e;updateShader()});
   $.ajax("examples.json").done(e => {examples = e;updateShader()});
   updateShader();
-  $('body').append("<textarea></textarea>");
+  $('head').append("<style id=\"cursorColor\"></style>");
+  $('body').append("<div id=\"textarea\"><textarea></textarea><code></code></div>");
   var b = $('<button value="undefined" id="runButton">run</button>');
   b.on('click',updateShader);
-  $('body').append(b)
+  $('#textarea').append(b)
   $(window).on('resize',e => updateTextarea());
   $('#pDiv').on('resize',e => updateTextarea());
-  var f1 = e => {if(e.keyCode==13&&e.shiftKey){updateShader();return false;}};
+  var f1 = e => {if(e.keyCode==13&&e.shiftKey){updateShader();return false;}else updateCode("text");};
   $("textarea").keyup(f1).keydown(f1).change(f1);
+  $("textarea").scroll(()=>updateCode("scroll"));
   lib.tweaker.events.push(updateTextarea);
+  lib.tweaker.events.push(updateCode);
   updateTextarea();
+  updateCode();
+}
+
+function updateCode(name){
+  if(name==undefined||name=="syntaxHighlighting"){
+    if(tweakables.syntaxHighlighting==false){
+      $("textarea").removeClass("transparent");
+    }else{
+      $("textarea").addClass("transparent");
+      updateCode("text");
+    }
+  }
+  if(name==undefined||name=="text"){
+    if(tweakables.syntaxHighlighting==false)return;
+    setTimeout(()=>_updateCode(),1);
+    _updateCode();
+  }
+  if(name==undefined||name=="scroll"){
+    $('code')[0].scrollTop = $('textarea')[0].scrollTop;
+  }
+  if(name==undefined||name=="syntaxStyle"){
+    var f = ()=>{
+      var color = $("code").css("color");
+      //console.log(color);
+      $("#cursorColor").html("textarea.transparent{color: {0};}".format(color));
+    };
+    $("#highlightstyle").attr("href","styles/"+tweakables.syntaxStyle+".css").ready(f);
+  }
+}
+
+function _updateCode(){
+  $('code').html($('textarea').val());
+  $('code').each(function(i, block) {
+    hljs.highlightBlock(block);
+  });
+  $('code')[0].scrollTop = $('textarea')[0].scrollTop;
 }
 
 function updateTextarea(name){
@@ -52,15 +93,15 @@ function updateTextarea(name){
     if(lib.tweaker.isTweakablesShown){
       t += $('#pDiv').outerWidth()+17;
     }
-    $('textarea').css({top: 0, left: t, position:'absolute'});
-    $('textarea').outerHeight(windowHeight);
-    $('textarea').outerWidth(windowWidth-t);
-    $('#runButton').css({bottom: 0, right: 0, position:'absolute',"z-index":1});
+    $('#textarea').css({top: 0, left: t, position:'absolute'});
+    $('#textarea').outerHeight(windowHeight);
+    $('#textarea').outerWidth(windowWidth-t);
+    //$('#runButton').css({bottom: 0, right: 0, position:'absolute',"z-index":1});
   }else{
-    $('textarea').css({position:'relative',top: 0, left: 0});
-    $('textarea').outerHeight(windowHeight-height);
-    $('textarea').outerWidth(width);
-    $('#runButton').css({bottom: 0, right: windowWidth-width, position:'absolute',"z-index":1});
+    $('#textarea').css({position:'relative',top: 0, left: 0});
+    $('#textarea').outerHeight(windowHeight-height);
+    $('#textarea').outerWidth(width);
+    //$('#runButton').css({bottom: 0, right: /*windowWidth-width*/0, position:'absolute',"z-index":1});
   }
 }
 
@@ -90,6 +131,7 @@ function updateShader(){
   console.error = old;
   noStroke();
   isDirty = true; 
+  updateCode();
 }
 
 function draw(){

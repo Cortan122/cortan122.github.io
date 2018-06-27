@@ -22,7 +22,7 @@
         left:0;
         font: 400 13.3333px monospace;
         display: block;
-        padding: 2 !important;
+        padding: 2px !important;
         margin: 0 !important;
         overflow-y:auto;
         overflow-x:hidden;
@@ -30,10 +30,17 @@
         border-width: 1px;
         border-style: solid;
         border-color: rgb(169, 169, 169);
+        /*line-height: 113%;*/
       }
       code {
-        width: -webkit-fill-available;
-        height: -webkit-fill-available;
+        width: 100%;
+        width: -moz-available;          /* WebKit-based browsers will ignore this. */
+        width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+        width: fill-available;
+        height: 100%;
+        height: -moz-available;          /* WebKit-based browsers will ignore this. */
+        height: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+        height: fill-available;
         top:0;
         left:0;
         z-index: -1;

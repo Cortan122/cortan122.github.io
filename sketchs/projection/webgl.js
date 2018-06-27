@@ -146,7 +146,7 @@ function trueDraw3D(){
 
   if(tweakables.edgeThickness>0){
     a.strokeWeight(tweakables.edgeThickness);
-    a.stroke(0);
+    a.stroke(tweakables.accentColor);
   }else{
     a.noStroke();
   }

@@ -9,6 +9,6 @@
     "code":"//templateName:color\nfloat s = 10.0;\nfloat t = 0.5;\ngl_FragColor = vec4(x*s+t,y*s+t,0.0,1.0);"
   },
   "spiral":{
-    "code":"//templateName:spiral\nfloat a = atan(x,y);\nfloat r = length(vPos);\n\nfloat a_expected = mod((r),pi*2.0);\n//float a_expected = mod(log(r),pi*2.0);\n\nfloat n =  mod(a_expected - a,pi*2.0)>1.0?0.0:1.0;\ngl_FragColor = color(n);"
+    "code":"//templateName:spiral\nfloat a = atan(x,y);\nfloat r = length(vPos);\n\nfloat a_expected = r*200.0;\n//float a_expected = log(r);\n//float a_expected = log(r)*2.0+mod(uTime,1.0)*60.0*pi*2.0/6.0;\n\nfloat n =  mod(a_expected - a,pi*2.0)>1.0?0.0:1.0;\ngl_FragColor = color(n);"
   }
 }

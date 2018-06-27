@@ -12,8 +12,8 @@ var tweakables = {
   inputRepeatSpeed:-1,
   templateName:"random",
   syntaxStyle:"rainbow",//"monokai-sublime","sunburst","rainbow"
-  syntaxHighlighting:true,
-  inlineTextarea:true,
+  syntaxHighlighting:false,
+  inlineTextarea:false,
   cacheFrames:true,
   showFPS:true,
   metaStart:true
@@ -36,7 +36,7 @@ function setup(){
   $.ajax("examples.json").done(e => {examples = e;updateShader()});
   updateShader();
   $('head').append("<style id=\"cursorColor\"></style>");
-  $('body').append("<div id=\"textarea\"><textarea></textarea><code></code></div>");
+  $('body').append('<div id="textarea"><textarea spellcheck="false"></textarea><code></code></div>');
   var b = $('<button value="undefined" id="runButton">run</button>');
   b.on('click',updateShader);
   $('#textarea').append(b)

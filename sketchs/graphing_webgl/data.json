@@ -6,10 +6,11 @@
   "name": "Faster Graphing",
   "time": 1526050200,
   "jsfiles": [
-    "main.js"
+    "main.js",
+    "highlight.pack.js"
   ],
   "lines": {
-    "html": 37,
-    "js": 136
+    "html": 81,
+    "js": 181
   }
 }

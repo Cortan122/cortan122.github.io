@@ -190,7 +190,7 @@
     if(typeof argument == 'string'){
       if(argument.length == 1){
         argument = argument.toUpperCase();
-        if(argument.match(/[^A-Z0-9 ]/))return keyCodeDictionary[argument];
+        if(argument.match(/[^A-Z0-9 ]/))return keyCodeDictionary[argument.toLowerCase()];
         return argument.charCodeAt(0);
       }
     }
@@ -495,8 +495,9 @@
       }
 
       mgr.trueinput = function (i) {
-        //doUpdate();
-        eval(inputRom[i].action);
+        try{
+          eval(inputRom[i].action);
+        }catch(e){alert(e.stack);}
       }
 
       mgr.longinput = (function (d){
@@ -570,8 +571,35 @@
           }
         })();
       }
+      
+      mgr.buttonBoard = function(){
+        var b = $('#buttonBoard');
+        if(b.length == 0){
+          b = $('<div id="buttonBoard"></div>');
+          $('body').append(b);
+        }
+        for (var i = 0; i < inputRom.length; i++) {
+          var t = inputRom[i];
+          var d = t.description;
+          let l = i;
+          if(!d)continue;
+          b.append( $('<button>'+d+'</button>').on('click',e=>mgr.trueinput(l)) );
+        }
+        var f = e=>{
+          if(e != "buttonBoard")return;
+          if(tweakables.buttonBoard){
+            $("#buttonBoard").css('display','block');
+          }else{
+            $("#buttonBoard").css('display','none');
+          }
+        };
+        f("buttonBoard");
+        lib.tweaker.events.push(f);
+      }
 
       mgr.parseInputRom();
+      
+      if(tweakables.buttonBoard!==undefined)mgr.buttonBoard();
 
     }
   };
@@ -579,6 +607,10 @@
   lib.init3 = function(){
     if(lib.isInit3 == true){console.log("lib already init3alized");return;}
     lib.isInit3 = true;
+    
+    if(tweakables.buttonBoard!==undefined){
+      $('body').prepend($('canvas'));
+    }
 
     if(window.tweakables && window.tweakables.showFPS !== undefined && window.$){
       if($("#frDiv").length == 0)$("body").append("<div id='frDiv'></div>");
@@ -610,7 +642,9 @@ Array.prototype.remove || (Array.prototype.remove = function(e) {
   if (index > -1) {
     this.splice(index, 1);
   }
+  return this;
 });
+Object.defineProperty(Array.prototype,"remove",{enumerable: false});
 
 Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e) {
   var index = this.indexOf(e);
@@ -619,7 +653,9 @@ Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e) {
   }else if(index > -1){
     this[index] = this.pop();
   }
+  return this;
 });
+Object.defineProperty(Array.prototype,"remove_fast",{enumerable: false});
 
 Array.prototype.shuffle || (Array.prototype.shuffle = function() {
   var j, x, i;
@@ -631,10 +667,27 @@ Array.prototype.shuffle || (Array.prototype.shuffle = function() {
   }
   return this;
 });
+Object.defineProperty(Array.prototype,"shuffle",{enumerable: false});
 
 Array.prototype.diff || (Array.prototype.diff = function(a) {
   return this.filter(function(i) {return a.indexOf(i) < 0;});
 });
+Object.defineProperty(Array.prototype,"diff",{enumerable: false});
+
+Array.prototype.max || (Array.prototype.max = function(a){
+  return getMaxOfArray(this);
+});
+Object.defineProperty(Array.prototype,"max",{enumerable: false});
+
+Array.prototype.min || (Array.prototype.min = function(a){
+  return getMinOfArray(this);
+});
+Object.defineProperty(Array.prototype,"min",{enumerable: false});
+
+Array.prototype.sum || (Array.prototype.sum = function(a){
+  return getSumOfArray(this);
+});
+Object.defineProperty(Array.prototype,"sum",{enumerable: false});
 
 Array.prototype.flatten || (Array.prototype.flatten = function() {
   var arr = this;
@@ -642,10 +695,33 @@ Array.prototype.flatten || (Array.prototype.flatten = function() {
     return flat.concat(Array.isArray(toFlatten) ? toFlatten.flatten() : toFlatten);
   }, []);
 });
+Object.defineProperty(Array.prototype,"flatten",{enumerable: false});
 
 Array.prototype.copy || (Array.prototype.copy = function() {
   return this.slice();
 });
+Object.defineProperty(Array.prototype,"copy",{enumerable: false});
+
+Array.prototype.equals || (Array.prototype.equals = function(array) {
+  // if the other array is a falsy value, return
+  if(!array)return false;
+
+  // compare lengths - can save a lot of time 
+  if (this.length != array.length)return false;
+
+  for(var i = 0, l=this.length; i < l; i++){
+    // Check if we have nested arrays
+    if(this[i] instanceof Array && array[i] instanceof Array) {
+      // recurse into the nested arrays
+      if(!this[i].equals(array[i]))return false;       
+    }else if(this[i] != array[i]) { 
+      // Warning - two different object instances will never be equal: {x:20} != {x:20}
+      return false;
+    }
+  }
+  return true;
+});
+Object.defineProperty(Array.prototype,"equals",{enumerable: false});
 
 Object.assignAll || (Object.assignAll = function() {
   var ks = Object.getOwnPropertyNames(b);

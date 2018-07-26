@@ -1,15 +1,16 @@
 {
   "categories": [
-    "Unfinished"
+    "Unfinished",
+    "Games"
   ],
-  "name": "Logicpic AI",
+  "name": "Nonograms + AI",
   "time": 1503661680,
   "jsfiles": [
     "main.js",
     "AI.js"
   ],
   "lines": {
-    "html": 18,
-    "js": 522
+    "html": 60,
+    "js": 695
   }
 }

@@ -139,7 +139,7 @@
         ],
         "lines": {
             "html": 17,
-            "js": 208
+            "js": 210
         }
     },
     "firework": {
@@ -195,11 +195,12 @@
         "name": "Faster Graphing",
         "time": 1526050200,
         "jsfiles": [
-            "main.js"
+            "main.js",
+            "highlight.pack.js"
         ],
         "lines": {
-            "html": 37,
-            "js": 136
+            "html": 81,
+            "js": 181
         }
     },
     "gravity": {
@@ -275,21 +276,6 @@
             "js": 280
         }
     },
-    "logipic": {
-        "categories": [
-            "Unfinished"
-        ],
-        "name": "Logicpic AI",
-        "time": 1503661680,
-        "jsfiles": [
-            "main.js",
-            "AI.js"
-        ],
-        "lines": {
-            "html": 18,
-            "js": 522
-        }
-    },
     "maze": {
         "categories": [
             "Unfinished",
@@ -318,6 +304,22 @@
         "lines": {
             "html": 17,
             "js": 257
+        }
+    },
+    "nonograms": {
+        "categories": [
+            "Unfinished",
+            "Games"
+        ],
+        "name": "Nonograms + AI",
+        "time": 1503661680,
+        "jsfiles": [
+            "main.js",
+            "AI.js"
+        ],
+        "lines": {
+            "html": 60,
+            "js": 695
         }
     },
     "pathfinding": {
@@ -421,7 +423,7 @@
             "operators.js"
         ],
         "lines": {
-            "html": 70,
+            "html": 71,
             "js": 2576
         }
     },

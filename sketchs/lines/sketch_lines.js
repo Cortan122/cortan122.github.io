@@ -9,7 +9,9 @@ var fov = 1;
 var canvas;
 var res = 200;
 
-var doProspective = 2;
+var raycastLimit = 100;
+var doCalcOrientation = false;
+var doProspective = 1;
 var doLoop = true;
 var doRotation = true;
 
@@ -46,6 +48,65 @@ function draw() {
   }
 }
 
+function calcOrientation(a,x0,y0,x1,y1){
+  if(!doCalcOrientation)
+    return (abs(cos(a)) < sqrt(2)/2);
+  var a1 = atan2(y1-y0-.5,x1-x0-.5);
+  var a2 = modulo(atan2(y1-y0+.5,x1-x0-.5),2*PI);
+  var a3 = modulo(atan2(y1-y0+.5,x1-x0+.5),2*PI);
+  var a4 = modulo(atan2(y1-y0-.5,x1-x0+.5),2*PI);
+  var a0 = modulo(a,2*PI);
+  if(a0<PI/2){
+    return a0>a1;
+  }else if(a0<PI){
+    return a0<a4;
+  }else if(a0<PI*1.5){
+    return a0>a3;
+  }else{
+    return a0<a2||y1>-.55;
+  }
+}
+
+function getDist(a,x0,y0,ray){
+  var n = ray[1];
+
+  var V = createVector;
+  var x2 = cos(a)*10000+x0;
+  var y2 = sin(a)*10000+y0;
+  var x1 = ray[2];
+  var y1 = ray[3];
+
+  if(doProspective == 6){
+    var lines = [
+      [V(x1-.5,y1-.5),V(x1-.5,y1+.5)],
+      [V(x1-.5,y1+.5),V(x1+.5,y1+.5)],
+      [V(x1+.5,y1+.5),V(x1+.5,y1-.5)],
+      [V(x1+.5,y1-.5),V(x1-.5,y1-.5)]
+    ];
+    var line = [V(x0,y0),V(x2,y2)];
+    var t2 = lines.map(e=>intersectionChecker.point(e,line));
+    var t1 = t2.filter(e=>e!=undefined);
+    var t0 = t1.map(e=>dist(x0,y0,e.x,e.y));
+    var pointdists = t0.sort();
+    if(pointdists.length==0){
+      //debugger;
+      return 10000;
+    }
+    return pointdists[0];
+  }
+
+  var distance = dist(x0,y0,x1,y1);
+  var orientation = calcOrientation(a,x0,y0,x1,y1);
+  var deltax = abs(x0-x1)-.5;
+  var deltay = abs(y0-y1)-.5;
+  if(doProspective == 1)n = ray[1]/(orientation?sin(a):cos(a));
+  if(doProspective == 2)n = distance;
+  if(doProspective == 3)n = distance/(orientation?sin(a):cos(a));
+  if(doProspective == 4)n = !orientation?deltax*cos(a):deltay*sin(a);
+  if(doProspective == 5)n = ray[1]/(orientation?abs(sin(a)):abs(cos(a)));
+  return n;
+}
+
 function truedraw(resolution){
   background(0);
   //translate(width/4,height/4);
@@ -60,9 +121,7 @@ function truedraw(resolution){
     var y1 = (sin(a)*10)+y0;
     var ray = raycast(x0, y0, x1, y1);
     var c = ray[0];
-    var n = ray[1];//*cos(a);//(abs(cos(a)) > sqrt(2)/2)?abs(sin(a)):abs(cos(a));
-    if(doProspective == 1){n = ray[1]/((abs(cos(a)) < sqrt(2)/2)?sin(a):cos(a));/*n = dist(x0,y0,ray[2],ray[3]);*/}
-    if(doProspective == 2){n = dist(x0,y0,ray[2],ray[3]);}
+    var n = getDist(a,x0,y0,ray);
     push();
     stroke(c);
     strokeWeight(width/(resolution+0));
@@ -156,7 +215,7 @@ function raycast(x0, y0, x1, y1){
   var x = x0;
   var n = 0;
   var offset = createVector(0,0);
-  while (n < 100){
+  while (n < raycastLimit){
     var c = checkimg(x,y,offset);
     if(alpha(c) == 255){break;}
     if(alpha(c) == 254){offset.x = red(c)-x;offset.y = green(c)-y;}
@@ -207,4 +266,48 @@ function line122(x0, y0, x1, y1){
 
 function modulo(a,b){
   return a - b * floor(a/b);
+}
+
+var intersectionChecker = {
+  onSegment:function(p,q,r){
+    return (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
+      q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y));
+  },
+  orientation:function(p,q,r){
+    // See http://www.geeksforgeeks.org/orientation-3-ordered-points/
+    // for details of below formula.
+    var val = (q.y - p.y) * (r.x - q.x) -
+              (q.x - p.x) * (r.y - q.y);
+    if (val == 0) return 0;  // colinear
+    return (val > 0)? 1: 2; // clock or counterclock wise
+  },
+  doIntersect:function(p1, q1, p2, q2){
+    // Find the four orientations needed for general and
+    // special cases
+    var o1 = intersectionChecker.orientation(p1, q1, p2);
+    var o2 = intersectionChecker.orientation(p1, q1, q2);
+    var o3 = intersectionChecker.orientation(p2, q2, p1);
+    var o4 = intersectionChecker.orientation(p2, q2, q1);
+    // General case
+    if (o1 != o2 && o3 != o4)
+      return true;
+    // Special Cases
+    // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+    if (o1 == 0 && intersectionChecker.onSegment(p1, p2, q1)) return true;
+    // p1, q1 and p2 are colinear and q2 lies on segment p1q1
+    if (o2 == 0 && intersectionChecker.onSegment(p1, q2, q1)) return true;
+    // p2, q2 and p1 are colinear and p1 lies on segment p2q2
+    if (o3 == 0 && intersectionChecker.onSegment(p2, p1, q2)) return true;
+    // p2, q2 and q1 are colinear and q1 lies on segment p2q2
+    if (o4 == 0 && intersectionChecker.onSegment(p2, q1, q2)) return true;
+    return false; // Doesn't fall in any of the above cases
+  },
+  doIntersectE:function(e1,e2){
+    return intersectionChecker.doIntersect(e1[0],e1[1],e2[0],e2[1]);
+  },
+  point:function(/*line*/ e1,/*line*/ e2){
+    if(!intersectionChecker.doIntersectE(e1,e2))return undefined;
+    var p1 = e1[0],p2 = e1[1],p3 = e2[0],p4 = e2[1];
+    return createVector(((p1.x*p2.y-p1.y*p2.x)*(p3.x-p4.x)-(p1.x-p2.x)*(p3.x*p4.y-p3.y*p4.x))/((p1.x-p2.x)*(p3.y-p4.y)-(p1.y-p2.y)*(p3.x-p4.x)),((p1.x*p2.y-p1.y*p2.x)*(p3.y-p4.y)-(p1.y-p2.y)*(p3.x*p4.y-p3.y*p4.x))/((p1.x-p2.x)*(p3.y-p4.y)-(p1.y-p2.y)*(p3.x-p4.x)));
+  }
 }

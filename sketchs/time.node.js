@@ -25,7 +25,7 @@ fs.readFile('dir.txt', 'utf8', function(err, contents) {
         var temp = index.match(rex);
         if(temp){
           var jsfiles = temp.map(e => e.replace(rex,'$1'));
-          j.jsfiles = jsfiles = jsfiles.filter(e => !e.match(/(jquery)|(libraries)|(http)|(https)/));
+          j.jsfiles = jsfiles = jsfiles.filter(e => !e.match(/(jquery)|(libraries)|(http)|(https)|(lib\/)/));
           var r = 0;
           for (var i = 0; i < jsfiles.length; i++) {
             try{

@@ -307,6 +307,6 @@ function AI_all(){
     r += t;
   }
   var time1 = (new Date).getTime();
-  //console.log(`AI_all("${jsonCache[grid.id].name}") took ${time1-time} ms`);
+  console.log(`AI_all("${jsonCache[grid.id].name}") took ${time1-time} ms and ${r} steps`);
   return r;
 }

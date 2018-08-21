@@ -1,0 +1,99 @@
+<html>
+  <head> 
+    <meta charset="UTF-8" /> 
+    <!-- uncomment lines below to include libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="lib/html2canvas.min.js"></script>
+    <script src="lib/js-graph-it.js"></script>
+    <script src="../libraries/p5.js"></script> 
+    <!--<script src="../libraries/p5.dom.js"></script>-->
+    <!--<script src="../libraries/p5.sound.js"></script>-->
+    <script src="../libraries/library.js"></script> 
+    <script src="main.js"></script> 
+    <link rel="stylesheet" type="text/css" href="lib/js-graph-it.css" />
+    <link rel="stylesheet" type="text/css" href="lib/sf-homepage.css" />
+    <style> 
+      body {
+        font-smooth: never;
+        -webkit-font-smoothing : none;
+        padding: 0;
+        margin: 0;
+      }
+      img.connector-end{
+        background-color: #f90;
+      }
+      div.anchor{
+        z-index: -99999;
+        /*border-color: transparent;*/
+        border: none;
+        background-color: transparent;
+        color: transparent;
+        padding: 0px;
+        height: 100%;
+        display: inline-block;
+        user-select: none;
+      }
+      div.layouttemp{
+        margin: 10px 5px;
+        display: inline-block;
+        position: static !important;
+        vertical-align:top;
+      }
+      .layoutlayer{
+        white-space: nowrap;
+      }
+      .anchorStrip{
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-align:center;
+        white-space: normal;
+      }
+      .anchorStrip.top{top:0px;}
+      .anchorStrip.bottom{bottom:0px;}
+      #mainCanvas{
+        width: 100%;
+        height: 100%;
+      }
+      #mainCanvas_innerDiv{
+        /*width: calc(100%) !important;*/
+        /*height: calc(100% - 16px) !important;*/
+      }
+      div.asmcode{
+        font-family: consolas,monospace;
+        white-space: pre;
+        tab-size: 8;
+      }
+      #menu{
+        height: fit-content;
+        position: absolute;
+        right: 0px;
+        z-index: 99999;
+        background-color: white;
+      }
+      #pDiv{
+        color: black;
+        font-size: 20px;
+        position: static !important;
+        width: calc(100% - 20px);
+        padding-left: 20px;
+        height: auto !important; 
+      }
+      #buttonBoard{
+        text-align: center;
+      }
+      #buttonBoard button{
+        display: block;
+        width: 100%;
+      }
+    </style> 
+  </head> 
+  <body>
+    <div id="menu">
+      <div id="buttonBoard"></div>
+      <!-- <div id="pDiv"></div> -->
+    </div>
+    <div class="canvas" id="mainCanvas"></div>
+  </body>
+</html>

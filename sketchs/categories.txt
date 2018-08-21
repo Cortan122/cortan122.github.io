@@ -158,6 +158,20 @@
             "js": 133
         }
     },
+    "flowchart": {
+        "categories": [
+            "Unfinished"
+        ],
+        "name": "Flowchart",
+        "time": 1534594320,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 100,
+            "js": 349
+        }
+    },
     "gradient": {
         "categories": [
             "Images",
@@ -273,7 +287,7 @@
         ],
         "lines": {
             "html": 17,
-            "js": 280
+            "js": 383
         }
     },
     "maze": {

@@ -381,7 +381,11 @@
 
         var displayTweakables = this.displayTweakables;
         displayTweakables();
-        if(tweakables.metaStart)setTimeout(this.toggleTweakables, 1);//delayEval(1,'toggleTweakables()');
+        if(tweakables.metaStart){
+          setTimeout(this.toggleTweakables, 1);
+        }else{
+          setTimeout(()=>{this.toggleTweakables();this.toggleTweakables()},1);
+        }
       }).bind(twr);
 
       twr.isTweakablesShown = false;
@@ -599,7 +603,7 @@
 
       mgr.parseInputRom();
       
-      if(tweakables.buttonBoard!==undefined)mgr.buttonBoard();
+      if(window.tweakables&&tweakables.buttonBoard!==undefined)mgr.buttonBoard();
 
     }
   };
@@ -608,7 +612,7 @@
     if(lib.isInit3 == true){console.log("lib already init3alized");return;}
     lib.isInit3 = true;
     
-    if(tweakables.buttonBoard!==undefined){
+    if(window.tweakables && tweakables.buttonBoard!==undefined){
       $('body').prepend($('canvas'));
     }
 

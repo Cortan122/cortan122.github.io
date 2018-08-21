@@ -1,6 +1,6 @@
 ; this can not be done in PIC
-; __cache_sp:word 0xffff
-; __cache_div:word 0xffff
+; __cache_sp:word 0xcccc
+; __cache_div:word 0xcccc
 define __cache_sp 0
 define __cache_div 2
 

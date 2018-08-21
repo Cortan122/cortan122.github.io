@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const crto = require('./crto.js');
+const parseArgv = require('./argv.js');
+const util = require('util');
+const ansi_to_html = new (require('../ansi_to_html.js'))({
+  newline: true
+});
 const { min,max,abs } = Math;
 const instructionSet = [
   "jmp ##","mov ax ##","mov ah #","mov al #","mov fl #","mov b #","mov c #","mov sp ##","nop","mov ax ip","mov ah ip","mov al ip","mov fl ip","mov b ip","mov c ip","mov sp ip",
@@ -21,7 +26,37 @@ const instructionSet = [
   "nop","call ##","call ax","ret","mov al [ax]","push ax","pop ax","test al","test ax","push [#]","pop [#]","","","","print al","hlt"
 ];
 const instructionLength = instructionSet.map(e=>e.split('#').length);
-const filename = process.argv[2]?process.argv[2]:"./examples/out.crtb";
+var filename = "./examples/out.crtb";
+var useJsonOutput = false;
+var useHtml = false;
+var useColor = true;
+var useDataXrefs = false;
+var arrowDepth = 8;
+
+const argvRom = {
+  "--json":[0,1,()=>{
+    useJsonOutput = true;
+  }],
+  "--html":[0,1,()=>{
+    useHtml = true;
+  }],
+  "--nocolor":[0,1,()=>{
+    useColor = false;
+  }],
+  "--arrows":[1,1,(a)=>{
+    arrowDepth = parseInt(a);
+  }],
+  "argv":(argv)=>{
+    if(argv.length>1){
+      console.error(`disasm.js: expects 1 or 0 non-option arguments`);
+      return 1;
+    }
+    if(argv.length)filename = argv[0];
+  }
+};
+
+parseArgv(process.argv,argvRom);
+
 var ram = fs.readFileSync(filename);
 var entryPoints = [0];
 var resultingLines = [];
@@ -30,6 +65,8 @@ var lineIndices = [];
 var lineSizes = [];
 var xrefs = [];
 var externs = [];
+var xrefsarr = [];
+var deadends = [];
 // var ip = 0;
 
 Array.prototype.max = function(){
@@ -92,7 +129,8 @@ function disasm(ip){
   var line = "";
   var opcode = ram[ip];
   if(opcode==undefined){
-    console.error("out of bounds: "+tohex(ip,4))
+    console.error("out of bounds: "+tohex(ip,4));
+    deadends.push(ip);
     return [];
   }
   var instruction = instructionSet[opcode];
@@ -136,6 +174,7 @@ function disasm(ip){
     return [t];
   }
   if(instruction.match(/^jmp/)){
+    deadends.push(ip);
     return [];
   }
   if(m = instruction.match(/^(call|jn?[czso]) ([0-9a-f]{4})$/i)){
@@ -148,7 +187,10 @@ function disasm(ip){
     }
     return [t,ip+size];
   }
-  if(instruction == "hlt"||instruction == "ret")return [];
+  if(instruction == "hlt"||instruction == "ret"){
+    deadends.push(ip);
+    return [];
+  }
   return [ip+size];
 }
 
@@ -267,7 +309,7 @@ function color(){
       if(!ref)continue;
       var c = colors;
       let line;
-      if(ref.t == "call"||ref.t == "data"){
+      if(ref.t == "call"||(ref.t == "data"&&useDataXrefs)){
         line = `${c.comment}; ${ref.t.toUpperCase()} XREF from ${tohex(ref.s,4)}${c.no}`;
       }else if(ref.t == "global"){
         line = `${c.comment}; global ${ref.name}()${c.no}`;
@@ -328,11 +370,8 @@ function addBoxChars(a,b){
   return boxChars[ir];
 }
 
-function drawArrows(){
-  const spaces = 8;
-  var headers = resultingLines.map(e=>Array(spaces).fill(" "));
-
-  var xrefsarr = [];
+function makexrefsarr(){
+  xrefsarr = [];
   for (var i = 0; i < xrefs.length; i++) {
     var x = xrefs[i];
     if(x == undefined)continue;
@@ -344,6 +383,12 @@ function drawArrows(){
       xrefsarr.push(ref);
     }
   }
+  deadends = deadends.map(e=>lineIndices.indexOf(e));
+}
+
+function drawArrows(){
+  const spaces = arrowDepth;
+  var headers = resultingLines.map(e=>Array(spaces).fill(" "));
 
   for (var i = 0; i < xrefsarr.length; i++) {
     var ref = xrefsarr[i];
@@ -400,8 +445,88 @@ main();
 
 color();
 
-drawArrows();
+if(!useColor){
+  resultingLines = resultingLines.map(line=>{
+    return line.replace(/\x1b\[[0-9;]*m/g,'');
+  });
+}
 
-console.log(resultingLines.join('\n'));
+makexrefsarr();
 
-//todo?:use gojs.net for graph view
+if(arrowDepth>0)drawArrows();
+
+if(!useJsonOutput){
+  if(useHtml){
+    console.log(ansi_to_html.toHtml(resultingLines.join('\n')));
+  }else{
+    console.log(resultingLines.join('\n'));
+  }
+}else{
+  // todo?:use /*gojs.net*/ js-graph-it for graph view
+  var blocks = [];
+  var linetoblock = []; 
+  xrefsarr = xrefsarr.filter(e=>e.t.startsWith('jmp'));
+  var breaks = [];
+  for(var ref of xrefsarr){
+    breaks.push({v:ref.s,t:'s',ref});
+    breaks.push({v:ref.d,t:'d',ref});
+  }
+  for(var end of deadends){
+    breaks.push({v:end,t:'end'});
+  }
+  breaks = breaks.sort((a,b)=>a.v-b.v);
+
+  var index = 0;
+  var blockindex = 0;
+  for(var brk of breaks){
+    var code = resultingLines.slice(index,brk.v+(brk.t!='d'?1:0));
+    var b = {code,out:[],in:[]};
+    blocks.push(b);
+    if(brk.t=='s'){
+      b.out.push({v:brk.ref.d,t:brk.ref.t});
+    }else if(brk.t=='end'){
+      b.out.push({v:-1,t:'end'});
+    }
+    linetoblock[index] = blockindex;
+    index += code.length;
+    if(code.length)blockindex++;
+  }
+  linetoblock[index] = blockindex;
+  var code = resultingLines.slice(index);
+  blocks.push({code,out:[],in:[]});
+
+  var previndex; 
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i];
+    if(b.code.length){
+      previndex = i;
+      continue;
+    }
+    blocks[i] = null;
+    blocks[previndex].out = blocks[previndex].out.concat(b.out);
+  }
+  blocks = blocks.filter(e=>e);
+
+  for(var i = 0; i < blocks.length; i++){
+    var b = blocks[i];
+    if(b.out.length==0&&i!=blocks.length-1){
+      b.out.push({v:i+1,t:'fall'});
+    }
+    b.out = b.out.map(e=>{
+      if(e.t=='end')return;
+      if(e.t!='fall')e.v = linetoblock[e.v];
+      if(e.v==undefined)return console.error(linetoblock,blocks.length),e;//wtf
+      if(blocks[e.v]==undefined)return console.error(e.v),e;//wtf
+      blocks[e.v].in.push({v:i,t:e.t});
+      return e;
+    }).filter(e=>e);
+  }
+
+  //console.log(util.inspect(blocks,{depth:null}));
+  blocks.map(e=>e.html=ansi_to_html.toHtml(e.code.join('\n')));
+  blocks.map(e=>{delete e.code;delete e.in;});
+
+  console.log(JSON.stringify(blocks));
+}
+
+//node disasm.js --json --arrows 0 > ../../../sketchs/flowchart/example.json

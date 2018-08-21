@@ -1,6 +1,6 @@
-var fs = require('fs');
-var path = require('path');
-var parseArgv = require('./argv.js');
+const fs = require('fs');
+const path = require('path');
+const parseArgv = require('./argv.js');
 
 const argvRom = {
   "-o":[1,1,(a)=>{
@@ -749,7 +749,7 @@ const doPrintLineString = true;
 var last_if_result = undefined;//for the #else directive
 
 var pathToLibFolder = path.resolve(__dirname,"./lib");
-var filename = "examples/test.crtc";
+var filename = "examples/pre_test.crtc";
 var outputFilename = undefined;
 parseArgv(process.argv,argvRom);
 

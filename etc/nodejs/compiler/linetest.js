@@ -16,5 +16,5 @@ function main(code){
 var pointer = 0;
 
 printer.doPrintLineString = false;
-printer.init(main,["examples/test.crtc"]);
+printer.init(main,["examples/pre_test.crtc"]);
 

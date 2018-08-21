@@ -1,7 +1,7 @@
 //var t = require('./module.js')
 
-var path = require('path');
-var cp = require('child_process');
+const path = require('path');
+const cp = require('child_process');
 const exec = cp.exec;
 
 function getLineNumber(pos){
@@ -32,9 +32,13 @@ function getLineString(pos){
 
 function printError(str,pointer){
   var r = getLineNumber(pointer);
-  console.error(`${r[0]}:${r[1]}: ${str}`);
+  var t = doPrintLinePos?`${r[2]}:`:'';
+  console.error(`${r[0]}:${r[1]}:${t} ${str}`);
   if(doPrintLineString){
     console.error("└─>"+getLineString(pointer));
+    if(doPrintLinePos){
+      console.error(' '.repeat(3+r[2])+'^');
+    }
   }
 }
 
@@ -50,6 +54,7 @@ function main(_source,func){
 }
 
 var doPrintLineString = true;
+var doPrintLinePos = false;
 
 var linebreaks;
 //var pointer = 0;
@@ -108,3 +113,7 @@ Object.defineProperty(module.exports, "doPrintLineString", {
   set:a=>{doPrintLineString=a;}
 });
 
+Object.defineProperty(module.exports, "doPrintLinePos", {
+  get:()=>doPrintLinePos,
+  set:a=>{doPrintLinePos=a;}
+});

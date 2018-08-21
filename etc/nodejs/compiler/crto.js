@@ -47,3 +47,12 @@ function write(filename,data){
 }
 
 module.exports = {decode,encode,read,write,startPos:4,entryPoint:"start"};
+
+if(require.main == module){
+  var files = process.argv.slice(2);
+  for(var name of files){
+    var t = read(name);
+    delete t.code;
+    console.log(JSON.stringify(t,null,2));
+  }
+}

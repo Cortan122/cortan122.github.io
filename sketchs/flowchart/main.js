@@ -1,8 +1,4 @@
 const colorRom = {
-  /*get jmp (){return getTweakableColor(0)},
-  get jmpt(){return getTweakableColor(1)},
-  get jmpf(){return getTweakableColor(2)},
-  get fall(){return getTweakableColor(3)},*/
   jmp :'var(--color_0)',
   jmpt:'var(--color_1)',
   jmpf:'var(--color_2)',
@@ -10,8 +6,12 @@ const colorRom = {
 };
 
 var tweakables = {
+  filename:'example.json',
   colors:'blue green red #f90',
-  buttonBoard:true
+  layoutType:'vertical',
+  buttonBoard:true,
+  oneAnchorStrip:true,
+  randomScatter:false,
 };
 
 var inputRom = [
@@ -22,17 +22,25 @@ var inputRom = [
   {keys:['f10'],action:'takeScreenshot()',description:'Screenshot'}
 ];
 
-const useSingularAnchorStrip = true;
 const preferVerticalOrientation = true;//is irrelevant because of lib mod at line 904
-const useSmartLayout = true;
-const useRandomScatter = false;
 const randomScatterRange = [-5,5];
 
-var isInit = false;
+Object.defineProperty(this, "useSingularAnchorStrip", {
+  get:()=>tweakables.oneAnchorStrip
+});
+Object.defineProperty(this, "useRandomScatter", {
+  get:()=>tweakables.randomScatter
+});
+Object.defineProperty(this, "useSmartLayout", {
+  get:()=>tweakables.layoutType!='dumb'
+});
+
 var sourceData;
 var globalHtmlsCache;
 var currentFunction = 0;
 var showAllGroups = true; 
+var isTouching = false;
+var globalPositionOffset = {x:0,y:0};
 
 function changeFunctionGroup(dir){
   if(dir==undefined){
@@ -41,7 +49,13 @@ function changeFunctionGroup(dir){
     showAllGroups = dir==0;
   }
   if(showAllGroups){
-    relayout();
+    if(tweakables.layoutType=='layered'){
+      relayout();
+    }else if(tweakables.layoutType=='horizontal'){
+      layoutHorizontal();
+    }else if(tweakables.layoutType=='vertical'){
+      layoutVertical();
+    }
     $('#statusDiv').html('Everything');
     return;
   }
@@ -64,6 +78,19 @@ function updateColors(){
   }`);
 }
 
+function replacetw_layoutType(){
+  var rom = ['dumb','layered','horizontal','vertical'];
+  $('#tw_layoutType').find('input').remove();
+  var s = $(`
+    <select>
+      ${rom.map(e=>`<option value="${e}">${e}</option>`).join('\n')}
+    </select>
+  `);
+  s.on('change',()=>{tweakables.layoutType = s.val();lib.tweaker.onChangeTweakable("layoutType")});
+  s.appendTo('#tw_layoutType');
+  s.val(tweakables.layoutType);
+}
+
 function setup(){
   noCanvas();
   noLoop();
@@ -72,12 +99,17 @@ function setup(){
     .detach().appendTo($('<div></div>').prependTo('#buttonBoard'))
     .css({display:'inline',width:'33.333%'});
   $('<div id="statusDiv"></div>').prependTo('#buttonBoard').html('Everything');
+  replacetw_layoutType();
   lib.tweaker.events.push(a=>{
     if(a!='colors')return;
     updateColors();
   });
   updateColors();
-  init();
+  lib.tweaker.events.push(a=>{
+    if(a=='layoutType'||a=='randomScatter')changeFunctionGroup();
+    else if(a=='oneAnchorStrip'||a=='filename')resetFilename(a=='filename');
+  });
+  resetFilename();
 }
 
 function syncajax(remote_url){
@@ -210,6 +242,8 @@ function elementPositionHelper(html,margin=true,border=false,padding=false){
     pos.top += floor(random(...randomScatterRange));
     //pos.left += floor(random(...randomScatterRange));
   }
+  pos.top += globalPositionOffset.y;
+  pos.left += globalPositionOffset.x;
   return pos;
 }
 
@@ -233,7 +267,7 @@ function layout(htmls,group=undefined){
   }else{
     for (var i = 0; i < htmls.length; i++) {
       var html = htmls[i];
-      if(!e.parent().length)continue;
+      if(!html.parent().length)continue;
       layoutSingleElement(html);
     }
   }
@@ -270,11 +304,44 @@ function relayout(group,htmls){
   nudgeBlocks();
 }
 
-function init(){
-  if(isInit)return;
-  isInit = true;
-  // resizeInnerDiv();
-  var json = JSON.parse(syncajax('./example.json'));
+function layoutHorizontal(x='x',width='width'){
+  var htmls = getHtmls();
+  var canvas = getCanvas();
+  var data = sourceData;
+  globalPositionOffset = {x:0,y:0};
+  htmls.map(e=>{
+    if(!e.parent().length)e.appendTo(getCanvas());
+  });
+  data.groups.map((e,i)=>{
+    layout(htmls,i);
+    globalPositionOffset[x] = getSizeOfInnerDiv(false)[width];
+    htmls.map(e=>{
+      if(!e.parent().length)e.appendTo(getCanvas());
+    });
+  });
+  globalPositionOffset = {x:0,y:0};
+  resizeInnerDiv();
+  nudgeBlocks();
+}
+
+function layoutVertical(){
+  layoutHorizontal('y','height');
+}
+
+function resetFilename(bool=true){
+  canvases = new Array();
+  if(bool){
+    $.ajax(tweakables.filename).done(e=>{
+      if(typeof e == 'string')e = JSON.parse(e);
+      init(e);
+    });
+  }else{
+    init(sourceData);
+  }
+}
+
+function init(json){
+  globalHtmlsCache = undefined;
   sourceData = json;
   analyzeData();
   var canvas = $('#mainCanvas');
@@ -310,6 +377,8 @@ function init(){
   resizeInnerDiv();
   initPageObjects();
   nudgeBlocks();
+  if(tweakables.layoutType=='vertical')layoutVertical();
+  else if(tweakables.layoutType=='horizontal')layoutHorizontal();
 }
 
 function getSizeOfInnerDiv(useWindow=true,[padx,pady]=[0,0]){
@@ -318,7 +387,7 @@ function getSizeOfInnerDiv(useWindow=true,[padx,pady]=[0,0]){
   var width = htmls.map(e=>e.outerWidth(true)+e.position().left).max();
   if(useWindow){
     height = max(height,window.innerHeight-17);
-    width = max(width,window.innerWidth);
+    width = max(width,window.innerWidth-17);
   }
   return {height:height+pady,width:width+padx};
 }
@@ -341,8 +410,29 @@ function takeScreenshot(){
     can.attr('style','');
     saveCanvas(canvas);
   });
-  //can.attr('style','');
 }
 
-window.onload = init;
+function mouseDragged(e){
+  if(!isTouching)return;
+  if(touches.length>1)return;
+  e.clientX = mouseX;
+  e.clientY = mouseY;
+  movemouse(e);
+}
+
+function mousePressed(){}
+function mouseReleased(){}
+
+function touchEnded(e){
+  stopDrag(e);
+  isTouching = false;
+}
+
+function touchStarted(e){
+  e.clientX = mouseX;
+  e.clientY = mouseY;
+  startDrag(e);
+  if(isdrag)isTouching = true;
+}
+
 window.onresize = resizeInnerDiv;

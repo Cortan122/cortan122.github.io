@@ -1,0 +1,47 @@
+.extern div
+
+__mod10:
+mov [sp-4] ax
+mov ax 0d10
+mov [sp-6] ax
+call div
+mov ax [sp-8]
+mov [sp-2] ax
+mov ax [sp-0xa]
+ret
+
+__print_priv:
+test ax
+jz __print_priv_ret
+call __mod10
+push ax 
+mov ax [sp-2]
+call __print_priv
+pop ax
+add ax '0'
+print al
+__print_priv_ret:
+ret
+
+__print_zero:
+mov ax '0'
+print al
+jmp __print_ret
+
+print:
+push ax
+test ax
+jz __print_zero
+push [0]
+push [1]
+call __print_priv
+pop [1]
+pop [0]
+__print_ret:
+mov ax ' '
+print al
+pop ax
+ret
+
+.undefine __.*
+.global print

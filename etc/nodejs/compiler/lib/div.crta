@@ -1,0 +1,52 @@
+.extern add_to_ax or_to_ax and_to_ax negate_ax
+
+; int div(int [sp-4],int [sp-6])
+div:
+enter 8
+mov ax 0
+mov [sp+2] ax
+mov [sp+4] ax
+mov ax [sp+6]
+call negate_ax
+mov [sp+6] ax
+mov ax 0x8000
+mov b 0xf
+__div_loop:
+mov [sp-4] ax
+mov ax [sp+2]
+bsh ax 1
+mov [sp+2] ax
+mov ax [sp+8]
+call and_to_ax
+test ax
+jz __div_if_end
+mov ax [sp+2]
+add ax 1
+mov [sp+2] ax
+__div_if_end:
+mov ax [sp+6]
+mov [sp-4] ax
+mov ax [sp+2]
+call add_to_ax
+test ax
+js __div_if2_end
+mov [sp+2] ax
+mov ax [sp+4]
+mov [sp-4] ax
+mov ax 1
+bsh ax b
+call or_to_ax
+mov [sp+4] ax
+__div_if2_end:
+mov al b
+add ax -1
+mov b al
+mov ax 1
+bsh ax b
+test ax
+jnz __div_loop
+mov ax [sp+4]
+leave
+
+.undefine __.*
+.global div

@@ -18,12 +18,12 @@ const instructionSet = [
   "jmp ip+#","jmp ip+##","call ip+#","call ip+##","","","","","jmp sp","mov ax sp","mov ah sp","mov al sp","mov fl sp","mov b sp","mov c sp","mov sp sp",
   "add ax ip","add ax #","add ax [##]","add ax [#]","add ax fl","add ax b","add ax c","add ax sp","jmp [ax]","mov ax [ax]","mov ah [ax]","mov al [ax]","mov fl [ax]","mov b [ax]","mov c [ax]","mov sp [ax]",
   "and ax ip","and ax #","and ax [##]","and ax [#]","and ax fl","and ax b","and ax c","and ax sp","mov [ax] ip","mov [ax] ax","mov [ax] ah","mov [ax] al","mov [ax] fl","mov [ax] b","mov [ax] c","mov [ax] sp",
-  "or ax ip","or ax #","or ax [##]","or ax [#]","or ax fl","or ax b","or ax c","or ax sp","","","","","","","","",
-  "xor ax ip","xor ax #","xor ax [##]","xor ax [#]","xor ax fl","xor ax b","xor ax c","xor ax sp","","","","","","","","",
+  "or ax ip","or ax #","or ax [##]","or ax [#]","or ax fl","or ax b","or ax c","or ax sp","mov ip [sp+#]","mov ax [sp+#]","mov ah [sp+#]","mov al [sp+#]","mov fl [sp+#]","mov b [sp+#]","mov c [sp+#]","mov sp [sp+#]",
+  "xor ax ip","xor ax #","xor ax [##]","xor ax [#]","xor ax fl","xor ax b","xor ax c","xor ax sp","mov [sp+#] ip","mov [sp+#] ax","mov [sp+#] ah","mov [sp+#] al","mov [sp+#] fl","mov [sp+#] b ","mov [sp+#] c ","mov [sp+#] sp",
   "bsh ax ip","bsh ax #","bsh ax [##]","bsh ax [#]","bsh ax fl","bsh ax b","bsh ax c","bsh ax sp","","","","","","","","",
   "","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","",
-  "nop","call ##","call ax","ret","mov al [ax]","push ax","pop ax","test al","test ax","push [#]","pop [#]","","","","print al","hlt"
+  "nop","call ##","call ax","ret","mov al [ax]","push ax","pop ax","test al","test ax","push [#]","pop [#]","enter #","leave","","print al","hlt"
 ];
 const instructionLength = instructionSet.map(e=>e.split('#').length);
 var filename = "./examples/out.crtb";
@@ -144,6 +144,11 @@ function disasm(ip){
 
   instruction = instruction.replace(/ip\+##/,tohex(size+ip+(ram[ip+1]<<8)+ram[ip+2],4));
   instruction = instruction.replace(/ip\+#/,tohex(size+ip+parseNegative(ram[ip+1]),4));
+  instruction = instruction.replace(/sp\+#/,()=>{
+    var n = parseNegative(ram[ip+1]);
+    if(n==0)return 'sp';
+    return 'sp'+(n>0?'+':'-')+tohex(abs(n),2);
+  });
 
   var j = 0;
   instruction = instruction.replace(/#/g,()=>{
@@ -187,7 +192,7 @@ function disasm(ip){
     }
     return [t,ip+size];
   }
-  if(instruction == "hlt"||instruction == "ret"){
+  if(instruction == "hlt"||instruction == "ret"||instruction == "leave"){
     deadends.push(ip);
     return [];
   }
@@ -290,7 +295,7 @@ function color(){
       `\t${colors.opcode}$1${colors.data}$2\t${colors.opcode}$3${colors.no} `
     );
     line = line.replace(/\b(ax|sp|ip|al|ah|c|b|fl)\b/g,`${colors.register}$1${colors.no}`);
-    line = line.replace(/( |\[)([0-9a-f]{2,4})( |\]|$)/g,
+    line = line.replace(/([ \[+-])([0-9a-f]{2,4})([ \]+-]|$)/g,
       `${colors.no}$1${colors.data}$2${colors.no}$3`
     );
     //todo
@@ -462,7 +467,6 @@ if(!useJsonOutput){
     console.log(resultingLines.join('\n'));
   }
 }else{
-  // todo?:use /*gojs.net*/ js-graph-it for graph view
   var blocks = [];
   var linetoblock = []; 
   xrefsarr = xrefsarr.filter(e=>e.t.startsWith('jmp'));
@@ -474,8 +478,8 @@ if(!useJsonOutput){
   for(var end of deadends){
     breaks.push({v:end,t:'end'});
   }
-  breaks = breaks.sort((a,b)=>a.v-b.v);
-
+  breaks = breaks.sort((a,b)=>a.v-b.v||b.t=='d');
+  
   var index = 0;
   var blockindex = 0;
   for(var brk of breaks){
@@ -513,16 +517,20 @@ if(!useJsonOutput){
       b.out.push({v:i+1,t:'fall'});
     }
     b.out = b.out.map(e=>{
+      var prevv = e.v;
       if(e.t=='end')return;
       if(e.t!='fall')e.v = linetoblock[e.v];
-      if(e.v==undefined)return console.error(linetoblock,blocks.length),e;//wtf
+      if(e.v==undefined)return console.error(
+        `linetoblock mismatch: line ${prevv} not maped to any block\n`,
+        ' avalible lines are:\n ',
+        linetoblock.map((e,i)=>i).filter(e=>e!=undefined));//wtf
       if(blocks[e.v]==undefined)return console.error(e.v),e;//wtf
       blocks[e.v].in.push({v:i,t:e.t});
       return e;
     }).filter(e=>e);
   }
 
-  //console.log(util.inspect(blocks,{depth:null}));
+  // console.error(util.inspect(blocks,{depth:null}));
   blocks.map(e=>e.html=ansi_to_html.toHtml(e.code.join('\n')));
   blocks.map(e=>{delete e.code;delete e.in;});
 

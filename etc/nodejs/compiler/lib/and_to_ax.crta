@@ -1,0 +1,9 @@
+; int and_to_ax(int)
+and_to_ax:
+mov [0] sp
+mov sp [sp-2]
+and ax sp
+mov sp [0]
+ret
+
+.global and_to_ax

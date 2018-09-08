@@ -1,0 +1,9 @@
+; int add_to_ax(int)
+add_to_ax:
+mov [0] sp
+mov sp [sp-2]
+add ax sp
+mov sp [0]
+ret
+
+.global add_to_ax

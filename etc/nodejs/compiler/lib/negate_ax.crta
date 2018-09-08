@@ -1,0 +1,10 @@
+; int negate_ax()
+negate_ax:
+mov [0] sp
+mov sp 0xffff
+xor ax sp
+add ax 1
+mov sp [0]
+ret
+
+.global negate_ax

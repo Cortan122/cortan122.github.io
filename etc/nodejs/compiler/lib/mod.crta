@@ -1,0 +1,18 @@
+.extern div
+
+; int mod(int [sp-4],int [sp-6])
+mod:
+enter 8
+mov ax [sp+8]
+mov [sp-4] ax
+mov ax [sp+6]
+mov [sp-6] ax
+call div
+mov ax [sp-8]
+mov [sp+2] ax
+mov ax [sp-0xa]
+mov [sp+4] ax
+leave
+
+; .undefine __.*
+.global mod

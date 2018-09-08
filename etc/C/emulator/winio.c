@@ -34,17 +34,6 @@ void unHideCursor(){
   SetConsoleCursorInfo(consoleHandle, &info);
 }
 
-void readFile(char * name){
-  FILE *fp;
-
-  fp = fopen(name, "r");
-  //fgets(ram, 65536, fp);
-  fread(ram, 1, 65536, fp);
-  fclose(fp);
-
-  //ip = ax = fl = b = c = sp = 0;
-}
-
 char *strsep(char **stringp, const char *delim) {
   if (*stringp == NULL) { return NULL; }
   char *token_start = *stringp;

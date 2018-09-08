@@ -6,6 +6,7 @@ const HIDDEN_COLS = ["category","categories",'jsfiles'];
 var   COL_FORMAT = ["link","text","time",".js num4"];
 const ARROWS = "\u25E4\u25E3";//"\u25BC\u25B2";
 const MAX_PING_TIME = 5000;
+const LOCAL_STORAGE = "table_sortedColumn";
 
 var totalLinesOfJavascript = 0;//temp
 
@@ -18,6 +19,10 @@ function syncajax(remote_url) {
 }
 
 function setup() {
+  if(localStorage[LOCAL_STORAGE]==undefined){
+    localStorage[LOCAL_STORAGE] = "1";
+  }
+
   if(getQueryParameterByName('a')=="true"){
     COL_FORMAT = ["link","text","text","ping"];
     var r = {};
@@ -104,7 +109,12 @@ function displayTable(arr,format){
     } 
   }
   $('body').append(table);
-  table.find('th').eq(0).click().click();
+
+  var stval = parseInt(localStorage[LOCAL_STORAGE]);
+  var colIndex = Math.abs(stval)-1;
+  var th = table.find('th').eq(colIndex);
+  th.click();
+  if(stval<0)th.click();
 }
 
 function intFormat(int,len){
@@ -155,6 +165,8 @@ function applyFormat(text,format,cell){
 }
 
 function updateArrows(n,dir){
+  localStorage[LOCAL_STORAGE] = ((n+1)*(dir?1:-1)).toString();
+
   var headers = $("#myTable").children('tr').eq(0).children('th');
   var l = headers.length;
   for(var i = 1; i < l; i++){

@@ -66,14 +66,16 @@ function alloc(o){
     if(acc>pos){
       var d = acc-pos;
       if(t.name){
-        console.error(`colision: ${t.name} and ${name}`);
+        console.error(`memory colision: ${t.name} and ${name}`);
+        doBreak = true;
         return;
       }
       t.v -= d;
       var d2 = d-len;
       if(d2<0){
         if(!mimage[i+1])throw 'ohnoh';
-        console.error(`colision: ${mimage[i+1].name} and ${name}`);
+        console.error(`memory colision: ${mimage[i+1].name} and ${name}`);
+        doBreak = true;
         return;
       }
       mimage.splice(i+1,0,{v:len,name,code:o.code},{v:d2});
@@ -97,6 +99,7 @@ function apply(o,offset=0){
     var t = rg[k];
     if(t!=undefined){
       console.error(`global colision("${k}"): ${globalSource[k]} and ${o.name}`);
+      doBreak = true;
     }
     rg[k] = gls[k]+offset;
     globalSource[k] = o.name;
@@ -110,10 +113,11 @@ function find(o){
   for(var i = 0; true; i++){
     if(i >= mimage.length){
       console.error(`no space to put ${name}`);
+      doBreak = true;
       return 0;
     }
     var t = mimage[i];
-    if(t.v>=len){
+    if(t.v>=len&&!t.name){
       return acc;
     }
     acc += t.v;
@@ -178,7 +182,7 @@ function finish(){
     var buff = r.code;
     if(addr!=undefined&&addr>crto.startPos){
       buff[0] = 0xf1;
-      buff.writeUInt16BE(1,addr);
+      buff.writeUInt16BE(addr,1);
       buff[3] = 0xff;
     }
     fs.writeFileSync(outputFilename,buff,"binary");
@@ -209,25 +213,37 @@ for(var i = 0; i < filenames.length; i++){
 assign(crtos);
 
 var mismatch = getMismatch();
-var liblist = fs.readdirSync(pathToLibFolder);
-
-if(mismatch.length){
-  var crtos = [];
-  for(var i = 0; i < mismatch.length; i++){
-    var name = mismatch[i]+'.crto';
-    if(liblist.indexOf(name)==-1){
-      console.error(`${name} not avalible`);
-      //r.globals[mismatch[i]] = 0xcafe;
-      continue;
-    }
-    var p = path.resolve(pathToLibFolder,name);
-    crtos.push(crto.read(p));
-  }
-  assign(crtos);
-  mismatch = getMismatch();
-  //if(mismatch.length)throw 122;
+var filelist = fs.readdirSync(pathToLibFolder);
+var liblist = filelist.filter(e=>path.extname(e)=='.crto');
+var asmlist = filelist.filter(e=>path.extname(e)=='.crta');
+if(liblist.length!=asmlist.length){
+  liblist = require('./assembleAllLibs.js')(asmlist,callback);
+}else{
+  callback();
 }
 
-link();
+function callback(){
 
-finish();
+  while(mismatch.length){
+    var crtos = [];
+    var doBreak = false;
+    for(var i = 0; i < mismatch.length; i++){
+      var name = mismatch[i]+'.crto';
+      if(liblist.indexOf(name)==-1){
+        console.error(`${name} not avalible`);
+        doBreak = true;
+        //r.globals[mismatch[i]] = 0xcafe;
+        continue;
+      }
+      var p = path.resolve(pathToLibFolder,name);
+      crtos.push(crto.read(p));
+    }
+    assign(crtos);
+    mismatch = getMismatch();
+    if(doBreak)break;
+  }
+
+  link();
+
+  finish();
+}

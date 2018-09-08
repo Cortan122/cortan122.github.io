@@ -1,0 +1,9 @@
+; int or_to_ax(int)
+or_to_ax:
+mov [0] sp
+mov sp [sp-2]
+or ax sp
+mov sp [0]
+ret
+
+.global or_to_ax

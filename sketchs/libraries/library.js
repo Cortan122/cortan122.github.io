@@ -329,9 +329,9 @@
       var twr = lib.tweaker = {};
       var s;
       if(window.tweakables_name == undefined){
-        s = window.location.toString();
+        s = window.location.pathname;
         if(s[s.length-1] == '/')s = s.substr(0,s.length-1);
-        s = s.substr(s.lastIndexOf('/')+1,999);
+        s = s.substr(s.lastIndexOf('/')+1);
       }else{
         s = tweakables_name;
       }

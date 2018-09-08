@@ -112,10 +112,16 @@ bool cmdhandler(char *cmd){
     }
   }else if(strcmp(argv[0],"r")==0){
     doRegdump = false;
+    bool doCount = false;
     if(argc>1&&strcmp(argv[1],"-v")==0){
       if(argc>2)argv[1] = argv[2];
       argc--;
       doRegdump = true;
+    }
+    if(argc>1&&strcmp(argv[1],"-c")==0){
+      if(argc>2)argv[1] = argv[2];
+      argc--;
+      doCount = true;
     }
     if(argc==1){
       runbin(-1);
@@ -124,6 +130,7 @@ bool cmdhandler(char *cmd){
     }else{
       printf("%s", "invalid command");
     }
+    if(doCount)printf("\n%d instructions executed",numExecutedInstructions);
     printf("\n");
   }else if(strcmp(argv[0],"q")==0){
     res = true;

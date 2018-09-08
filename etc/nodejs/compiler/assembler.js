@@ -28,16 +28,16 @@ const argvRom = {
 };
 
 const instructionRom = {
-  "define":ops=>{
-    if(!directiveArgCheck("define",2,ops))return;
+  ".define":ops=>{
+    if(!directiveArgCheck(".define",2,ops))return;
     var name = ops[0];
     var val = ops[1];
     if(!isLegalLabelName(name))return;
     envlabels[name] = val;
     return true;
   },
-  "undefine":ops=>{
-    if(!directiveArgCheck("undefine",1,ops))return true;
+  ".undefine":ops=>{
+    if(!directiveArgCheck(".undefine",1,ops))return true;
     reeval();
     var arg = ops[0];
     if(isLegalLabelName(arg,true)){
@@ -55,16 +55,16 @@ const instructionRom = {
     }
     return true;
   },
-  "pad":ops=>{
-    var t = padOrAlignHelper("pad",ops);
+  ".pad":ops=>{
+    var t = padOrAlignHelper(".pad",ops);
     if(t==undefined)return;
     var count = t[0];
     var char = t[1];
     ip += count;
     resault += char.repeat(count);
   },
-  "align":ops=>{
-    var t = padOrAlignHelper("align",ops);
+  ".align":ops=>{
+    var t = padOrAlignHelper(".align",ops);
     if(t==undefined)return;
     var target = t[0];
     var char = t[1];
@@ -78,15 +78,16 @@ const instructionRom = {
     ip += diff;
     resault += char.repeat(diff);
   },
-  "extern":ops=>{
-    if(!directiveArgCheck("extern",1,ops))return;
-    var name = ops[0];
-    if(!isLegalLabelName(name))return;
-    envlabels[name] = `{э${name}}`;
+  ".extern":ops=>{
+    if(!directiveArgCheck(".extern",1,ops,true))return;
+    for(var name of ops){
+      if(!isLegalLabelName(name))continue;
+      envlabels[name] = `{э${name}}`;
+    }
     return true;
   },
-  "global":ops=>{
-    if(!directiveArgCheck("global",1,ops))return;
+  ".global":ops=>{
+    if(!directiveArgCheck(".global",1,ops))return;
     var name = ops[0];
     if(!isLegalLabelName(name,true)){
       printError(`illegal identifier: "${name}"`);
@@ -104,13 +105,13 @@ const instructionRom = {
     globals[name] = parseInt(envlabels[name],16);
     return true;
   },
-  "byte":ops=>{
-    if(!directiveArgCheck("byte",1,ops))return;
+  ".byte":ops=>{
+    if(!directiveArgCheck(".byte",1,ops))return;
     ip += 1;
     resault += assembleSymbol(ops[0],1);
   },
-  "word":ops=>{
-    if(!directiveArgCheck("word",1,ops))return;
+  ".word":ops=>{
+    if(!directiveArgCheck(".word",1,ops))return;
     ip += 2;
     resault += assembleSymbol(ops[0],2);
   },
@@ -163,6 +164,17 @@ const instructionRom = {
       }else{
         throw "What";
       }
+      return;
+    }
+    if(r1.v=="indstack"){
+      //"indexed moves can only be done on registers (fatal)"
+      if(r2.t!="reg")printError("moves need to have at least 1 register");
+      assembleOpcode(0xb8+r2.v,[r1.str],1);
+      return;
+    }
+    if(r2.v=="indstack"){
+      if(r1.t!="reg")printError("moves need to have at least 1 register");
+      assembleOpcode(0xa8+r1.v,[r2.str],1);
       return;
     }
 
@@ -247,6 +259,12 @@ const instructionRom = {
       "1":()=>assembleOpcode(0xf6,[],0),
       "else":()=>assembleOpcode(0xf6,[],0)
     });
+  },
+  "enter":ops=>{
+    assembleOpcode(0xfb,ops,1);
+  },
+  "leave":ops=>{
+    assembleOpcode(0xfc,ops,0);
   }
 };
 
@@ -348,12 +366,12 @@ function padOrAlignHelper(name,ops){
   return [count,char];
 }
 
-function directiveArgCheck(name,count,ops){
+function directiveArgCheck(name,count,ops,silent=false){
   if(ops.length<count){
     printError(`${name} needs ${count} argument${count!=1?'s':''} (fatal)`);
     return false;
   }
-  if(ops.length>count){
+  if(ops.length>count&&!silent){
     printError(`${name} only needs ${count} argument${count!=1?'s':''}`);
   }
   return true;
@@ -476,7 +494,12 @@ function assembleRegister(str){
   for (var i = 0; i < registerRom.length; i++) {
     if(registerRom[i].includes(str))return {v:i,l:registerLengthRom[i],t:"reg"};
   }
-  if(str.match(/^\[[^\[\]]*\]$/)){//this regex just matches something in brackets
+  if(str.match(/^\[sp[\+\-][^\[\]]*\]$/)){//this regex just matches [sp+*]
+    var tempstr = str.substring(4,str.length-1);
+    if(str[3]=='-')tempstr = '-'+tempstr;
+    return {v:"indstack",str:tempstr};
+  }
+  if(str.match(/^\[[^\[\]]*\]$/)){//this regex just matches [*]
     var tempstr = str.substr(1,str.length-2);
     var reg = assembleRegister(tempstr).v;
     if(reg=="num")return {v:"indnum",l:getIntegerLength(tempstr),str:tempstr};
@@ -733,7 +756,7 @@ function finish(){
       var addr = globals[crto.entryPoint];
       if(addr!=undefined&&addr>crto.startPos){
         buff[0] = 0xf1;
-        buff.writeUInt16BE(1,addr);
+        buff.writeUInt16BE(addr,1);
         buff[3] = 0xff;
       }
       fs.writeFileSync(outputFilename,buff,"binary");

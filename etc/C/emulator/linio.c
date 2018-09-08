@@ -19,11 +19,3 @@ void HideCursor(){
 void unHideCursor(){
   printf("\e[?25h"); 
 }
-
-void readFile(char * name){
-  FILE* fd;
-
-  fd = fopen(name, "r");
-  fread(ram, 1, 65536, fd);
-  fclose(fd);
-}

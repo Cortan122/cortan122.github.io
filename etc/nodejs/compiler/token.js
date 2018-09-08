@@ -17,9 +17,20 @@ const orderOfOperations = [
 ];
 
 const keywordRom = {
-  return:()=>{},
+  return:arr=>{
+    var r = arr[0];
+    r.type = 'operator';
+    r.p1 = parseExpression(arr.slice(1));
+    return r;
+  },
   //...
 };
+
+function flattenPunctuationTree(token){
+  if(token.type!='punctuation')return token;
+  var t = flattenPunctuationTree;
+  return [].concat(t(token.p1),t(token.p2));
+}
 
 function printError(a,b){
   module.exports.printError(a,b);
@@ -229,6 +240,7 @@ function parseType(tokens){
       isconstptr = true;
       tkens = tkens.slice(0,tkens.length-1);
     }
+    //todo: else if "func[]"
     var t = parseType(tkens);
     var isarr = block.children.length?true:false;
     r = {
@@ -237,7 +249,7 @@ function parseType(tokens){
       target:t,
       const:isconstptr
     };
-    if(isarr)r.length = block.children;//todo:parseExpression(block.children)
+    if(isarr)r.length = parseExpression(block.children);
     return r;
   }
   var modifiers = tokens.slice(0,tokens.length-1);
@@ -318,7 +330,8 @@ function parseFuncHeader(tokens){
     type:'header',
     name:name.string,
     returntype:type,
-    args:rargs
+    args:rargs,
+    pointer:name.pointer
   };
 }
 
@@ -331,7 +344,8 @@ function parseVar(tokens){
   return {
     type:'var',
     vartype:type,
-    name:name.string
+    name:name.string,
+    pointer:name.pointer
   }; 
 }
 
@@ -410,20 +424,74 @@ function getLineStrings(line){
   });
 }
 
+function canBeAVariableDeclaration(tokens){
+  var i = 0;
+  for(var t of tokens){
+    if(t.type=='identifier'){i++;continue;}
+    if(t.blocktype=='[')continue;
+    return false;
+  }
+  if(i<2)return false;
+  return true;
+}
+
+function parseCodeLine(line,out){
+  /*var line;
+  if(linetoken instanceof Array){
+    line = linetoken;
+  }else{
+    line = linetoken.children;
+  }*/
+  if(line.length==0)return;
+  var keyword = line[0].string;
+  var strings = getLineStrings(line);
+  if(keywordRom[keyword]){
+    return keywordRom[keyword](line);
+  }
+  if(strings[1]==':'&&line[0].type=='identifier'){
+    out.unshift(parseCodeLine(line.slice(2),out));
+    return {
+      type:'var',
+      vartype:'label',
+      name:keyword,
+      pointer:line[0].pointer
+    };
+  }
+  if(canBeAVariableDeclaration(line)){
+    return parseVar(line);
+  }
+  var index = strings.indexOf('=');
+  if(index==-1){
+    return parseExpression(line);
+  }else if(index == line.length-1){
+    printErrorToken(line[line.length-1]);
+  }
+  var part1 = line.slice(0,index);
+  var part2 = line.slice(index+1);
+  if(!canBeAVariableDeclaration(part1)){
+    return parseExpression(line);
+  }
+  var res = parseVar(part1);
+  if(part2.length){
+    res.init = parseExpression(part2);
+    if(res.init.type=='punctuation'){
+      res.init.list = flattenPunctuationTree(res.init);
+    }
+  }
+  return res;
+}
+
 function parseCode(tokens){
   var lines = splitLines(tokens);
   var result = [];
   for(var i = 0; i < lines.length; i++){
-    var line = lines[i];
-    var keyword = line[0].string;
-    var strings = getLineStrings(line);
-    if(keywordRom[keyword]){
-      result.push(keywordRom[keyword](line));
-      continue;
-    }
-    //
+    var out = [];
+    var t = parseCodeLine(lines[i].children,out);
+    if(t)result.push(t);
+    out.map(e=>result.push(e));
   }
-  throw 'todo:parseCode';
+  return result;
+  //throw 'todo:parseCode';
 }
 
 function parseTree(tokens){
@@ -459,7 +527,7 @@ function parseTree(tokens){
       result.push({
         type:'funccode',
         header:t,
-        code:last.children//todo:parseCode(last.children)
+        code:parseCode(last.children)
       });
       continue;
     }else/* if(strings.includes('='))*/{
@@ -473,6 +541,9 @@ function parseTree(tokens){
       var res = parseVar(part1);
       if(part2.length){
         res.init = parseExpression(part2);
+        if(res.init.type=='punctuation'){
+          res.init.list = flattenPunctuationTree(res.init);
+        }
       }
       result.push(res);
     }

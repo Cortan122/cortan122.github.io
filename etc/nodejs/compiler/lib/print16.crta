@@ -1,8 +1,8 @@
 ; this can not be done in PIC
-; __cache_sp:word 0xcccc
-; __cache_div:word 0xcccc
-define __cache_sp 0
-define __cache_div 2
+; __cache_sp:.word 0xcccc
+; __cache_div:.word 0xcccc
+.define __cache_sp 0
+.define __cache_div 2
 
 __div:
 ; mov b 0
@@ -47,7 +47,7 @@ mov ax '0'
 print al
 jmp __print_ret
 
-print:
+print16:
 push ax
 test ax
 jz __print_zero
@@ -66,5 +66,5 @@ print al
 pop ax
 ret
 
-undefine __.*
-global print
+.undefine __.*
+.global print16

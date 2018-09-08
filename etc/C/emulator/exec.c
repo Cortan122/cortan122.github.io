@@ -21,6 +21,8 @@ const bool decemalprint = false;
 
 static volatile bool keepRunning = true;
 
+unsigned int numExecutedInstructions = 0;
+
 void regdump();
 
 void setreg(int num,uint16_t val){
@@ -73,6 +75,7 @@ uint16_t getreg(int num){
     case 7:
       return sp;
   }
+  return printf("%s\n","WTF");
 }
 
 void writetoram(uint16_t data,int len,uint16_t addr){
@@ -101,7 +104,7 @@ uint16_t readfromram(int len,uint16_t* addr){
     r |= ram[*addr];
     return r;
   }else{
-    printf("%s\n", "oh noh");
+    return printf("%s\n", "oh noh");
   }
 }
 
@@ -249,6 +252,16 @@ bool exec(){
       writetoram(popfromstack(1),1,readfromram(1,&ip));
       ip++;
       break;
+    case 0xfb:;
+      uint16_t oldsp = sp;
+      sp -= readfromram(1,&ip);
+      pushtostack(oldsp,2);
+      ip++;
+      break;
+    case 0xfc:
+      sp = popfromstack(2);
+      ip = popfromstack(2);
+      break;
     case 0xfe:
       if(decemalprint){
         printf("%d ",ax);
@@ -358,6 +371,17 @@ bool exec(){
 
     ip++;
     writetoram(getreg(tl),reglengths[tl],addr);
+  }else if(th == 0xa && tl > 7){
+    uint8_t addr = readfromram(1,&ip);
+    ip++;
+    int t = tl&0b0111;
+    uint16_t acccopy = sp+parseNegative(addr);
+    setreg(t,readfromram(reglengths[t],&acccopy));
+  }else if(th == 0xb && tl > 7){
+    uint8_t addr = readfromram(1,&ip);
+    ip++;
+    int t = tl&0b0111;
+    writetoram(getreg(t),reglengths[t],sp+parseNegative(addr));
   }else{
     ip++;
     printf("%s:%02x\n","invalid instruction?",t);
@@ -366,11 +390,13 @@ bool exec(){
 }
 
 void runbin(int limit){
+  numExecutedInstructions = 0;
   while(true){
     if(!keepRunning)return;
     if(limit == 0)return;
     if(limit > 0)limit--;
     regdump();
+    numExecutedInstructions++;
     if(exec())return;
   }
 }

@@ -1,0 +1,64 @@
+//You should not edit this file
+//To customize the game you need to create an "options.json" file
+{
+  //Gameplay options:
+  "width": 20,
+  "height": 10,
+  "offsetX": 1,
+  "offsetY": 1,
+  "numberOfBombs": 20,
+  "isFirstClickSafe": true,
+  "numberOfLives": 1, //-1 = Infinity
+  "requireAllBombsFlagged": true,
+
+  //Input options:
+  "longClickThreshold": 200, //in milliseconds
+  "showUnknownKeyCodes": false,
+  "keybinds": {
+    "28":"leftclick", //enter
+    "57":"rightclick",//space
+    "61008":"down",   //↓
+    "31":"down",      //s
+    "61000":"up",     //↑
+    "17":"up",        //w
+    "61003":"left",   //←
+    "30":"left",      //a
+    "61005":"right",  //→
+    "32":"right",     //d
+    "1":"esc",        //esc
+    "19":"restart",   //r
+    "60":"restart",   //f2
+    "63":"redraw",    //f5
+    "24":"options",   //o
+    "25":"pause",     //p
+    "64":"save",      //f6
+    "67":"load",      //f9
+  },
+
+  //Visual options:
+  "chixelList": {
+    "invisible":{"char":"?","color":"gray"},
+    "flag":     {"char":"!","color":"red"},
+    "bomb":     {"char":"●","color":"white"},
+    "fire":     {"char":"✶","color":"yellow"},
+    "0":        {"char":".","color":"lightgray"},
+    "1":        {"char":"1","color":"#0018f7"},
+    "2":        {"char":"2","color":"#007e1d"},
+    "3":        {"char":"3","color":"#fc1525"},
+    "4":        {"char":"4","color":"#000084"},
+    "5":        {"char":"5","color":"#870c0e"},
+    "6":        {"char":"6","color":"#007f7e"},
+    "7":        {"char":"7","color":"#0f0"},
+    "8":        {"char":"8","color":"magenta"},
+    "9":        {"char":"9","color":"magenta"},
+  },
+  "boxDrawingColor": "pink",
+  "defaultColor": {"fg":"white","bg":"black"},
+  "mouseMode": {"mode":"overwrite","char":null,"color":{"fg":"transparent","bg":"orange"}},
+  "openConfigInNotepad": true,
+  "showMenu": true,
+
+  //Optimization options:
+  "bakeFullRedraws": true,
+  "showFunctionTimes": false,
+}

@@ -23,8 +23,38 @@ const keywordRom = {
     r.p1 = parseExpression(arr.slice(1));
     return r;
   },
+  asm:arr=>{
+    var block;
+    var r = arr[0];
+    r.type = 'operator';
+    if(arr[1].blocktype=='{'){
+      block = arr[1].children;
+    }else{
+      block = arr.slice(1);
+    }
+    r.asm = codeToAsm(block);
+    return r;
+  }
   //...
 };
+
+function codeToAsm(block){
+  var str = "";
+  var previ = false;
+  var h = e=>e.type=='identifier'||e.blocktype=='[';
+  block.map(e=>{
+    if(previ&&h(e))str += ' ';
+    if(e.type=='block'){
+      var ti = "[({".indexOf(e.blocktype);
+      str += e.blocktype+codeToAsm(e.children)+"])}"[ti];
+      return;
+    }else{
+      str += e.string;
+    }
+    previ = h(e);
+  });
+  return str;
+}
 
 function flattenPunctuationTree(token){
   if(token.type!='punctuation')return token;
@@ -641,3 +671,4 @@ function main(code){
 }
 
 module.exports.main = main;
+module.exports.flattenPunctuationTree = flattenPunctuationTree;

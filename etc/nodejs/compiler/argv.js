@@ -72,4 +72,23 @@ function parseArgv(argv,rom){
   return args;
 }
 
+function argvToString(argv){
+  var r = "";
+  for (var i = 0; i < argv.length; i++) {
+    var t = argv[i];
+    var tr = "";
+    for (var j = 0; j < t.length; j++) {
+      if(t[j]!='"'){
+        tr += t[j];
+      }else{
+        tr += '\\'+t[j];
+      }
+    }
+    r += ' "'+tr+'"';
+  }
+  r = r.substr(1);
+  return r;
+}
+
+parseArgv.argvToString = argvToString;
 module.exports = parseArgv;

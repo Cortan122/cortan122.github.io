@@ -11,7 +11,7 @@ var tweakables = {
   colorMode:0,
   color:'#00c864',
   scrollSpeed:.01,
-  blur:true,
+  blur:10,
   draw:true,
   showFPS:true,
   metaStart:true
@@ -59,8 +59,8 @@ function onChangeDrawMode(name){
 }
 
 function draw() {
-  if(tweakables.blur&&tweakables.draw){
-    background(0,0,0,10);
+  if(tweakables.draw){
+    background(0,0,0,tweakables.blur);
   }
 
   var mspt = (new Date).getTime();

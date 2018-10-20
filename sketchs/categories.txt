@@ -168,8 +168,8 @@
             "main.js"
         ],
         "lines": {
-            "html": 100,
-            "js": 349
+            "html": 106,
+            "js": 439
         }
     },
     "gradient": {
@@ -258,6 +258,20 @@
         "lines": {
             "html": 13,
             "js": 38
+        }
+    },
+    "identicon": {
+        "categories": [
+            "Unfinished"
+        ],
+        "name": "Identicons",
+        "time": 1538994600,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 16,
+            "js": 25
         }
     },
     "intervals": {
@@ -480,7 +494,7 @@
         "time": 1520106900,
         "lines": {
             "html": 43,
-            "js": 277
+            "js": 289
         },
         "jsfiles": [
             "ping.js",

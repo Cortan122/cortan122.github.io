@@ -2,7 +2,7 @@
 2)Dragging the mouse results in no clicks (fixed)
 3)Numbers above 99 are displayed in a weird base (not a bug?)
 4)Sometimes the first click only uncovers one tile (not a bug?)
-5)No sound
+5)No sound (fixed)
 6)No tutorial (fixed?)
 7)Can not open "options.json" automatically (fixed)
 8)Pausing dose not stop the timer (not a bug?)

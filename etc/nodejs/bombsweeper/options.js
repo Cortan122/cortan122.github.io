@@ -3,8 +3,9 @@ const path = require('path');
 const EventEmitter = require('events');
 const cp = require('child_process');
 const json5 = require("json5");
+const deepEqual = require("deep-equal");
 
-const filename = `./options.json`;
+const filename = "./options.json";
 const defaultFilename = path.join(__dirname,"default.json");
 const defaultFile = fs.readFileSync(defaultFilename);
 const defaultw = json5.parse(defaultFile);
@@ -13,12 +14,36 @@ const myEmitter = new EventEmitter();
 
 var tw = {};
 
+function isObject(o){
+  return typeof o == 'object' && o != null && !(o instanceof Array);
+}
+
+function readData(data){
+  try{
+    var t = json5.parse(data);
+    if(!deepEqual(t,tw)){
+      tw = t;
+      myEmitter.emit('change');
+    }
+  }catch(e){
+    console.log(e.message);
+  }
+}
+
 function readFile(){
   fs.readFile(filename,(err,data)=>{
     if(err)data = '{}';
-    tw = json5.parse(data);
-    myEmitter.emit('change');
+    readData(data);
   });
+}
+
+function readFileSync(){
+  try{
+    data = fs.readFileSync(filename);
+  }catch(e){
+    data = '{}';
+  }
+  readData(data);
 }
 
 function open(){
@@ -43,7 +68,7 @@ function recAssign(a,b){
     r[prop] = a[prop];
   }
   for(var prop in b){
-    if(typeof r[prop] == 'object' && typeof b[prop] == 'object' && b[prop]!=null && r[prop]!=null){
+    if(isObject(r[prop]) && isObject(b[prop])){
       r[prop] = recAssign(r[prop],b[prop]);
     }else{
       r[prop] = b[prop];
@@ -63,14 +88,16 @@ function createProxy(prop){
 myEmitter.open = open;
 myEmitter.createProxy = createProxy;
 
+myEmitter.on('change',()=>console.log("option.json has changed (press [R]eset to aplly)"));
+
 fs.watch(path.join(filename,'..'),(a,name)=>{
-  if(name==path.basename(filename)){
-    console.log("option.json has changed (press [R]eset to aplly)");
+  if(name==path.basename(filename)&&a=="change"){
+    // console.log("option.json has changed (press [R]eset to aplly)");
     readFile();
   }
 });
 
-readFile();
+readFileSync();
 
 const options = module.exports = new Proxy(myEmitter, {
   get(target, property, receiver){
@@ -81,8 +108,8 @@ const options = module.exports = new Proxy(myEmitter, {
     }else if(
       property in tw &&
       property in defaultw &&
-      typeof defaultw[property] == 'object' &&
-      typeof tw[property] == 'object'
+      isObject(defaultw[property]) &&
+      isObject(tw[property])
     ){
       return recAssign(defaultw[property],tw[property]);
     }else if(property in tw){

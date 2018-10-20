@@ -17,6 +17,7 @@ Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e) {
   }
   return this;
 });
+Object.defineProperty(Array.prototype,"remove_fast",{enumerable: false});
 
 function randomChoice(arr){
   return arr[Math.floor(Math.random() * arr.length)];

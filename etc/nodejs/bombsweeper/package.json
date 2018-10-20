@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "color": "^3.0.0",
+    "deep-equal": "^1.0.1",
     "iohook": "^0.2.0",
     "json5": "^2.0.1",
     "window-size": "^1.1.1"
@@ -15,5 +16,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

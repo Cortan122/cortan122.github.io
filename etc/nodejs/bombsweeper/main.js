@@ -1,4 +1,4 @@
-const {floor,abs} = Math;
+const {floor,abs,max} = Math;
 const readline = require('readline');
 const fs = require('fs');
 const api = require("./api.js");
@@ -7,12 +7,15 @@ const Color = require("./color.js");
 const boxDrawing = require("./boxdrawing.js");
 const options = require("./options.js");
 const huffman = require("./huffman.js");
+const sound = require("./sound.js");
 
 const chixelRom = options.createProxy("chixelList");
 const numericAlphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+-=`\\;',./{}|[]<>?\"";
 const savegameFilePath = './save.game';
 
 var safeCursor;
+var menuHeight;
+var clickHandlers = [];
 var offset = {x:1,y:1};
 var size = {x:20,y:10};
 var isNextClickSafe;
@@ -99,6 +102,7 @@ function redrawTimer(){
   var cpos = api.getCursorPos();
   api.write(str,size.x+offset.x+7,offset.y,options.defaultColor);
   api.setCursorPos(cpos);
+  sound.play("tick");
 }
 
 function redrawBombCounter(){
@@ -118,6 +122,7 @@ function redrawLiveCounter(){
 }
 
 function redrawBox(){
+  clickHandlers = [];
   var t = [Color(options.boxDrawingColor),'Ж'];
   boxDrawing.Box(
     offset.x-1,
@@ -126,10 +131,11 @@ function redrawBox(){
     size.y+offset.y
   ).draw(...t);
   var doLives = options.numberOfLives>1;
+  const eleven = 11;
   boxDrawing.Box(
     size.x+offset.x,
     offset.y-1,
-    size.x+offset.x+1+11,
+    size.x+offset.x+1+eleven,
     offset.y+2+doLives
   ).draw(...t);
   api.write('Time: 00:00',size.x+offset.x+1,offset.y,options.defaultColor);
@@ -137,24 +143,47 @@ function redrawBox(){
   if(doLives){
     api.write('Lives:00/00',size.x+offset.x+1,offset.y+2,options.defaultColor);
   }
+  menuHeight = offset.y+1+doLives+3;
   redrawLiveCounter();
   redrawBombCounter();
   redrawTimer();
   if(options.showMenu){
-    const menu = [
-      "Controls:  ",
-      "[R]estart  ",
-      "[O]ptions  ",
-    ];
+    var marr = options.menu;
+    if(!marr.map){
+      console.log(marr);
+      throw 1;
+    }
+    const menu = marr.map(e=>{
+      if(typeof e == "string"){
+        return e;
+      }else{
+        return e.string;
+      }
+    });
+    const events = marr.map(e=>{
+      if(typeof e == "string"){
+        return "";
+      }else{
+        return e.event;
+      }
+    });
     boxDrawing.Box(
       size.x+offset.x,
       offset.y+2+doLives,
-      size.x+offset.x+1+11,
+      size.x+offset.x+1+eleven,
       offset.y+3+doLives+menu.length
     ).draw(...t);
     menu.map((e,i)=>{
       api.write(e,size.x+offset.x+1,offset.y+3+doLives+i,options.defaultColor);
+      if(options.clickableMenu&&events[i]!=""){
+        var t = {event:events[i],x:size.x+offset.x+2,y:offset.y+4+doLives+i};
+        for(var j = 0;j < eleven;j++){
+          clickHandlers.push({...t});
+          t.x++;
+        }
+      }
     });
+    menuHeight = offset.y+3+doLives+menu.length+2;
   }
   oldBoxColor = options.boxDrawingColor;
 }
@@ -169,7 +198,7 @@ function redrawGame(){
         drawTileAt(x,y);
       }
     }
-    safeCursor = {y:size.y+2+offset.y,x:/*offset.x+1*/0};
+    safeCursor = {y:max(size.y+2+offset.y,menuHeight),x:/*offset.x+1*/0};
     api.setCursorPos(safeCursor);
   };
   if(options.bakeFullRedraws)api.bake(t);
@@ -187,6 +216,7 @@ function placeFireAt(pos){
   setTimeout(()=>{
     cleanup();
     console.log('Oh no!');
+    sound.play("boom");
   },10);
   fires.push(pos);
   redrawLiveCounter();
@@ -204,6 +234,7 @@ function checkWinCondition(){
     setTimeout(()=>{
       cleanup();
       console.log("You Win!!");
+      sound.play("victory");
     },10);
     onGameOver();
   } 
@@ -226,6 +257,9 @@ function load(){
   cleanup();
   console.log(`Loading game from ${savegameFilePath}`);
   fs.readFile(savegameFilePath,(err,rawdata)=>{
+    if(err.code=='ENOENT'){
+      return console.log(`File ${savegameFilePath} does not exist`);
+    }
     if(err)throw err;
     var data64 = rawdata.toString('base64');
     var data = huffman.decode(data64);
@@ -263,8 +297,20 @@ function save(){
   // console.log(data);
 }
 
+function checkClickHandler(pos){
+  for(var h of clickHandlers){
+    if(h.x==pos.x&&h.y==pos.y){
+      api.emit(h.event);
+      sound.play("menu");
+      return true;
+    }
+  }
+  return false;
+}
+
 api.on('click',pos=>{
   if(isDead)return;
+  if(checkClickHandler(pos))return;
   var prevFC = game.getFlagCount();
   var prevHC = game.getHiddenCount();
   var r;
@@ -279,6 +325,8 @@ api.on('click',pos=>{
   }else if(r == 'bomb'){
     var t = {x:pos.x-1-offset.x,y:pos.y-1-offset.y};
     placeFireAt(t);
+  }else{
+    sound.play("error");
   }
   if(prevFC!=game.getFlagCount()){
     redrawBombCounter();
@@ -313,6 +361,10 @@ api.on('save',()=>{
 
 api.on('load',()=>{
   load();
+});
+
+api.on('mute',()=>{
+  sound.mute();
 });
 
 options.on('change',()=>{

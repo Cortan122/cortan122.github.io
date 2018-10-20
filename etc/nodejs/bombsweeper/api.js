@@ -146,7 +146,7 @@ function init2dArray(x,y,fill,usefunc){
 
 function stratMoveHandler(){
   if(process.platform == "win32"){
-    windowMoveListner = cp.spawn(path.join(__dirname,'winmoved.exe'));
+    windowMoveListner = cp.spawn(path.join(__dirname,'bin/winmoved.exe'));
     windowMoveListner.stdout.on('data',(data)=>{
       // console.log(`stdout: ${data}`);
       if(data=='fail\r\n')return;
@@ -169,7 +169,7 @@ function getWindowDimentions(){
   if(process.platform == "win32"){
     // var hwnd = Window.getHwnd();
     var j = json5.parse(
-      cp.execSync(path.join(__dirname,'wininfo.exe')).toString()//this causes lag
+      cp.execSync(path.join(__dirname,'bin/wininfo.exe')).toString()//this causes lag
     );
     r.h = j.clientRect.h;
     r.w = j.clientRect.w;
@@ -505,7 +505,7 @@ function setupEvents(){
     redraw();
   });
 
-  cp.spawn(path.join(__dirname,'quickEdit.exe'),['2'],{stdio:'inherit'}).on('close',setupMutableStdout);
+  cp.spawn(path.join(__dirname,'bin/quickEdit.exe'),['2'],{stdio:'inherit'}).on('close',setupMutableStdout);
 
   clear();
 }
@@ -537,8 +537,14 @@ module.exports = {
   setMouseMode,
   redrawMouse,
   on:(...a)=>myEmitter.on(...a),
+  emit:a=>{
+    if(keyboardRom[a]){
+      return keyboardRom[a]();
+    }
+    myEmitter.emit(a);
+  },
   pause,
-  bake
+  bake,
 };
 
 boxDrawing.init(module.exports);

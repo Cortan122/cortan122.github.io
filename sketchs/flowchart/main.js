@@ -78,19 +78,6 @@ function updateColors(){
   }`);
 }
 
-function replacetw_layoutType(){
-  var rom = ['dumb','layered','horizontal','vertical'];
-  $('#tw_layoutType').find('input').remove();
-  var s = $(`
-    <select>
-      ${rom.map(e=>`<option value="${e}">${e}</option>`).join('\n')}
-    </select>
-  `);
-  s.on('change',()=>{tweakables.layoutType = s.val();lib.tweaker.onChangeTweakable("layoutType")});
-  s.appendTo('#tw_layoutType');
-  s.val(tweakables.layoutType);
-}
-
 function setup(){
   noCanvas();
   noLoop();
@@ -99,7 +86,7 @@ function setup(){
     .detach().appendTo($('<div></div>').prependTo('#buttonBoard'))
     .css({display:'inline',width:'33.333%'});
   $('<div id="statusDiv"></div>').prependTo('#buttonBoard').html('Everything');
-  replacetw_layoutType();
+  lib.tweaker.makeEnum("layoutType",['dumb','layered','horizontal','vertical']);
   lib.tweaker.events.push(a=>{
     if(a!='colors')return;
     updateColors();

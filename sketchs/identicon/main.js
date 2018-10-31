@@ -27,19 +27,6 @@ var inputRom = [
 
 var numericAlphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_.~";
 
-function tweakableEnum(name,rom){
-  //var rom = ['dumb','layered','horizontal','vertical'];
-  $('#tw_'+name).find('input').remove();
-  var s = $(`
-    <select>
-      ${rom.map(e=>`<option value="${e}">${e}</option>`).join('\n')}
-    </select>
-  `);
-  s.on('change',()=>{tweakables[name] = s.val();lib.tweaker.onChangeTweakable(name)});
-  s.appendTo('#tw_'+name);
-  s.val(tweakables[name]);
-}
-
 function hashToNum(str){
   var arr = str.split('').map(e=>{
     var t = numericAlphabet.indexOf(e);
@@ -103,7 +90,7 @@ function setup(){
 
   generate();
 
-  tweakableEnum("preset",Object.keys(presets));
+  lib.tweaker.makeEnum("preset",Object.keys(presets));
   lib.tweaker.events.push(onChange);
   onChange();
 }

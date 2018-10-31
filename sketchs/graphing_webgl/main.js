@@ -33,7 +33,7 @@ function setup(){
   createCanvas(500, 500, WEBGL);
   $.ajax("frag.glsl").done(e => {FragShaderTemplate = e;updateShader()});
   $.ajax("vert.glsl").done(e => {VertShaderSource = e;updateShader()});
-  $.ajax("examples.json").done(e => {examples = e;updateShader()});
+  $.ajax("examples.json").done(e => {examples = e;updateShader();examplesEnum()});
   updateShader();
   $('head').append("<style id=\"cursorColor\"></style>");
   $('body').append('<div id="textarea"><textarea spellcheck="false"></textarea><code></code></div>');
@@ -49,6 +49,12 @@ function setup(){
   lib.tweaker.events.push(updateCode);
   updateTextarea();
   updateCode();
+}
+
+function examplesEnum(){
+  var arr = Object.keys(examples);
+  arr.push("random");
+  lib.tweaker.makeEnum("templateName",arr);
 }
 
 function updateCode(name){

@@ -355,7 +355,7 @@
             }
           }
         }
-      }
+      };
 
       twr.initTweakables = (function (){
         try{
@@ -467,13 +467,25 @@
           $(".input.tweakables").each(function(i,e) {resizeTextbox.call(e);});
       }).bind(twr);
 
+      twr.makeEnum = function (name,rom) {
+        $('#tw_'+name).find('input,select').remove();
+        var s = $(`
+          <select>
+            ${rom.map(e=>`<option value="${e}">${e}</option>`).join('\n')}
+          </select>
+        `);
+        s.on('change',()=>{tweakables[name] = s.val();lib.tweaker.onChangeTweakable(name)});
+        s.appendTo('#tw_'+name);
+        s.val(tweakables[name]);
+      };
+
       twr.resizeTextbox = function () {
         var t = 10;
         this.style.width = 0;
         var newWidth = this.scrollWidth + t;
         //if( this.scrollWidth >= this.clientWidth )newWidth += t;
         this.style.width = newWidth + 'px';
-      }
+      };
 
       //setTimeout(twr.initTweakables, 1);
       twr.initTweakables();

@@ -7,7 +7,7 @@ const deepEqual = require("deep-equal");
 
 const filename = "./options.json";
 const defaultFilename = path.join(__dirname,"default.json");
-const defaultFile = fs.readFileSync(defaultFilename);
+const defaultFile = fs.readFileSync(defaultFilename,'utf8');
 const defaultw = json5.parse(defaultFile);
 
 const myEmitter = new EventEmitter();
@@ -92,7 +92,7 @@ myEmitter.on('change',()=>console.log("option.json has changed (press [R]eset to
 
 fs.watch(path.join(filename,'..'),(a,name)=>{
   if(name==path.basename(filename)&&a=="change"){
-    // console.log("option.json has changed (press [R]eset to aplly)");
+    // console.log("option.json has changed (press [R]eset to apply)");
     readFile();
   }
 });

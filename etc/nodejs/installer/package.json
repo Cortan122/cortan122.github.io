@@ -1,0 +1,9 @@
+{
+  "main": "bombsweeper.js",
+  "license": "ISC",
+  "dependencies": {
+    "copy-dir": "^0.4.0",
+    "rimraf": "^2.6.2",
+    "uglify-es": "^3.3.9"
+  }
+}

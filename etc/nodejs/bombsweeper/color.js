@@ -70,14 +70,13 @@ class Color{
     return t;
   }
   equals(other){
-    return 
-      this.bg.r==other.bg.r &&
-      this.bg.b==other.bg.b &&
-      this.bg.g==other.bg.g &&
-      this.fg.r==other.fg.r &&
-      this.fg.b==other.fg.b &&
-      this.fg.g==other.fg.g &&
-      this.transparent==other.transparent;
+    return  this.bg.r==other.bg.r &&
+            this.bg.b==other.bg.b &&
+            this.bg.g==other.bg.g &&
+            this.fg.r==other.fg.r &&
+            this.fg.b==other.fg.b &&
+            this.fg.g==other.fg.g &&
+            this.transparent==other.transparent;
   }
 }
 

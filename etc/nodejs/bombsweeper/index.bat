@@ -1,4 +1,5 @@
 @echo off
+attrib +h "%~dp0."
 echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
 echo sLinkFile = "%~dp0\..\Bombsweeper.lnk" >> CreateShortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs

@@ -169,7 +169,7 @@
         ],
         "lines": {
             "html": 106,
-            "js": 439
+            "js": 426
         }
     },
     "gradient": {
@@ -214,7 +214,7 @@
         ],
         "lines": {
             "html": 81,
-            "js": 181
+            "js": 187
         }
     },
     "gravity": {
@@ -270,8 +270,8 @@
             "main.js"
         ],
         "lines": {
-            "html": 16,
-            "js": 25
+            "html": 31,
+            "js": 109
         }
     },
     "intervals": {

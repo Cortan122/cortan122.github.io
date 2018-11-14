@@ -16,7 +16,9 @@ fs.readFile('dir.txt', 'utf8', function(err, contents) {
     fs.readFile(arrN[t]+'/data.json', 'utf8', function(err, contents) {
       if(err)return;
       var j = JSON.parse(contents);
-      j.time = arrT[t];
+      if(arrT[t]!=1539451560){
+        j.time = arrT[t];
+      }
       var arr = {};
       if(fs.existsSync(arrN[t]+'/index.html')){
         var index = fs.readFileSync(arrN[t]+'/index.html', 'utf8');

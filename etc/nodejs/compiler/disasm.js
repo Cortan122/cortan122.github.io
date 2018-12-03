@@ -241,7 +241,7 @@ function color(){
     register:ColorRGB("fg",253,150,33),
     comment:ColorRGB("fg","#ff0000")
   };
-  for(var i in colors){
+  for(let i in colors){
     if(i == 'no')continue;
     colors[i] = colors.no+colors[i];
   }

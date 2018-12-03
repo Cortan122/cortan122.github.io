@@ -230,7 +230,7 @@ int main(int argc,char *argv[]){
   }
 
   readFile(filename);
-  ip = ax = fl = b = c = sp = 0; 
+  ip = ax = fl = b = c = sp = 0;
   if(cmdhandler1(initcmd))return 0;
   if(doloop){
     char buffer[maxcmdlength];

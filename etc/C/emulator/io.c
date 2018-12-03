@@ -13,7 +13,7 @@ void readFile(char * name){
   FILE* fd;
   fd = fopen(name, "r");
   if(fd==NULL){
-    printf("file %s dose not exist\n",name);
+    printf("file %s does not exist\n",name);
     exit(1);
     return;
   }

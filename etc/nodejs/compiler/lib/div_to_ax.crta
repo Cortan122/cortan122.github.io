@@ -1,0 +1,12 @@
+.extern div
+
+; int div_to_ax(int)
+div_to_ax:
+enter 2
+mov [sp-4] ax
+mov ax [sp+2]
+mov [sp-6] ax
+call div
+leave
+
+.global div_to_ax

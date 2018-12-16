@@ -1,0 +1,10 @@
+; int write_to_ax(int)
+write_to_ax:
+mov [0] sp
+mov sp [sp-2]
+mov [ax] sp
+mov ax sp
+mov sp [0]
+ret
+
+.global write_to_ax

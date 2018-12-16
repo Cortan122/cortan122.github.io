@@ -1,0 +1,12 @@
+.extern mult
+
+; int mult_to_ax(int)
+mult_to_ax:
+enter 2
+mov [sp-6] ax
+mov ax [sp+2]
+mov [sp-4] ax
+call mult
+leave
+
+.global mult_to_ax

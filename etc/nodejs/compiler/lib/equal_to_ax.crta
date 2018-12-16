@@ -1,0 +1,17 @@
+.extern sub_to_ax
+
+; int equal_to_ax(int)
+equal_to_ax:
+enter 2
+mov [sp-4] ax
+mov ax [sp+2]
+call sub_to_ax
+test ax
+and ax 0
+jnz __equal_to_ax_ret
+add ax 1
+__equal_to_ax_ret:
+leave
+
+.undefine __.*
+.global equal_to_ax

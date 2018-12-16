@@ -1,0 +1,9 @@
+; int xor_to_ax(int)
+xor_to_ax:
+mov [0] sp
+mov sp [sp-2]
+xor ax sp
+mov sp [0]
+ret
+
+.global xor_to_ax

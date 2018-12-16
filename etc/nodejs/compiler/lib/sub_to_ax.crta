@@ -1,0 +1,15 @@
+.extern negate_ax add_to_ax
+
+; int sub_to_ax(int)
+sub_to_ax:
+enter 2
+call negate_ax
+mov [0] ax
+mov ax [sp+2]
+mov [sp-4] ax
+mov ax [0]
+call add_to_ax
+call negate_ax
+leave
+
+.global sub_to_ax

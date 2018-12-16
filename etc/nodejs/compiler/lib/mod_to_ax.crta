@@ -1,0 +1,13 @@
+.extern div
+
+; int mod_to_ax(int)
+mod_to_ax:
+enter 2
+mov [sp-4] ax
+mov ax [sp+2]
+mov [sp-6] ax
+call div
+mov ax [sp-0xa]
+leave
+
+.global mod_to_ax

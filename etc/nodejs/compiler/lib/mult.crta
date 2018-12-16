@@ -1,6 +1,6 @@
 .extern add_to_ax and_to_ax
 
-; int mult(int,int)
+; int mult(int [sp-4],int [sp-6])
 mult:
 enter 6
 mov ax 0
@@ -31,50 +31,3 @@ leave
 
 .undefine __.*
 .global mult
-
-; ; int mult1(int,int)
-; mult1:
-; enter 6
-; mov ax 0
-; mov [sp+2] ax
-; __mult1_loop:
-; mov ax [sp+2]
-; mov [sp-6] ax
-; mov ax [sp+4]
-; mov [sp-4] ax
-; call add
-; mov [sp+2] ax
-; mov ax -1
-; mov [sp-6] ax
-; mov ax [sp+6]
-; mov [sp-4] ax
-; call add
-; mov [sp+6] ax
-; test ax
-; jnz __mult1_loop
-; mov ax [sp+2]
-; leave
-
-; ; int mult2(int,int)
-; mult2:
-; mov ax [sp-2]
-; mov [14] ax
-; mov ax [sp-4]
-; mov [12] ax
-; mov [10] sp
-; mov ax 0
-; mov [16] ax
-; __mult2_loop:
-; mov ax [16]
-; mov sp [12]
-; add ax sp
-; mov [16] ax
-; mov ax [14]
-; mov sp -1
-; add ax sp
-; mov [14] ax
-; test ax
-; jnz __mult2_loop
-; mov sp [10]
-; mov ax [16]
-; ret

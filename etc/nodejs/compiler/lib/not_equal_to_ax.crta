@@ -1,0 +1,12 @@
+.extern equal_to_ax
+
+; int not_equal_to_ax(int)
+not_equal_to_ax:
+enter 2
+mov [sp-4] ax
+mov ax [sp+2]
+call equal_to_ax
+xor ax 1
+leave
+
+.global not_equal_to_ax

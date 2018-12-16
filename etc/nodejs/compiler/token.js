@@ -4,11 +4,11 @@ const orderOfOperations = [
   [['?:'],'RtL'],//todo
   [['||'],'LtR'],
   [['&&'],'LtR'],
+  [['==','!='],'LtR'],
+  [['<','<=','>','>='],'LtR'],
   [['|'],'LtR'],
   [['^'],'LtR'],
   [['&'],'LtR'],
-  [['==','!='],'LtR'],
-  [['<','<=','>','>='],'LtR'],
   [['<<','>>'],'LtR'],
   [['+','-'],'LtR'],
   [['*','/','%'],'LtR'],
@@ -34,7 +34,47 @@ const keywordRom = {
     }
     r.asm = codeToAsm(block);
     return r;
-  }
+  },
+  if:arr=>{
+    var r = arr[0];
+    r.type = 'operator';
+    r.code = [];
+    if(!arr[1]){
+      printError("expected a '()' block",r.pointer);
+      return r;
+    }
+    if(arr[1].blocktype!='('){
+      printError(`unexpected ${arr[1].blocktype}`,arr[1].pointer);
+      return r;
+    }
+    r.p1 = parseExpression([arr[1]]);
+    if(arr[2].blocktype=='{'){
+      r.code = arr[2].children;
+    }else{
+      r.code = arr.slice(2);
+    }
+    if(r.code.length){
+      r.code.push({type: 'punctuation', string: ';', pointer: r.code[r.code.length-1].pointer});
+      r.code = parseCode(r.code);
+    }
+    return r;
+  },
+  while:arr=>{
+    return keywordRom.if(arr);
+  },
+  else:arr=>{
+    var r = arr[0];
+    r.type = 'operator';
+    r.code = [];
+    if(arr[1].blocktype=='{'){
+      r.code = arr[1].children;
+    }else{
+      r.code = arr.slice(1);
+    }
+    r.code.push({type: 'punctuation', string: ';', pointer: r.code[r.code.length-1].pointer});
+    r.code = parseCode(r.code);
+    return r;
+  },
   //...
 };
 
@@ -53,6 +93,7 @@ function codeToAsm(block){
     }
     previ = h(e);
   });
+  str = str.replace(/\,[ ]*/g,' ');
   return str;
 }
 
@@ -120,15 +161,15 @@ function numberMatch(code,index,regex=/[0-9]/){
 
 function stringMatch(code,index){
   if(code[index]!='"')throw 122;
-  var i = code.indexOf('"',index);
-  return code.substring(index,i);
+  var i = code.indexOf('"',index+1);
+  return code.substring(index,i+1);
 }
 
 function operatorMatch(code,index){
   var h = i=>code[i+index];
   var str = "";
   for(var i = 0;i+index < code.length; i++){
-    if("=-+*/?.<>&|^!~:".includes(h(i))){
+    if("=-+*/?.<>&|^!~:%".includes(h(i))){
       str += h(i);
     }else break;
   }
@@ -387,9 +428,12 @@ function findHiddenOperators(tokens){
     if(!prev)prev = {};
     var next = tokens[i+1];
     if(!next)next = {};
-    var str;
+    var str = undefined;
     if(t.type=='block'&&t.blocktype=='['){
       str = 'index';
+      if(prev.type=='operator'&&prev.string=='index'){
+        str = undefined;
+      }
     }else if(t.type=='block'&&t.blocktype=='('){
       if(prev.type=='identifier'){
         str = 'call';
@@ -443,6 +487,7 @@ function parseExpression(tokens){
       }
     }
   }
+  
   throw 'todo:parseExpression';//todo: printError
 }
 
@@ -602,7 +647,7 @@ function main(code){
     }
     var char = code[i];
     if(char=='"'){
-      var str = stringMatch(code,index);
+      var str = stringMatch(code,i);
       tokens.push({
         type:'string',
         string:str,

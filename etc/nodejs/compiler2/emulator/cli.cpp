@@ -97,9 +97,16 @@ struct string{
   }
 };
 
-static void printArgvHelp(){
-  printf("%s\n", "usage: ./debug [filename] [--batch] [-c command]");
-  exit(-1);
+static void printArgvHelp(int exitcode){
+  fprintf(exitcode?stderr:stdout, "%s\n",
+    "usage: ./vm [options] [file]\n\n"
+    "  -c command \t Execute a command\n"
+    "  --batch \t Exit immediately after executing command\n"
+    "  --visual \t Open image window\n"
+    "  --color \t Use \\x1b[ to add color\n"
+    "  --help \t Print this help\n"
+  );
+  exit(exitcode);
 }
 
 bool parseArgv(int argc,char *argv[]){
@@ -108,24 +115,27 @@ bool parseArgv(int argc,char *argv[]){
     bool hasSeenFilename = false;
     bool hasSeenInitcmd = false;
     for (int i = 1; i < argc; i++){
-      if(strcmp(argv[i],"--batch")==0){
+      string arg = argv[i];
+      if(arg == "--batch"){
         ret = false;
-      }else if(strcmp(argv[i],"--color")==0){
+      }else if(arg == "--help"){
+        printArgvHelp(0);
+      }else if(arg == "--color"){
         useColor = true;
-      }else if(strcmp(argv[i],"--visual")==0){
+      }else if(arg == "--visual" || arg == "--screen"){
         useScreen = true;
-      }else if(strcmp(argv[i],"-c")==0&&!hasSeenInitcmd){
+      }else if(arg == "-c" && !hasSeenInitcmd){
         hasSeenInitcmd = true;
         i++;
         if(i==argc){
-          printArgvHelp();
+          printArgvHelp(64);
         }
         currantCommand = argv[i];
       }else if(!hasSeenFilename){
         hasSeenFilename = true;
         filename = argv[i];
       }else{
-        printArgvHelp();
+        printArgvHelp(64);
       }
     }
   }
@@ -187,7 +197,7 @@ static bool runOneCommand(string str){
       return printError(arg2);
     }
   }else if(arg1 == "pause"){
-    system("pause");//todo
+    system_pause();
   }else if(arg1 == "sleep"){
     string arg2 = nextArg(str);
     if(arg2 == ""){
@@ -209,14 +219,16 @@ static bool runOneCommand(string str){
     if(arg2 != ""){
       filename = arg2;
     }
-    memset(ram,0,getRamSize());
+    memset(ram,0,getRamSize());//todo:fixme
     readFile(filename);
     registerReset();
   }else if(arg1 == "r" || arg1 == "run"){
     doRegdump = false;
     bool doCount = false;
+    bool doTime = false;
     bool doNewline = true;
-    int interations = -1;
+    bool doQuit = false;
+    int iterations = -1;
     for(string arg = nextArg(str); arg != ""; arg = nextArg(str)){
       if(arg[0] == '-'){
         for(size_t i = 1; i < arg.len; i++){
@@ -224,23 +236,35 @@ static bool runOneCommand(string str){
             doRegdump = true;
           }else if(arg[i]=='c'){
             doCount = true;
+          }else if(arg[i]=='q'){
+            doQuit = true;
           }else if(arg[i]=='n'){
             doNewline = false;
+          }else if(arg[i]=='t'){
+            doTime = true;
           }else{
             printf("error: unexpected option '%c'\n",arg[i]);
             return printError(arg.ptr+i);
           }
         }
-      }else if(interations==-1){
-        interations = parseInt(arg);
+      }else if(iterations==-1){
+        iterations = parseInt(arg);
       }else{
         arg.print("error: unexpected argument '$'\n");
         return printError(arg);
       }
     }
-    runbin(interations);
+    int time = time_ms();
+    bool res = runbin(iterations);
+    time -= time_ms();
     if(doCount)printf("\n%d instructions executed",numExecutedInstructions);
+    if(doTime)printf(
+      "\nrun took %d ms (%.4f instructions per millisecond)",
+      -time,
+      -(numExecutedInstructions/(float)time)
+    );
     if(doNewline)printf("\n");
+    if(doQuit&&res)return true;
   }else{
     arg1.print("error: unknown command '$'\n");
     printError(arg1);
@@ -265,7 +289,10 @@ static bool runCommand(string str){
     if(tlen==-1)return printError(str.ptr+str.len,"')' expected");
     str++;
     for(size_t i = 0; i < numIterations; i++){
-      if(runCommand( str.slice(0,tlen-1) ))return true;
+      if(runCommand( str.slice(0,tlen-1) )){
+        //return true; //this results in 'q' being interpreted as 'exit(0)' 
+        break; //this results in 'q' being interpreted as 'break'
+      }
       if(!keepRunning)return false;
     }
     str += tlen;
@@ -309,3 +336,5 @@ bool runCommand(char *str){
   if(len!=0 && isspace(str[len-1]))len--;
   return runCommand(str,len);
 }
+
+// cls;f;r -t

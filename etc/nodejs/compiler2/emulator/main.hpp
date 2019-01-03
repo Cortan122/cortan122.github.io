@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+#if defined(_WIN32) || defined(WIN32)
+int getline(char **, size_t *, FILE *);
+#endif
+
 // main.cpp
 extern const char * filename;
 extern char * currantCommand;
@@ -10,7 +14,7 @@ extern bool useColor;
 extern bool useScreen;
 
 void hexdump(int page=0);
-void runbin(int limit=-1);
+bool runbin(int limit=-1);
 
 // cli.cpp
 bool runCommand(char *str);
@@ -37,16 +41,19 @@ extern "C"{
   uint8_t* SetupSharedMemory(int size);
   void FreeSharedMemory();
   void sleep_ms(int milliseconds);
-
-  #if defined(_WIN32) || defined(WIN32)
-    #define BOXDRAWING_VERTICAL "\xb3"
-    #define BOXDRAWING_HORIZONTAL "\xc4"
-    #define BOXDRAWING_CROSS "\xc5"
-  #endif
-
-  #ifdef linux
-    #define BOXDRAWING_VERTICAL "│"
-    #define BOXDRAWING_HORIZONTAL "─"
-    #define BOXDRAWING_CROSS "┼"
-  #endif
+  int time_ms();
+  void system_pause();
+  void startScreen();
 }
+
+#if defined(_WIN32) || defined(WIN32)
+  #define BOXDRAWING_VERTICAL "\xb3"
+  #define BOXDRAWING_HORIZONTAL "\xc4"
+  #define BOXDRAWING_CROSS "\xc5"
+#elif defined(linux)
+  #define BOXDRAWING_VERTICAL "│"
+  #define BOXDRAWING_HORIZONTAL "─"
+  #define BOXDRAWING_CROSS "┼"
+#else
+#error We are not on linux and not on windows?
+#endif

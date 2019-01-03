@@ -93,3 +93,22 @@ void FreeSharedMemory(){
   UnmapViewOfFile(SetupSharedMemory_buffer);
   CloseHandle(SetupSharedMemory_hMapFile);
 }
+
+int time_ms(){
+  SYSTEMTIME time;
+  GetSystemTime(&time);
+  long time_ms = (time.wSecond * 1000) + time.wMilliseconds;
+  return time_ms;
+}
+
+void sleep_ms(int milliseconds){
+  Sleep(milliseconds);
+}
+
+void system_pause(){
+  system("pause");
+}
+
+void startScreen(){
+  system("tasklist /FI \"IMAGENAME eq screen.exe\" 2>NUL | find /I /N \"screen.exe\">NUL || start \"./screen/out/screen.exe\" \"./screen/out/screen.exe\" ");
+}

@@ -168,6 +168,7 @@ function getProxyCode(){
     archer.queryRegisterLength(arch.instructionPointer)*8,
     arch.maxRegisterSize*8,
     arch.endianness=='big'?'':'// ',
+    true?'':'// ',
   );
 }
 
@@ -214,6 +215,8 @@ function main(){
     #include <stdio.h>
     #include <stdint.h>
     #include <stdbool.h>
+
+    #define inline __attribute__((always_inline)) inline
   \n`);
   res += getRegisterDeclarations();
   res += getProxyCode();

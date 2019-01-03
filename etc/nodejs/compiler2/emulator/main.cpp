@@ -4,9 +4,7 @@
 #include <string.h>
 #include "main.hpp"
 
-int getline(char ** __restrict__, size_t * __restrict__, FILE * __restrict__);
-
-const char * filename = "./out.crtb";
+const char * filename = "./examples/out.crtb";
 char currantCommand_initial[] = "0(cls)";
 char * currantCommand = &currantCommand_initial[0];
 
@@ -61,16 +59,17 @@ void regdump(bool force=false){
   printf("\n");
 }
 
-void runbin(int limit){
+bool runbin(int limit){
   numExecutedInstructions = 0;
   while(true){
-    if(!keepRunning)return;
-    if(limit == 0)return;
+    if(!keepRunning)return false;
+    if(limit == 0)return false;
     if(limit > 0)limit--;
     regdump();
     numExecutedInstructions++;
-    if(exec())return;
+    if(exec())return true;
   }
+  return false;
 }
 
 int main(int argc,char *argv[]){
@@ -87,9 +86,10 @@ int main(int argc,char *argv[]){
     uint8_t* t = SetupSharedMemory(getRamSize());
     if(t != NULL){
       ram = t;
-      memset(ram,0,getRamSize());
-      system("tasklist /FI \"IMAGENAME eq test.exe\" 2>NUL | find /I /N \"test.exe\">NUL || start screen.exe.lnk");
+      memset(ram,0,getRamSize());//todo:fixme
+      startScreen();
     }else{
+      printf("warning: unable to use screen\n");
       useScreen = false;
     }
   }

@@ -1,4 +1,4 @@
-const archer = require('../arch.js');
+const archer = require('../arch/arch.js');
 const arch = archer.arch;
 const fs = require('fs');
 const cp = require('child_process');

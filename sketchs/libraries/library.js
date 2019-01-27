@@ -633,7 +633,7 @@
       lib.tweaker.events.push(e=>{
         if(e != "showFPS")return;
         if(tweakables.showFPS){
-          $("#frDiv").css('display','inline-block');
+          $("#frDiv").css('display','block');
         }else{
           $("#frDiv").css('display','none');
         }

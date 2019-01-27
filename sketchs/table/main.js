@@ -1,4 +1,5 @@
 const MAX_PING_TIME = 5000;
+const LOCAL_STORAGE = "table_sortedColumn";
 
 var totalLinesOfJavascript = 0;//temp
 
@@ -23,8 +24,17 @@ function setup() {
     theTable.callback(r);
   }else if(getQueryParameterByName('anime')=="true"){
     Table({
-      colFormat:["link","text","time","num2"],
-      filePath:"../../private/anime/list",
+      colFormat:["link","text","time","num"],
+      filePath:"../../private/anime/list.php",
+      defaultSortDirection:'-3',
+    }).init();
+  }else if(getQueryParameterByName('list')=="true"){
+    Table({
+      colFormat:["num","text","num","img","link mal","text","num","bool","bool","bool"],
+      filePath:"../../private/anime/list/index.php",
+      hiddenCols:['title','id'],
+      firstHeaderName:'index',
+      // defaultSortDirection:'-3',
     }).init();
   }else{
     Table().init();

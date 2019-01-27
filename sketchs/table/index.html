@@ -36,6 +36,20 @@
       /*td{
         overflow: hidden;white-space:nowrap;
       }*/
+      td:hover{
+        --is-hovering: block;
+        --is-not-hovering: none;
+      }
+      img.poster{
+        height: 18px;
+        display: var(--is-not-hovering,block);
+        pointer-events: none;
+      }
+      img.poster.zoom{
+        height: auto;
+        position: absolute;
+        display: var(--is-hovering,none);
+      }
     </style> 
   </head> 
   <body>   

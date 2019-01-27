@@ -1,4 +1,3 @@
-// const util = require('util');
 const Color = require("../bombsweeper/color.js");
 
 /**@type {Object.<string,(code:string,index:number)=>string>} */
@@ -7,8 +6,7 @@ const tokenTypeRom = {
     return doubleRegexMatch(code,index,/[a-zA-Z_$]/,/[a-zA-Z_$0-9]/);
   },
   'lineComment':(code,index)=>{
-    var h = i=>code[i+index];
-    if(h(0)=='/' && h(1)=='/'){
+    if(stringCompare(code,index,options.lineCommentSymbol)){
       return doubleRegexMatch(code,index,/[^\n]/);
     }
     return "";
@@ -52,7 +50,7 @@ const tokenTypeRom = {
   },
   'operator':(code,index)=>{
     var h = i=>code[i+index];
-    main:for(var op of operatorRom){
+    main:for(var op of options.operators){
       for(var i = 0; i < op.length; i++){
         if(h(i)!=op[i])continue main;
       }
@@ -89,21 +87,21 @@ const tokenValueRom = {
   'string':(token)=>{
     var o = token.string;
     var buf = Buffer.alloc(o.length);
-    var bufi = 0;
+    var bufferIndex = 0;
     for(var i = 1; i < o.length-1; i++){
       var char = o[i];
       if(char=='\\'){
         i++;
         var hex = escapedCharToHex(ind=>o[ind+i],e=>printError(e,token),inc=>i+=inc);
         if(hex==null)continue;
-        buf[bufi] = hex;
-        bufi++;
+        buf[bufferIndex] = hex;
+        bufferIndex++;
       }else{
-        buf[bufi] = char.charCodeAt(0);//todo:parseEncoding() 
-        bufi++;
+        buf[bufferIndex] = char.charCodeAt(0);//todo:parseEncoding() 
+        bufferIndex++;
       }
     }
-    token.value = buf.slice(0,bufi); 
+    token.value = buf.slice(0,bufferIndex); 
   },
   'char':(token)=>{
     var opt = options.interpretSingleQuotedStringsAs;
@@ -125,56 +123,10 @@ const tokenValueRom = {
   },
 };
 
-const operatorRom = [
-  '=',
-  '+=',
-  '-=',
-  '*=',
-  '/=',
-  '%=',
-  '<<=',
-  '>>=',
-  '&=',
-  '^=',
-  '|=',
-  '<',
-  '<=',
-  '>',
-  '>=',
-  '?',
-  ':',
-  '<<',
-  '>>',
-  ',',
-  '||',
-  '&&',
-  '|',
-  '&',
-  '^',
-  '*',
-  '/',
-  '%',
-  '==',
-  '!=',
-  '+',
-  '-',
-  '!',
-  '~',
-  '++',
-  '--',
-  ';',
-  '(',
-  ')',
-  '[',
-  ']',
-  '{',
-  '}',
-].sort((b,a)=>a.length-b.length);
-
 const colorReset = '\x1b[0m\x1b[2m'; 
 
 /**@type {TokenOptions} */
-var options = {
+const defaultOptions = {
   interpretSingleQuotedStringsAs:"number",
   printError:{
     lineStyle:"both",
@@ -188,14 +140,70 @@ var options = {
   filename:false,
   comments:true,
   newlines:true,
+  operators:[
+    '=',
+    '+=',
+    '-=',
+    '*=',
+    '/=',
+    '%=',
+    '<<=',
+    '>>=',
+    '&=',
+    '^=',
+    '|=',
+    '<',
+    '<=',
+    '>',
+    '>=',
+    '?',
+    ':',
+    '<<',
+    '>>',
+    ',',
+    '||',
+    '&&',
+    '|',
+    '&',
+    '^',
+    '*',
+    '/',
+    '%',
+    '==',
+    '!=',
+    '+',
+    '-',
+    '!',
+    '~',
+    '++',
+    '--',
+    ';',
+    '(',
+    ')',
+    '[',
+    ']',
+    '{',
+    '}',
+    '#',
+    '##',
+    '.',
+    '...',
+  ],
+  lineCommentSymbol:'//',
 };
+var options = defaultOptions;
 
 /**@type {Object.<string,string>} */
 var globalCode = {};
 var line = 1;
 var col = 1;
 
-function spliceSlice(str, index, add) {
+/**
+ * @param {string} str
+ * @param {number} index
+ * @param {string} add
+ */
+function spliceSlice(str, index, add){
   return str.slice(0, index) + (add || "") + str.slice(index);
 }
 
@@ -237,6 +245,11 @@ function getLineString(lineNumber=1,gCode=globalCode[""]){
   throw 'hi'+lineNumber;
 }
 
+/**
+ * @param {string} code
+ * @param {number} index
+ * @param {string} quote
+ */
 function stringMatch(code,index,quote){
   var h = i=>code[i+index];
   if(h(0)!=quote)return "";
@@ -264,6 +277,18 @@ function stringMatch(code,index,quote){
   return str+quote;
 }
 
+/**
+ * @param {string} code
+ * @param {number} index
+ * @param {string} string
+ */
+function stringCompare(code,index,string){
+  return code.slice(index,string.length+index)==string;
+}
+
+/**
+ * @param {string} name
+ */
 function printErrorColorHelper(name){
   var opt = options.printError;
   if(opt==false)return;
@@ -416,10 +441,10 @@ function main(code){
       var match = func(code,i);
       if(!match)continue;
       var loc = {start:{line,col,index:i},file:filename};
-      var tmparr = match.split('\n');
-      if(tmparr.length-1){
-        line += tmparr.length-1;
-        col = tmparr[tmparr.length-1].length+1;
+      var tempArr = match.split('\n');
+      if(tempArr.length-1){
+        line += tempArr.length-1;
+        col = tempArr[tempArr.length-1].length+1;
       }else{
         col += match.length;
       }
@@ -429,8 +454,8 @@ function main(code){
         string:match,
         loc,
       };
-      var valfunc = tokenValueRom[key];
-      if(valfunc)valfunc(token);
+      var valFunc = tokenValueRom[key];
+      if(valFunc)valFunc(token);
       tokens.push(token);
       i += match.length-1;
       continue main;
@@ -445,12 +470,11 @@ function main(code){
 
 /**
  * @param {string} code
- * @param {TokenOptions} Options
+ * @param {TokenOptions=} Options
  * @returns {Token[]}
  */
-function tokenize(code,Options={}){
-  // var optionsBackup = options;
-  options = recAssign(options,Options);
+function tokenize(code,Options){
+  if(Options)setOptions(Options);
 
   var r = main(code);
   var specialArray = [];
@@ -475,7 +499,6 @@ function tokenize(code,Options={}){
     res.push(e);
   });
 
-  // options = optionsBackup;
   return res;
 }
 
@@ -494,50 +517,25 @@ function untokenize(tokens){
   return r;
 }
 
-module.exports = {tokenize,printError,untokenize};
+function getOptions(){
+  return Object.assign({},options);//todo: fixme: you can edit nested objects 
+}
+
+/**
+ * @param {TokenOptions} Options
+ */
+function setOptions(Options){
+  options = recAssign(defaultOptions,Options);
+  options.operators.sort((b,a)=>a.length-b.length);
+}
+
+module.exports = {tokenize,printError,untokenize,getOptions,setOptions};
 
 // @ts-ignore
 if(require.main == module){
   const fs = require('fs');
-  var buff = fs.readFileSync('./examples/token2.crtc')
+  var buff = fs.readFileSync('../compiler/examples/token2.crtc')
   var r = tokenize(buff.toString());
-  // console.dir(r,{depth:null});
+  console.dir(r,{depth:null});
   // console.log(untokenize(r));
 }
-
-/**
- * @typedef {Object} PrintErrorOptions
- * @property {"none"|"simple"|"tabbed"|"highlighted"|"both"=} lineStyle
- * @property {{error:string,warning:string,message:string,_header:string}|false=} colors
- */
-
-/**
- * @typedef {Object} TokenOptions
- * @property {"number"|"char"|"string"=} interpretSingleQuotedStringsAs
- * @property {PrintErrorOptions|false=} printError
- * @property {string|false=} filename
- * @property {Boolean=} comments
- * @property {Boolean=} newlines
- */
-
-/**
- * @typedef {"identifier"|"lineComment"|"blockComment"|"number"|"operator"|"char"|"string"|"newline"} TokenType
- */
-
-/**
- * @typedef {Object} Token
- * @property {TokenType} type 
- * @property {string} string 
- * @property {Object} loc
- * @property {string} loc.file 
- * @property {Object} loc.end
- * @property {number} loc.end.line
- * @property {number} loc.end.col
- * @property {number} loc.end.index
- * @property {Object} loc.start
- * @property {number} loc.start.line
- * @property {number} loc.start.col
- * @property {number} loc.start.index
- * @property {number|Buffer=} value
- */
-function _dummyFunctionToMakeTheCommentsFoldable(){}

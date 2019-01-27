@@ -1,5 +1,6 @@
 typedef unsigned int16 int;//int8 is not working
 typedef unsigned int8 char;
+typedef unsigned int8 bool;
 
 void main();
 

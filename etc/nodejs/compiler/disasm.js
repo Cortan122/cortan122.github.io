@@ -521,8 +521,8 @@ if(!useJsonOutput){
       if(e.t=='end')return;
       if(e.t!='fall')e.v = linetoblock[e.v];
       if(e.v==undefined)return console.error(
-        `linetoblock mismatch: line ${prevv} not maped to any block\n`,
-        ' avalible lines are:\n ',
+        `linetoblock mismatch: line ${prevv} not mapped to any block\n`,
+        ' available lines are:\n ',
         linetoblock.map((e,i)=>i).filter(e=>e!=undefined));//wtf
       if(blocks[e.v]==undefined)return console.error(e.v),e;//wtf
       blocks[e.v].in.push({v:i,t:e.t});

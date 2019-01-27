@@ -104,7 +104,7 @@ const instructionRom = {
     if(list.length){
       result = functionCallHelper(...(list.map((e,i)=>{
         if(i==0)return [e,'ax'];
-        return [e,`[sp-${2+2*i}]`];
+        return [e,`[sp-0d${2+2*i}]`];
       }).reverse()));
     }
     var v1 = expressionToAsm(t.p1);
@@ -150,6 +150,14 @@ const instructionRom = {
     variableStack.regrets[`${endifLabel}:`] = `jmp ${endElseLabel}\n${endifLabel}:`;
     variableStack.pop();
     return result;
+  },
+  'goto':t=>{
+    const movToAx = movToAx_operatorHelper;
+    if(!t.p1)printError("goto is not happy",t.pointer);
+    var v1 = expressionToAsm(t.p1);
+    var r = movToAx(v1);
+    r.push(`jmp ax`);
+    return r;
   },
 };
 
@@ -239,11 +247,13 @@ function toInt(str){
 }
 
 function isConst(type){
-  //todo
-  return false;
+  return false;//todo
+  if(!type.modifiers)return false;
+  return type.modifiers.includes('const');
 }
 
 function isConst_asm(str){
+  if(typeof str == 'number')return true;
   return (!str.match(/[\[\]]/))&&(!str.match('ax'));//todo
 }
 
@@ -257,7 +267,7 @@ function initToNum(token){
   var r = expressionToAsm(token.init);
   if(r.length)throw 'idk';
   if(!r.v)throw 'idk';
-  if(!r.v.match(/^0?[xbdo]?[0-9a-f]+$/i))throw 'idk'+r.v;
+  if(!r.v.match(/^0?[xbdo]?[0-9a-f]+$/i))return r.v;//throw 'idk'+r.v;
   return r.v;
 }
 
@@ -542,7 +552,7 @@ function lineToAsm(token,f){
 }
 
 function toAsm(tokens){
-  var result = ['.align 100','; global strings'];
+  var result = ['.align 100 0','; global strings'];
   variableStack.regrets = {'; global strings':'; global strings'};
   var f = a=>{result = result.concat(a);return a;};
   for(var i = 0; i < tokens.length; i++){
@@ -581,5 +591,6 @@ function finish(str){
 
 tokenParser.printError = printError;
 printer.doPrintLinePos = true;
-printer.init(main,["examples/font/hello.crtc"]);
+// printer.init(main,["examples/font/hello.crtc"]);
 // printer.init(main,["examples/test.crtc"]);
+printer.init(main,["examples/snake.crtc"]);

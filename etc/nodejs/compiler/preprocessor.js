@@ -337,10 +337,10 @@ function getLineNumber2(pos){
   }else{
     r[0] += lineOffset;
   }
-  return [r[0]+1,r[1],simlpeFilename(filename)];
+  return [r[0]+1,r[1],simpleFilename(filename)];
 }
 
-function simlpeFilename(name){
+function simpleFilename(name){
   var f = name;
   var t = path.relative(process.cwd(),name);
   if(t.length<f.length)f = t;
@@ -736,7 +736,7 @@ function replacer(){
   var keys = Object.keys(linebreaks).filter(e=>!isNaN(e)).map(e=>parseInt(e));
   for (var i = 0; i < keys.length; i++) {
     var k = keys[i];
-    linebreaks[k].sname = simlpeFilename(linebreaks[k].name);
+    linebreaks[k].sname = simpleFilename(linebreaks[k].name);
   }
 
   mainClean();

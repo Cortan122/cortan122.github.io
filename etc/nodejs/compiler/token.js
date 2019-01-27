@@ -23,6 +23,12 @@ const keywordRom = {
     r.p1 = parseExpression(arr.slice(1));
     return r;
   },
+  goto:arr=>{
+    var r = arr[0];
+    r.type = 'operator';
+    r.p1 = parseExpression(arr.slice(1));
+    return r;
+  },
   asm:arr=>{
     var block;
     var r = arr[0];

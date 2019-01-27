@@ -1,7 +1,8 @@
-const biner = require('./binjson.js');
+const bin = require('./binjson.js');
 const fs = require('fs');
 const path = require('path');
-const type = biner.parse(`S({
+const type = bin.parse(`S({
+  headerLength:uint16,
   pic:bool,
   pos:uint16,
   externs:D([uint16]),
@@ -15,7 +16,9 @@ function encode(obj){
   var code = obj.code;
   //delete obj.code;
 
-  var header = Buffer.from(biner.encode(type,obj),'hex');
+  obj.headerLength = 0xcafe;
+  var header = Buffer.from(bin.encode(type,obj),'hex');
+  header.writeInt16BE(header.length,0);
 
   var r = Buffer.concat([header,code],code.length+header.length);
 
@@ -27,7 +30,7 @@ function decode(buf){
     buf = Buffer.from(buf,'hex');
   }
 
-  var r = biner.decode_rest(type,buf);
+  var r = bin.decode_rest(type,buf);
   r.code = r.rest;
   delete r.rest;
 

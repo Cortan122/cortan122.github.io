@@ -1,7 +1,7 @@
 const fs = require('fs');
 const vm = require('vm');
 const path = require('path');
-const tokenizer = require('./token2.js');
+const lexer = require('./lexer.js');
 const printError = require('./printError.js');
 
 /**@type {PreprocessorOptions} */
@@ -72,7 +72,7 @@ const directiveRom = {
         return {i:line.length};
       }
     }else if(types[0]=='<' && types[types.length-1]=='>'){
-      name = tokenizer.untokenize(line).slice(1,-1);//todo: fixme: get raw code
+      name = lexer.untokenize(line).slice(1,-1);//todo: fixme: get raw code
       for(let pathToLibFolder of options.headerFilePath){
         let t = path.resolve(pathToLibFolder,name);
         if(fs.existsSync(t)){
@@ -122,7 +122,7 @@ const directiveRom = {
     newline = main(newline,env,false);
     if(bool===undefined)bool = true;
     try{
-      bool = vm.runInNewContext(tokenizer.untokenize(newline),{},{"displayErrors":false}) && bool;//todo
+      bool = vm.runInNewContext(lexer.untokenize(newline),{},{"displayErrors":false}) && bool;//todo
     }catch(e){
       printError(`error: ${e.message}`,arr[i+1]);//todo
       return {i:line.length};
@@ -163,7 +163,7 @@ const directiveRom = {
   },
   "message":(arr,i,env)=>{
     var line = getLine(arr,i+1);
-    printError(`${arr[i].string}: ${tokenizer.untokenize(line)}`,arr[i]);
+    printError(`${arr[i].string}: ${lexer.untokenize(line)}`,arr[i]);
     return {i:line.length};
   },
   "undefine":(arr,i,env)=>{
@@ -490,12 +490,12 @@ function simplifyFilename(name){
  */
 function include(name,env={}){
   var code = fs.readFileSync(name,'utf-8');
-  var opt = tokenizer.getOptions();
+  var opt = lexer.getOptions();
   var prevName = opt.filename;
   opt.filename = simplifyFilename(name);
-  var r = tokenizer.tokenize(code,opt);
+  var r = lexer.tokenize(code,opt);
   opt.filename = prevName;
-  tokenizer.tokenize('',opt);
+  lexer.tokenize('',opt);
   var newEnv = Object.assign({},env);
   newEnv.__FILE__ = path.resolve(name).replace(/\\/g,'/');
   return main(r,newEnv);
@@ -528,7 +528,7 @@ module.exports = {preprocess,preprocessFile,getOptions,setOptions};
 // @ts-ignore
 if(require.main == module){
   let preprocessor = module.exports;
-  tokenizer.setOptions({comments:false});
+  lexer.setOptions({comments:false});
   let r = preprocessor.preprocessFile('../compiler/examples/pre2_test.crtc',{});
-  console.log(tokenizer.untokenize(r));
+  console.log(lexer.untokenize(r));
 }

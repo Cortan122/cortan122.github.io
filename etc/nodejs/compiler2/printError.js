@@ -59,7 +59,7 @@ function printErrorHeaderHelper(token){
  */
 function printErrorLineHelper(token,color){
   var filename = token.loc.file;
-  var t = require('./token2.js').getLineString(token.loc.start.line,filename);
+  var t = require('./lexer.js').getLineString(token.loc.start.line,filename);
   t = spliceSlice(t,token.loc.end.col-1,colorReset);
   t = spliceSlice(t,token.loc.start.col-1,color);
   return t;

@@ -8,6 +8,8 @@ function Table({
 
   var boolArray = {};
   window.boolArray = boolArray;
+  var totals = {};
+  window.totals = totals;
 
   const TABLE_ALIGN = "left";//"center"
   const TABLE_STYLE = 1;
@@ -97,11 +99,20 @@ function Table({
     return (char.repeat(len)+int.toString()).substr(-len);
   }
 
+  function incrementTotal(a,cell){
+    setTimeout(()=>{
+      var i = cell.index();
+      if(totals[i]==undefined)totals[i] = (typeof a == "number")?0:'';
+      totals[i] += a;
+    },1);
+  }
+
   let linkOffset = filePath.substr(0,filePath.lastIndexOf('/')+1);
   const formatFunctionRom = {
     "link":(a,cell,args) => "<a href="+(a.startsWith("http")?"":linkOffset)+a+">"+(args?args.join(' '):a)+"</a>",
     "img": a => `<img class="poster" src="${a}"><img class="poster zoom" src="${a}">`,
     "bool": (a,cell) => {
+      incrementTotal(+!!a,cell);
       var t = $(`<input type="checkbox">`);
       t.prop("checked",!!a);
       var str = 'undefined';
@@ -117,20 +128,31 @@ function Table({
         boolArray[str] = !boolArray[str];//todo: may not sync
       });
     },
-    "time":e => {
+    "time":(e,cell) => {
+      incrementTotal(parseInt(e),cell);
       var d = new Date(parseInt(e)*1000);//.toISOString()
       return d.toISOString().replace(/[TZ]/g,' ').substr(0,16);
     },
-    "date":e => {
+    "date":(e,cell) => {
+      incrementTotal(parseInt(e),cell);
       var d = new Date(parseInt(e)*1000);//.toISOString()
       return d.toISOString().split('T')[0];
     },
-    "num4":t => {
-      totalLinesOfJavascript += t;//temp
+    "num4":(t,cell) => {
+      incrementTotal(parseInt(t),cell);
       return intFormat(t,4);
     },
-    "num":t => {
+    "num":(t,cell) => {
+      incrementTotal(parseInt(t),cell);
       return intFormat(t,99," ");
+    },
+    "duration":(t,cell) => {
+      incrementTotal(parseInt(t),cell);
+      if(typeof humanizeDuration !== "undefined"){
+        return `<div style="display: none;">${intFormat(t,99," ")}</div>${humanizeDuration(t)}`;
+      }else{
+        return intFormat(t,99," ");
+      }
     },
     "ping":(t,cell) => {
       setTimeout(()=>{ping(cell.parent().children().eq(0).children().attr('href')).then(function(delta){

@@ -1,8 +1,6 @@
 const MAX_PING_TIME = 5000;
 const LOCAL_STORAGE = "table_sortedColumn";
 
-var totalLinesOfJavascript = 0;//temp
-
 function syncajax(remote_url) {
   return $.ajax({
     type: "GET",
@@ -30,7 +28,7 @@ function setup() {
     }).init();
   }else if(getQueryParameterByName('list')=="true"){
     Table({
-      colFormat:["num","text","num","img","link mal","text","num","bool","bool","bool"],
+      colFormat:["num","text","num","img","link mal","text","duration","bool","bool","bool"],
       filePath:"../../private/anime/list/index.php",
       hiddenCols:['title','id'],
       firstHeaderName:'index',

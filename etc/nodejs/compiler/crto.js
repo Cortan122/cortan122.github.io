@@ -6,7 +6,7 @@ const type = bin.parse(`S({
   pic:bool,
   pos:uint16,
   externs:D([uint16]),
-  globals:D(uint16)
+  globals:D(uint16),
 })`);
 
 function encode(obj){

@@ -21,9 +21,9 @@ module.exports = {
     ["c","cl","cx",1],
     ["fl","flags",1],
   ],
-  //note:the parts of a compound register need to be of size 1 and declared after it
+  //note(bug):the parts of a compound register need to be of size 1 and declared after it
   "compoundRegisters":{
-    "ax":["ah","al"], 
+    "ax":["ah","al"],
   },
   "additionalEmulatorCode":[
     `static inline void updateFlags(){

@@ -1,5 +1,3 @@
-const Color = require("../bombsweeper/color.js");
-
 /**@type {Object.<string,(code:string,index:number)=>string>} */
 const tokenTypeRom = {
   'identifier':(code,index)=>{
@@ -123,20 +121,9 @@ const tokenValueRom = {
   },
 };
 
-const colorReset = '\x1b[0m\x1b[2m'; 
-
 /**@type {TokenOptions} */
 const defaultOptions = {
   interpretSingleQuotedStringsAs:"number",
-  printError:{
-    lineStyle:"both",
-    colors:{
-      error:"#e74856",
-      warning:"#b4009e",
-      message:"#61d6d6",
-      _header:"\x1b[1m\x1b[38;2;255;255;255m",
-    },
-  },
   filename:false,
   comments:true,
   newlines:true,
@@ -199,12 +186,15 @@ var line = 1;
 var col = 1;
 
 /**
- * @param {string} str
- * @param {number} index
- * @param {string} add
+ * @param {string} string
+ * @param {Object=} token
  */
-function spliceSlice(str, index, add){
-  return str.slice(0, index) + (add || "") + str.slice(index);
+function printError(string,token){
+  if(token == undefined){
+    var name = options.filename?options.filename:"";
+    token = {loc:{start:{line,col},end:{line,col:col+1},file:name}};
+  }
+  require('./printError.js')(string,token);
 }
 
 function isObject(o){
@@ -226,7 +216,12 @@ function recAssign(a,b){
   return r;
 }
 
-function getLineString(lineNumber=1,gCode=globalCode[""]){
+/**
+ * @param {number} lineNumber
+ * @param {string} filename
+ */
+function getLineString(lineNumber,filename){
+  var gCode = globalCode[filename];
   var res = "";
   for(let i = 0; i < gCode.length; i++){
     const char = gCode[i];
@@ -284,63 +279,6 @@ function stringMatch(code,index,quote){
  */
 function stringCompare(code,index,string){
   return code.slice(index,string.length+index)==string;
-}
-
-/**
- * @param {string} name
- */
-function printErrorColorHelper(name){
-  var opt = options.printError;
-  if(opt==false)return;
-  var color = '';
-  if(opt.colors){
-    color = opt.colors[name];
-    if(color[0]!='\x1b'){
-      color = new Color(opt.colors[name],'transparent').toAnsiCode();
-    }
-  }
-  return color;
-}
-
-/**
- * @param {string} string
- * @param {Object=} token
- */
-function printError(string,token){
-  var opt = options.printError;
-  if(opt==false)return;
-  if(token == undefined){
-    token = {loc:{start:{line,col},end:{line,col:col+1},file:""}};
-  }
-  var indexOfSep = string.indexOf(':');
-  var errorType = string.slice(0,indexOfSep);
-  if(errorType==string)errorType = 'none';
-  var color = printErrorColorHelper(errorType);
-  string = color+errorType+colorReset+string.slice(indexOfSep);
-
-  var filename = token.loc.file;
-  var headerColor = printErrorColorHelper("_header");
-  var filenameString = headerColor;
-  if(filename!=""){
-    filenameString += filename+':';
-  }
-  console.error(`${filenameString}${token.loc.start.line}:${token.loc.start.col}:${colorReset} ${string}`);
-
-  if(opt.lineStyle=="none")return;
-  var t = getLineString(token.loc.start.line,globalCode[filename]);
-  t = spliceSlice(t,token.loc.end.col-1,colorReset);
-  t = spliceSlice(t,token.loc.start.col-1,color);
-  var inc = -1;
-  if(opt.lineStyle=="both"||opt.lineStyle=="tabbed"){
-    t = "└─>"+t;
-    inc += 3;
-  }
-  console.error(t);
-  if(opt.lineStyle=="both"||opt.lineStyle=="highlighted"){
-    var x = token.loc.start.col;
-    let t = Math.max(0,token.loc.end.col-x-1);
-    console.error(' '.repeat(inc+x)+color+'^'+'~'.repeat(t)+colorReset);
-  }
 }
 
 /**
@@ -529,7 +467,7 @@ function setOptions(Options){
   options.operators.sort((b,a)=>a.length-b.length);
 }
 
-module.exports = {tokenize,printError,untokenize,getOptions,setOptions};
+module.exports = {tokenize,getLineString,untokenize,getOptions,setOptions};
 
 // @ts-ignore
 if(require.main == module){

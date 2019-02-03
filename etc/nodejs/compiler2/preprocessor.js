@@ -2,6 +2,7 @@ const fs = require('fs');
 const vm = require('vm');
 const path = require('path');
 const tokenizer = require('./token2.js');
+const printError = require('./printError.js');
 
 /**@type {PreprocessorOptions} */
 const defaultOptions = {
@@ -337,14 +338,6 @@ function getLine(tokens,i){
     }
   }
   return r;
-}
-
-/**
- * @param {string} string
- * @param {object=} token
- */
-function printError(string,token){
-  tokenizer.printError(string,token);
 }
 
 /**

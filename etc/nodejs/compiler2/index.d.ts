@@ -14,8 +14,9 @@ type PreprocessorOptions = {
 
 type TokenType = "string" | "number" | "identifier" | "lineComment" | "blockComment" | "operator" | "char" | "newline";
 
-type PrintErrorOptions = {
+type PrintErrorOptions = false | {
   lineStyle?: "none" | "simple" | "tabbed" | "highlighted" | "both";
+  includeStack?: boolean;
   colors?: false | {
     error: string;
     warning: string;
@@ -26,7 +27,7 @@ type PrintErrorOptions = {
 
 type TokenOptions = {
   interpretSingleQuotedStringsAs?: "string" | "number" | "char";
-  printError?: false | PrintErrorOptions;
+  // printError?: false | PrintErrorOptions;
   filename?: string | false;
   comments?: boolean;
   newlines?: boolean;
@@ -51,6 +52,7 @@ type Token = {
     };
   };
   value?: number | Buffer;
+  includeStack?: Token;
 };
 
 /*

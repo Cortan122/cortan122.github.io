@@ -35,6 +35,7 @@ static void* SetupSharedMemory_buffer;
 static int SetupSharedMemory_size;
 static const char const* SetupSharedMemory_memname = "example_memory";
 
+#ifndef __ANDROID__
 uint8_t* SetupSharedMemory(int size){
   int memFd = shm_open(SetupSharedMemory_memname, O_CREAT | O_RDWR, S_IRWXU);
   if(memFd == -1){
@@ -64,6 +65,12 @@ void FreeSharedMemory(){
   munmap(SetupSharedMemory_buffer,SetupSharedMemory_size);
   shm_unlink(SetupSharedMemory_memname);
 }
+#else /* !__ANDROID__ */
+void FreeSharedMemory(){}
+uint8_t* SetupSharedMemory(int size){
+  return NULL;
+}
+#endif
 
 int time_ms(){
   struct timeval stop;

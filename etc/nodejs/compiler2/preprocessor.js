@@ -14,7 +14,7 @@ var options = defaultOptions;
 /**@type {Object.<string,(arr:Token[],i:number,env:PreprocessorEnvironment,bool?:boolean)=>{i?:number,r?:Token[]}|void>} */
 const directiveRom = {
   "define":(arr,i,env)=>{
-    //todo: # ## ...
+    //todo: # ...
     var line = getLine(arr,i+1);
     if(line.length == 0){
       printError("error: no macro name given in #define directive",arr[i+1]);
@@ -88,7 +88,7 @@ const directiveRom = {
       printError(`error: #include expects "FILENAME" or <FILENAME>`,arr[i+1]);
       return {i:line.length};
     }
-    return {i:line.length,r:include(name,env)};
+    return {i:line.length,r:include(name,env,line[0])};
   },
   "if":(arr,i,env,bool)=>{
     var line = getLine(arr,i+1);
@@ -341,6 +341,21 @@ function getLine(tokens,i){
 }
 
 /**
+ * @param {Token[]} r
+ * @param {Token} stack
+ */
+function assignIncludeStack(r,stack){
+  if(stack){
+    return r.map(e=>{
+      if(e.includeStack)return {...e,includeStack:stack};
+      e.includeStack = stack;
+      return e;
+    });
+  }
+  return r;
+}
+
+/**
  * @param {Token[]} tokens
  * @param {PreprocessorEnvironment} env
  * @returns {Token[]}
@@ -403,8 +418,9 @@ function main(tokens,env={},allowDirectivesOnFirstLine=true){
               newEnv[t.args[i]] = {text:main(bl.r[i],env,false),eval:true};
             }
           }
+          newEnv.__includeStack__я = e;
           if(t.eval){
-            r.push(...t.text);
+            r.push(...assignIncludeStack(t.text,newEnv.__includeStack__я));
           }else{
             r.push(...main(t.text,newEnv,false));
           }
@@ -415,7 +431,7 @@ function main(tokens,env={},allowDirectivesOnFirstLine=true){
       isNewline = false;
     }
   }
-  return r;
+  return assignIncludeStack(r,env.__includeStack__я);
 }
 
 /**
@@ -485,10 +501,11 @@ function simplifyFilename(name){
 }
 
 /**
- * @param {string} name 
- * @param {PreprocessorEnvironment=} env 
+ * @param {string} name
+ * @param {PreprocessorEnvironment=} env
+ * @param {Token=} includeStack
  */
-function include(name,env={}){
+function include(name,env={},includeStack=undefined){
   var code = fs.readFileSync(name,'utf-8');
   var opt = lexer.getOptions();
   var prevName = opt.filename;
@@ -498,6 +515,7 @@ function include(name,env={}){
   lexer.tokenize('',opt);
   var newEnv = Object.assign({},env);
   newEnv.__FILE__ = path.resolve(name).replace(/\\/g,'/');
+  if(includeStack)newEnv.__includeStack__я = includeStack;
   return main(r,newEnv);
 }
 
@@ -531,4 +549,5 @@ if(require.main == module){
   lexer.setOptions({comments:false});
   let r = preprocessor.preprocessFile('../compiler/examples/pre2_test.crtc',{});
   console.log(lexer.untokenize(r));
+  // console.dir(r,{"depth":null});
 }

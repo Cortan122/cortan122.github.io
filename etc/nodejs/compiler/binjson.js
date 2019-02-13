@@ -32,8 +32,8 @@ D.prototype.toString = function(){
 };
 
 function tohex(num,len=2,signed=false){
-  if(typeof num != 'number')throw 'type mismatch:int is not a number';
-  if(!Number.isInteger(num))throw 'type mismatch:int is a float';
+  if(typeof num != 'number')throw new TypeError('int is not a number');
+  if(!Number.isInteger(num))throw new TypeError('int is a float');
   if(signed){
     tempBuffer.writeIntBE(num,0,len/2);
   }else{
@@ -41,15 +41,15 @@ function tohex(num,len=2,signed=false){
   }
   return tempBuffer.toString('hex',0,len/2);
   /*
-    if(typeof num != 'number')throw 'type mismatch:int is not a number';
-    if(!Number.isInteger(num))throw 'type mismatch:int is a float';
+    if(typeof num != 'number')throw new TypeError('int is not a number');
+    if(!Number.isInteger(num))throw new TypeError('int is a float');
     if(num<0){
-      if(!signed)throw 'type mismatch:unsigned int is negative';
-      if(num<-(1<<(len*4)))throw 'type mismatch:int too negative';
+      if(!signed)throw new TypeError('unsigned int is negative');
+      if(num<-(1<<(len*4)))throw new TypeError('int too negative');
       num &= parseInt("f".repeat(len),16);
       console.log(-1&parseInt("f".repeat(len),16))
     }
-    if(num.toString(2).length > len*4-(+signed))throw 'type mismatch:int too big';
+    if(num.toString(2).length > len*4-(+signed))throw new TypeError('int too big');
     var s = num.toString(16);
     while(s.length < len){
       s = '0'+s;
@@ -59,7 +59,7 @@ function tohex(num,len=2,signed=false){
 }
 
 function encode_str(str){
-  if(typeof str != "string")throw 'type mismatch:string is not an string';
+  if(typeof str != "string")throw new TypeError('string is not an string');
   return Buffer.from(str,'utf8').toString('hex')+'00';
 }
 
@@ -80,7 +80,7 @@ function encode_D(type,data){
 }
 
 function encode_arr(type,data){
-  if(!Array.isArray(data))throw 'type mismatch:array is not an array';
+  if(!Array.isArray(data))throw new TypeError('array is not an array');
   var r = tohex(data.length,arrayLengthLength);
   for(var i = 0;i < data.length;i++){
     r += encode(type,data[i]);
@@ -94,7 +94,7 @@ function encode(type,data){
     "bool":e=>{
       if(e===true)return '01';
       else if(e===false)return '00';
-      else throw 'type mismatch: not a bool';
+      else throw new TypeError(` not a bool (${e})`);
     },
     "uint8":e=>tohex(e,2,false),
     "int8":e=>tohex(e,2,true),
@@ -109,12 +109,12 @@ function encode(type,data){
     "uint48":e=>tohex(e,12,false),
     "int48":e=>tohex(e,12,true),
     "float32":e=>{
-      if(typeof e != 'number')throw 'type mismatch:float is not a number';
+      if(typeof e != 'number')throw new TypeError('float is not a number');
       tempBuffer.writeFloatBE(e,0);
       return tempBuffer.toString('hex',0,4);
     },
     "float64":e=>{
-      if(typeof e != 'number')throw 'type mismatch:float is not a number';
+      if(typeof e != 'number')throw new TypeError('float is not a number');
       tempBuffer.writeDoubleBE(e,0);
       return tempBuffer.toString('hex',0,8);
     }
@@ -168,7 +168,7 @@ function decode_bool(str,pb){
   pb[0] += 1;
   if(c==1)return true;
   else if(c==0)return false;
-  else throw 'type mismatch:not a bool';
+  else throw new TypeError('not a bool');
 }
 
 function decode_str(str,pb){

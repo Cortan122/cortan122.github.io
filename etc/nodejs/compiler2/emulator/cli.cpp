@@ -274,6 +274,7 @@ static bool runOneCommand(string str){
   if(lastarg == "")return false;
   lastarg.print("error: unexpected argument '$'\n");
   printError(lastarg);
+  return false;
 }
 
 static bool runCommand(string str){

@@ -1,5 +1,6 @@
 type PreprocessorEnvironment = {
   __FILE__?: string;
+  __includeStack__я?:Token;
   [x: string]: {
     args?: string[];
     text: Token[];
@@ -23,6 +24,10 @@ type PrintErrorOptions = false | {
     message: string;
     _header: string;
   };
+  verbosity?: 0|1|2,
+  panicThreshold?: 0|1|2,
+  quickPanic?: boolean,
+  cache?: boolean,
 };
 
 type TokenOptions = {

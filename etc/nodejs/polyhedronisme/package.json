@@ -1,0 +1,22 @@
+{
+  "name": "polyhedronisme",
+  "main": "parser.js",
+  "version": "0.0.1",
+  "license": "MIT",
+  "dependencies": {
+    "underscore": "^1.9.1"
+  },
+  "scripts": {
+    "clean": "rm pegjs-parser.js bundle.js polyhedronisme.js polyhedronisme.min.js",
+    "build_parser": "pegjs -o pegjs-parser.js parser.pegjs",
+    "build": "browserify -r ./parser.js:polyhedronisme -o bundle.js && echo window. | cat - bundle.js | babel -f bundle.js --presets @babel/env | tee polyhedronisme.js | uglifyjs --compress --mangle -o polyhedronisme.min.js"
+  },
+  "devDependencies": {
+    "pegjs": "^0.10.0",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "browserify": "^16.2.3",
+    "uglify-js": "^3.4.9"
+  }
+}

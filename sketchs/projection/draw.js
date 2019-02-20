@@ -1,15 +1,4 @@
-var palette = [
-  '#aaff00',
-  '#55ff00',
-  'hsb(203, 100%, 100%)',
-  '#f11',
-  '#ff0',
-  '#0ff',
-  '#00f'
-];
-
-function draw() {
-  updateKeyboard();
+function draw(){
   if(tweakables.useWebGL && doUpdateT){
     doUpdateT = !tweakables.cacheFrames;
     //calcFaceColors();
@@ -22,50 +11,10 @@ function draw() {
   if(doUpdateT){trueDraw(); doUpdateT = !tweakables.cacheFrames; }
 }
 
-/*var test = 1;
-function trueDraw3D() {
-  var a = renderer3D;
-  a.background(100);
-  //a.fill(255,transparency);
-  a.push();
-  //a.rotateX(test);
-  //a.rotateY(test2);
-  //a.translate(test,test2);
-  //a.plane(50, 50);
-  //a.rotateY(frameCount * 0.01);
-  //a.torus(100, 30);
-  //a.pop();
-  //return;
-  a.translate(-width/2,-height/2);
-  a.scale(test,test);
-  //a.translate(offset*2,offset*2);
-  // a.translate(0, 250);
-  // a.rotateX(-PI/3);
-  // a.translate(-1700/2, -2000/2);
-  a.strokeWeight(20);
-  a.stroke('black');
-  //a.fill('red');
-  randomSeed(1);
-  for (var i = 0; i < arrTF.length; i++) {
-    var c = color(getFaceColor(arrTF[i]));
-    a.fill(c.red,c.green,c.blue);
-    //a.fill(255,100,0);
-    a.beginShape();
-    for (var j = 0; j < arrTF[i].length; j++) {
-      a.vertex(arrTF[i][j].x*scl,arrTF[i][j].y*scl,(arrTF[i][j].z-10)*scl);
-    }
-    a.endShape(CLOSE);
-  }
-  a.pop();
-}*/
-
 function trueDraw() {
   calcFaceColors();
   background(tweakables.backgroundColor);
   drawS();
-  // drawF();
-  // drawE();
-  // drawP();
 }
 
 function draw1E(e){
@@ -75,23 +24,25 @@ function draw1E(e){
   var x1 = _perspective(e[1]).x;var y1 = _perspective(e[1]).y;
   line(x*scl,y*scl,x1*scl,y1*scl);
 }
+
 function draw1P(p){
-  if(tweakables.vertexSize<=0&&tweakables.vertexLabels<=0)return;
+  if(tweakables.vertexSize<=0 && tweakables.vertexLabels=="none")return;
   strokeWeight(tweakables.vertexSize);
   stroke(accentColor);
   var x = _perspective(p).x;var y = _perspective(p).y;
   point(x*scl,y*scl);
   var textP = tweakables.vertexLabels;
-  if(textP){
+  if(textP!="none"){
     push();
     //noStroke();
     strokeWeight(1);
     fill(255);
-    if(textP == 1)text(arrP.indexOf(p), x*scl ,y*scl);
-    if(textP == 2)text(round10(p.z,-2), x*scl ,y*scl);
+    if(textP == "index")text(arrP.indexOf(p), x*scl ,y*scl);
+    if(textP == "z")text(round10(p.z,-2), x*scl ,y*scl);
     pop();
   }
 }
+
 function draw1F(f){
   //return draw1TF(f);
   strokeWeight(0);
@@ -105,6 +56,7 @@ function draw1F(f){
   }
   triangle(x*scl,y*scl,x1*scl,y1*scl,x2*scl,y2*scl);
 }
+
 function draw1TF(f){
   strokeWeight(0);
   if(arrE.length == 0){strokeWeight(2);stroke(accentColor);}
@@ -169,8 +121,8 @@ function sort1(){
     var t = [];
     t = t.concat( f.filter(function(v){return v.includes(temp)&&!r.includes(v);}) );
     t = t.concat( arrE.filter(function(v){return v.includes(temp)&&!r.includes(v);}) );
-    t = t.sort(sortHelper); 
-    
+    t = t.sort(sortHelper);
+
     t.push(temp);
     if(reverseSort)t.reverse();
     r = r.concat(t);

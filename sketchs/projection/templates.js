@@ -106,22 +106,35 @@ var prevTemplateStr = undefined;
 
 function template(data){
   isTemplating = true;
-  $("#urlDispenser").attr("href","?s="+data);
   if(data.indexOf('//') != -1){
     data = data.split('//')[0];
   }
   if(data.endsWith(' ')){
     data = data.replace(/( )*$/g,'');
   }
-  var data0 = data;
-  if(data.indexOf(' ') == -1&&templateStrings[data] === undefined&&data.match(/polygon[0-9]+$/)==null){
-    data = data.match(/[^\(\)]\(?[0-9\.\-\,]*\)?/g).join(' ');
-  }
-  rotator.save(prevTemplateStr==data0);
+  rotator.save(prevTemplateStr==data);
   isPlanarView = false;
   cachedMeshProperties = undefined;
 
   var time = (new Date).getTime();
+  var time1;
+  if(tweakables.polyhedronisme){
+    time1 = template_poly(data);
+  }else{
+    time1 = template_basic(data);
+  }
+
+  doUpdate();
+  isTemplating = false;
+  rotator.restore();
+  prevTemplateStr = data+tweakables.polyhedronisme;
+
+  var time2 = (new Date).getTime();
+  print('template({1}) took {0}+{2}={3} ms'.format(time1-time,data,time2-time1,time2-time));
+}
+
+function template_basic(data){
+  $("#urlDispenser").attr("href","?tw_polyhedronisme=false&s="+data);
   __template(data);
   var time1 = (new Date).getTime();
 
@@ -133,21 +146,39 @@ function template(data){
   resetView();
   fixNormalsI(10,true);//fixNormals();
   updateStats();
-  doUpdate();
   if(tweakables.useWebGL){
     objString = makeObj();
   }
-  isTemplating = false;
-  rotator.restore();
-  prevTemplateStr = data0;
 
-  var time2 = (new Date).getTime();
-  print('template({1}) took {0}+{2}={3} ms'.format(time1-time,data0,time2-time1,time2-time));
+  return time1;
+}
+
+function template_poly(data){
+  $("#urlDispenser").attr("href","?tw_polyhedronisme=true&s="+data);
+  data = data.replace(/[^0-9.a-zA-Z(),\-]/g,'');
+  const polyhedronisme = require('polyhedronisme');
+
+  // polyhedronisme.setPalette(palette,tweakables.hashSensitivity,"fixed","signature");
+  polyhedronisme.setPalette(palette);
+  var poly = polyhedronisme(data);
+  var time1 = (new Date).getTime();
+
+  model3D = undefined;
+  cachedMeshProperties = undefined;
+  objString = poly.toOBJ(100);
+  resetView();
+  loadMesh_poly(poly);
+  updateStats();
+
+  return time1;
 }
 
 function __template(data0){
   if(typeof data0 == 'number')return _template(data0);
   if(!isNaN(data0))return _template(parseInt(data0));
+  if(data0.indexOf(' ') == -1 && templateStrings[data0] == undefined && data0.match(/polygon[0-9]+$/)==null){
+    data0 = data0.match(/[^\(\)]\(?[0-9\.\-\,]*\)?/g).join(' ');
+  }
   data0 = data0.replace(/ *$/,'');
   var data = data0.toLowerCase();
   if(templateStrings[data] !== undefined)return __template(templateStrings[data]);
@@ -155,7 +186,7 @@ function __template(data0){
     var t = data0[data0.length-1];
     var rom = {'T':'{3,3}','C':'{4,3}','O':'{3,4}','I':'{3,5}','D':'{5,3}'};
     data = data.slice(0,-1);
-    data += rom[t]; 
+    data += rom[t];
   }
 
   var m = data.match(/polygon[0-9]+$/);
@@ -181,7 +212,7 @@ function templateReplacer(data){
     for (var i = 0; i < arr.length; i++) {
       var t = arr[i];
       while(
-        templateStrings[t] !== undefined 
+        templateStrings[t] !== undefined
         && typeof templateStrings[t] == 'string'
       ){arr[i] = t = templateStrings[t];b = true;}
     }

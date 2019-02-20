@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>polyH&eacute;dronisme help</title>
+
+  <style>
+    body {
+      font-size: 16px;
+      line-height: 24px;
+      background: #f0f0e5;
+      color: #252519;
+      font-family: "Palatino Linotype", "Book Antiqua", Palatino, FreeSerif, serif;
+    }
+
+    ul { list-style:none; }
+
+    div.container {
+      width: 720px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+
+    <p>The specification consists of a space-delimited series of polyhedral recipes.
+      Each recipe looks like: </p>
+
+    <p>[<b>op</b>][<b>op</b>] ... [<b>op</b>][<b>base</b>] <i>no spaces, just a string of characters</i> </p>
+
+    <p>where [<b>base</b>] is one of</p>
+
+    <ul>
+      <li>T - tetrahedron</li>
+      <li>C - cube</li>
+      <li>O - octahedron</li>
+      <li>I - icosahedron</li>
+      <li>D - dodecahedron</li>
+      <li>P<i>N</i> - N-sided prism</li>
+      <li>A<i>N</i> - N-sided anti-prism</li>
+      <li>Y<i>N</i> - N-sided pyramid</li>
+      <li>J<i>N</i> - Nth Johnson Solid (1 to 92)</li>
+      <li>U<i>N</i> - N-sided cupola</li>
+      <li>V<i>N</i> - N-sided anti-cupola</li>
+    </ul>
+
+    <p>and <b>op</b> is one of these
+      <a href="https://en.wikipedia.org/wiki/Conway_polyhedron_notation">polyhedron-building operators</a>:</p>
+
+    <ul>
+      <li><b>k<i>N</i></b> - <a href="https://en.wikipedia.org/wiki/Kleetope">kis</a> on N-sided faces (if no N, then general kis)</li>
+      <li><b>a</b> - ambo</li>
+      <li><b>g</b> - gyro</li>
+      <li><b>d</b> - dual</li>
+      <li><b>r</b> - reflect</li>
+      <li><b>e</b> - explode (a.k.a. <a href="https://en.wikipedia.org/wiki/Expansion_%28geometry%29">expand</a>, equiv. to <i>aa</i>) </li>
+      <li><b>b</b> - bevel (equiv. to <i>ta</i>) </li>
+      <li><b>o</b> - ortho (equiv. to <i>jj</i>) </li>
+      <li><b>m</b> - meta (equiv. to <i>k3j</i>) </li>
+      <li><b>t<i>N</i></b> - truncate vertices of degree N (equiv. to <i>dkNd</i>; if no N, then truncate all vertices) </li>
+      <li><b>j</b> - join (equiv. to <i>dad</i>) </li>
+      <li><b>s</b> - snub (equiv. to <i>dgd</i>) </li>
+      <li><b>p</b> - propellor</li>
+      <li><b>c</b> - chamfer</li>
+      <li><b>w</b> - whirl</li>
+      <li><b>q</b> - quinto</li>
+    </ul>
+
+    <p>Also, some newer, experimental operators:</p>
+
+    <ul>
+      <li><b>l</b> - <b>l</b>oft</li>
+      <li><b>P</b> - a stellation operation reverse-engineered from <b>P</b>erspectiva Corporum Regularium</li>
+      <li><b>n<i>N</i></b> - i<b>n</b>setN </li>
+      <li><b>x<i>N</i></b> - e<b>x</b>trudeN </li>
+      <li><b>Z</b> - triangulate</li>
+      <li><b>H</b> - hollow/skeletonize, useful for 3D printing, makes a
+        hollow-faced shell version of the polyhedron, only apply it once in
+        a recipe!</li>
+      <li><b>u<i>N</i></b> - limited version of the Goldberg-Coxeter u_n operator (for triangular meshes only)</li>
+    </ul>
+
+    <p> There are more complicated, parameterized forms for <b>k</b> and <b>n</b>: </p>
+    <ul>
+      <li><b>n</b>(<i>n</i>,<i>inset</i>,<i>depth</i>) - this applies the
+        inset operator on <i>n</i>-sided faces, insetting by <i>inset</i> scaled from
+        0 to 1, and extruding in or out along the normal by <i>depth</i>
+        (can be negative)
+      </li>
+      <li><b>k</b>(<i>n</i>,<i>depth</i>) - this applies the kis operator
+        on <i>n</i>-sided faces, setting the pyramidal height out or in along the normal by <i>depth</i>
+        (can be negative)
+      </li>
+      <li><b>H</b>(<i>inset</i>,<i>depth</i>) - this applies the
+        hollowing/skeletonizing operator on all faces, insetting by
+        <i>inset</i> (scaled from 0 to 1), and with a shell thickness of <i>depth</i>
+      </li>
+    </ul>
+
+    <p>Note that for most of the above operations, while the <i>topology</i> of the result is uniquely specified,
+      a great variety of <i>geometry</i> is possible. For maximum flexibility, the above operators do not enforce convexity
+      of the polyhedron, or planarity of the faces,
+      at each step. If these properties are desired in the final result, the following geometric "refinement" operators
+      can be used. These operators are for
+      canonicalizing the polyhedral shape, and are mainly intended for making
+      the more traditional, convex polyhedra more symmetric:</p>
+    <ul>
+      <li><b>K<i>N</i></b> - quic<b>K</b> and dirty canonicalization, it can blow
+        up, iteratively refines shape N times.</li>
+      <li><b>C<i>N</i></b> - proper <b>C</b>anonicalization, intensive, slow convergence, iteratively refines shape N times.
+        Flattens faces.
+        A typical N is 200 or 300.</li>
+      <li><b>A<i>N</i></b> - convex spherical <b>A</b>djustment. Iterates N times. May give more pleasing symmetry,
+        but can be unstable for certain shapes.</li>
+      <li><b>U</b> - projects every vertex onto the <b>U</b>nit sphere.</li>
+    </ul>
+
+    <p>These can blow up the geometry of the weirder polyhedra, which can
+      be interesting too!</p>
+
+    <b> 3D Printing </b>
+    <p>You can export these shapes in forms appropriate for 3D printing by
+      shapeways. Export in VRML2 format to preserve face colors if you want
+      to use their colored fused-sand process. You'll probably want to rescale
+      the exported geometry to a non-tiny size.</p>
+
+    <p>More Information: </p>
+    <ul>
+      <li><a href="http://en.wikipedia.org/wiki/Conway_polyhedron_notation"> Wikipedia on Conway Polyhedral Notation</a></li>
+      <li><a href="http://www.georgehart.com/">George W. Hart's Polyhedral Site</a></li>
+      <li><a href="http://dmccooey.com/polyhedra/index.html">Visual Polyhedra</a></li>
+      <li><a href="http://github.com/levskaya/polyhedronisme">Source and more information at Github</a></li>
+    </ul>
+
+    <p>Thanks:</p>
+    <ul>
+      <li>George Hart - for his original pages, artworks and software characterizing higher polyhedra.</li>
+      <li>Lars Huttar - for adding several new operators, and helping improve this site.</li>
+      <li>Lei Willems - for inventing quinto.</li>
+      <li>Everyone else - for all of your kind words and suggestions!</li>
+    </ul>
+
+    <div class="footer">
+      Text &amp; Figures CC-BY | Code MIT License | <a href="http://anselmlevskaya.com">Anselm Levskaya</a> 2019
+    </div>
+  </div>
+
+</body>
+
+</html>

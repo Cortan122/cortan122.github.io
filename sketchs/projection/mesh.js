@@ -1,5 +1,5 @@
 function edgeSplitAll(recursive){
-  Console.warn("edgeSplitAll is depricated");
+  console.warn("edgeSplitAll is depricated");
   if(!arrTF.length)findTrueFaces();
   var copy = arrE.slice();
   for (var i = 0; i < copy.length; i++) {
@@ -8,11 +8,11 @@ function edgeSplitAll(recursive){
 }
 
 function edgeSplit(e,recursive){
-  Console.warn("edgeSplit is depricated");
+  console.warn("edgeSplit is depricated");
   var t = _edgeSplit(e,0.5);
-  var e1 = t.e1; 
+  var e1 = t.e1;
   var e2 = t.e2;
-  t.v.isHidden = true;  
+  t.v.isHidden = true;
   if(recursive > 0 && recursive != undefined){
     edgeSplit(e1,recursive-1);
     edgeSplit(e2,recursive-1);
@@ -68,7 +68,7 @@ function sortFace1(f){
 }
 
 function sortFace(f){
-  Console.warn("sortFace is depricated");
+  console.warn("sortFace is depricated");
   //targetRotation(f[0]);
   var center = getSumOfArray(f).mult(1/f.length);
   var r = [];
@@ -90,11 +90,11 @@ function angleBetweenCCW(v1,v2){
     ||((n.z+n.y+n.x) == 0&&n.x == 0&&n.y > 0)
     ||((n.z+n.y+n.x) == 0&&n.x == 0&&n.y == 0&&n.z > 0)
     )a = TWO_PI-a;
-  return a;  
+  return a;
   /*var x1 = v1.x,y1 = v1.y,z1 = v1.z,x2 = v2.x,y2 = v2.y,z2 = v2.z;
   var dot = x1*x2 + y1*y2 + z1*z2;//between [x1, y1, z1] and [x2, y2, z2]
   var lenSq1 = x1*x1 + y1*y1 + z1*z1;
-  var lenSq2 = x2*x2 + y2*y2 + z2*z2; 
+  var lenSq2 = x2*x2 + y2*y2 + z2*z2;
   return acos(dot/sqrt(lenSq1 * lenSq2));*/
 }
 
@@ -109,7 +109,7 @@ function fixNormal(f,bool){
     var b = t>1||t<0;
   }else{
     var b = p5.Vector.angleBetween(normal,center)>PI/2;
-  }  
+  }
   if(b)f.reverse();
   return b;
 }
@@ -157,7 +157,7 @@ function standardizeEdgeLengths(b=true){
   cachedMeshProperties = undefined;
 }
 
-function loadMesh(data) {
+function loadMesh_old(data) {
   resetMesh();
   var s = data.split("\n");
   arrP.push(createVector(0,0,0));
@@ -177,6 +177,19 @@ function loadMesh(data) {
   rotator.history = undefined;
 }
 
+function loadMesh_poly(poly){
+  cachedMeshProperties = undefined;
+  arrP = poly.vertices.map(e=>createVector(...e));
+
+  arrTF = arrF = poly.faces.map((face,i)=>{
+    var r = face.map(e=>arrP[e]);
+    r.paletteIndex = poly.face_classes[i];
+    return r;
+  });
+  arrE = poly.edges().map(e=>e.map(e=>arrP[e]));
+  // makeEdges(); // too slow
+}
+
 function makeObj(precision){
   rotator.save();
   if(precision == undefined)precision = -8;
@@ -192,7 +205,7 @@ function makeObj(precision){
   var maxHash = max(arrTF.map(e => e.paletteIndex));
   for(var i = 0; i <= maxHash; i++){
     r += 'vt {0} {1}\n'.format((i%10)/10,floor(i/10)/10);
-  } 
+  }
   var normals = '#vertex normals\n';
   var face_defs = '#face defs\n';
   for (var i = 0; i < arrTF.length; i++) {
@@ -233,7 +246,7 @@ function meshProperties(bool){
   var r = {numVerts:arrP.length,numEdges:arrE.length,numFaces:arrTF.length};
   var edgeLengths = {};
   for (var i = 0; i < arrE.length; i++) {
-    var dist = round10(p5.Vector.convert(arrE[i][0]).dist(p5.Vector.convert(arrE[i][1])),-3);
+    var dist = p5.Vector.convert(arrE[i][0]).dist(p5.Vector.convert(arrE[i][1])).toFixed(3);
     if(!edgeLengths[dist])edgeLengths[dist] = 0;
     edgeLengths[dist]++;
   }
@@ -251,6 +264,7 @@ function meshProperties(bool){
 }
 
 function findTrueFaces(bool) {
+  console.warn("findTrueFaces is depricated");
   if(!bool&&(arrF.length==0||arrE.length!=0))return makeFaces();
   var temp = {};
   var tempE = {};
@@ -470,7 +484,7 @@ function buildRubiksCube(str){
         var pos = createVector(x-_1,y-_1,cubeSize/2);
         var f = [tempFunc(pos,.5,.5),tempFunc(pos,-.5,.5),tempFunc(pos,-.5,-.5),tempFunc(pos,.5,-.5)];
         f.color = _color;
-        arrTF.push(f); 
+        arrTF.push(f);
       }
     }
   };
@@ -484,7 +498,7 @@ function buildRubiksCube(str){
   buildFace(cube[4]);
   rotator.applyDir(2,180);
   buildFace(cube[1]);
-  
+
   resetView();
   rotator.applyMatrixG(tempHistory);
   updateStats();

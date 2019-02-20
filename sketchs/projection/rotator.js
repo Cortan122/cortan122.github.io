@@ -20,7 +20,7 @@ rotator.genericMatrixMult = function(m1,m2){
     for (var y = 0; y < m1.length; y++) {
       m[x][y] = 0;
       for (var i = 0; i < m1[0].length; i++) {
-        m[x][y] += m1[y][i]*m2[i][x]; 
+        m[x][y] += m1[y][i]*m2[i][x];
       }
     }
   }
@@ -50,6 +50,7 @@ rotator.applyMatrixG = function(m){
 }
 
 rotator.returnToInit = function(){
+  if(this.history==undefined)this.history = this.identityMatrix;
   this.applyMatrixG( this.inverse(this.history));
 }
 

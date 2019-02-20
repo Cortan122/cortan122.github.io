@@ -110,14 +110,12 @@ var objString;
 var _shaderRomHelperFunc = a=>{
   var t = color(palette[0]);
   a.ambientMaterial(t);
-};  
+};
 
 var shaderRom = {
-  none:[''],
+  // none:[''],
   normal:['a.normalMaterial()'],
-  //texture_u:['a.texture(paletteimg)',resetLights],
   texture:['a.texture(paletteimg)',setupLights],
-  //fill_u:[_shaderRomHelperFunc,resetLights],
   fill:[_shaderRomHelperFunc,setupLights]
 };
 
@@ -130,7 +128,7 @@ function trueDraw3D(){
     __parseObj(model3D,objString.split('\n'));
   }
   var rend = a._renderer;
-  rend.uMVMatrix = rotator.matrixToP5(rotator.history2).mult(rend.cameraMatrix);
+  rend.uMVMatrix = rotator.matrixToP5(rotator.history2).mult(rend.cameraMatrix||rend._curCamera.cameraMatrix);
   if(tweakables.transparency==0){
     a.noFill();
   }else{
@@ -182,8 +180,21 @@ function resetLights(a){
 
 function onChangeDrawMode(name){
   var tw = tweakables;
+  if(name=="polyhedronisme"){
+    setTimeout(readRecipe,1);
+  }
+  if(name==undefined||name=="polyhedronisme"){
+    let a = $('#help_atag');
+    let b = $('#tw_hashSensitivity');
+    if(tw.polyhedronisme){
+      a.removeClass('deprecated');
+      b.addClass('deprecated');
+    }else{
+      a.addClass('deprecated');
+      b.removeClass('deprecated');
+    }
+  }
   if(name==undefined||name=="useWebGL"){
-    //i do not know
     let a = $('#tw_shader');
     let b = $('#tw_vertexLabels,#tw_vertexSize,#tw_drawInvisibleLines');
     if(tw.useWebGL){
@@ -200,6 +211,20 @@ function onChangeDrawMode(name){
     }else{
       $("#frDiv").css('display','none');
     }
+  }
+  if(name==undefined||name=="shader"||name=="useWebGL"){
+    let a = $();
+    let b = $('#tw_enableLighting,#tw_transparency');
+    if(tw.useWebGL && tw.shader=='normal'){
+      a.removeClass('deprecated');
+      b.addClass('deprecated');
+    }else{
+      a.addClass('deprecated');
+      b.removeClass('deprecated');
+    }
+  }
+  if(name==undefined||name=="transparency"){
+    updatePalette();
   }
   if(!tw.useWebGL)return;
   var a = renderer3D;

@@ -13,28 +13,33 @@ var renderer3D;
 var colorF = 1;
 var zoom = 5;
 
+// var palette = ['#af0','#5f0','#009dff','#f11','#ff0','#0ff','#00f'];//original
+// var palette = ['#f77','#ddd','#899','#fff0e5','#a33','#f00','#fff','#aaa'];//polyhedronisme
+var palette = ['#af0','#5f0','#009dff','#fa0000','#ff6a00','#ff0','#007f0e','#0ff','#004aff','#00ff90','#b970ff','#ff7fb6'];//3D
+
 var tweakables = {
-  vertexLabels:-1,
-  vertexSize:-10,
   edgeThickness:-2,
   transparency:255,
+  shader:'texture',
+  hashSensitivity:100,
+  isometric:true,
+  drawInvisibleLines:false,
+  useWebGL:true,
+  polyhedronisme:true,
+  enableLighting:true,
+
   accentColor:'black',
   backgroundColor:'#666',
-  shader:'texture',
+  vertexSize:-10,
+  vertexLabels:"none",
+  defaultZoom:400,
   mouseSensitivity:1,
   scrollSpeed:1,
   rotationSpeed:9,
   inputRepeatDelay:5,
   inputRepeatSpeed:-1,
-  defaultZoom:400,
-  hashSensitivity:10,
-  cacheFrames:true,
-  isometric:true,
-  drawInvisibleLines:false,
-  useWebGL:true,
-  /*usePalette:true,*/
-  enableLighting:true,
   showFPS:false,
+  cacheFrames:true,
   metaStart:true
 };
 
@@ -55,30 +60,38 @@ Object.defineProperty(this, "transparency", {
   }, configurable: true, enumerable: false
 });
 
-function setup() {
-  parseInputRom();
+function setup(){
   createCanvas(500, 500);
   pixelDensity(1);
   renderer3D = createGraphics(500,500, WEBGL);
-  paletteimg = loadImage('palette.png',doUpdate);
+  paletteimg = createImage(20, 20);
   angleMode(DEGREES);
   background(tweakables.backgroundColor);
   lightSorce = createVector(10,10,0);
 
+  lib.tweaker.makeEnum("shader",Object.keys(shaderRom));
+  lib.tweaker.makeEnum("vertexLabels",["none","index","z"]);
   lib.tweaker.events.push(onChangeDrawMode);
   lib.tweaker.events.push(doUpdate);
-  onChangeDrawMode();
 
   initDOM();
+  onChangeDrawMode();
 
   var t = getQueryParameterByName("s");
-  if(t){template(t);$('#mainInput').val(t);}else{template('cube');}
-} 
+  if(t){template(t);$('#mainInput').val(t);}else{template('C');}
+
+  // bug: tweakables not showing up (for some reason)
+  // fix: this
+  setTimeout(()=>{$('#pDiv').hide().show(0);},1);
+}
 
 function initDOM(){
-  $('body').append('<div id="mainInputText" style="margin-top:0px;width: fit-content;width: -moz-fit-content;">Recipe:</div>');
-  $('#mainInputText').append('<input type="text" id="mainInput" style="width: {0}px;display: inline-block;margin: 0;">'
-    .format(round(width-$('#mainInputText').width())))
+  $('body').append('<table id="menuContainer"></table>');
+
+  $('#menuContainer').append('<tr id="mainInputText"><td>Recipe:</td><td id="mainInputContainer"></td></tr>');
+  var inputWidth = round(width-$('#mainInputText').width());
+  $('#mainInputContainer')
+    .append(`<input type="text" id="mainInput" style="width: ${inputWidth}px;">`)
     .append($('<div id="errorIconAnchor" style="display: inline-block;margin: 0;"></div>')
       .append('<div id="errorIcon" style="position:relative;left:-17px;top: 1px;color: white;font-weight:bold;">\u2713</div>')
     );
@@ -89,7 +102,22 @@ function initDOM(){
   });
   $('#mainInput').on("input",e => $('#errorIcon').css('color','white').attr('title','').html('\u2713'));
 
-  $('body').append('<div id="stats" class="stats">Stats: &nbsp;&nbsp;<div id="faces" class="stats">{0} faces<div id="faceList" class="statList">faceList</div></div>, <div id="edges" class="stats">{0} edges<div id="edgeList" class="statList">edgeList</div></div>, <div id="vertices" class="stats">{0} vertices</div></div>');
+  $('#menuContainer').append(
+    $('<tr><td>Palette:</td></tr>')
+    .append(`<input type="text" id="paletteInput">`)
+    .append('<button id="paletteButton">random</button>')
+  );
+  $('#paletteInput').val(palette.join(' ')).on("input",e=>{
+    palette = $(e.target).val().split(' ');
+    updatePalette();
+  }).css("width",inputWidth-$('#paletteButton').outerWidth());
+  $('#paletteButton').click(e=>{
+    palette = require('polyhedronisme').randomPalette();
+    $('#paletteInput').val(palette.join(' '));
+    updatePalette();
+  });
+
+  $('#menuContainer').append('<tr id="stats"><td>Stats:</td><td><div id="faces" class="stats">{0} faces<div id="faceList" class="statList">faceList</div></div>, <div id="edges" class="stats">{0} edges<div id="edgeList" class="statList">edgeList</div></div>, <div id="vertices" class="stats">{0} vertices</div></td></tr>');
   $("#faces").click(function() {
     $("#faceList").slideToggle("fast");
   });
@@ -97,24 +125,62 @@ function initDOM(){
     $("#edgeList").slideToggle("fast");
   });
 
-  $('body').append(
-    $('<div id="export_links">Export:</div>')
-      .append($('<a>OBJ</a>').click(()=>saveObj()) )
+  $('#menuContainer').append(
+    $('<tr><td>Export:</td></tr>').append(
+      $('<td></td>')
+      .append( $('<a>OBJ</a>').click(()=>saveObj()) )
       .append('<b>&nbsp;&#09;</b>')
-      .append($('<a>PNG</a>').click(savePng) )
+      .append( $('<a>PNG</a>').click(savePng) )
       .append('<b>&nbsp;&#09;</b>')
-      .append($('<a id="urlDispenser">URL</a>') )  
-    );
-  $('body').append(
-    $('<div id="view_links">View: &nbsp;</div>')
-      .append($('<a>Front</a>').click(resetView) )
-      .append('<b>&nbsp;&#09;</b>')
-      .append($('<a>Face</a>').click(faceOnRotation) )
-      .append('<b>&nbsp;&#09;</b>')
-      .append($('<a>Vetr</a>').click(vertOnRotation) )
-      .append('<b>&nbsp;&#09;</b>')
-      .append($('<a>Planar</a>').click(planarView) )  
+      .append('<a id="urlDispenser">URL</a>')
+    )
   );
+  $('#menuContainer').append(
+    $('<tr><td>View:</td></tr>').append(
+      $('<td></td>')
+      .append( $('<a>Front</a>').click(resetView) )
+      .append('<b>&nbsp;&#09;</b>')
+      .append( $('<a>Face</a>').click(faceOnRotation) )
+      .append('<b>&nbsp;&#09;</b>')
+      .append( $('<a>Vetr</a>').click(vertOnRotation) )
+      .append('<b>&nbsp;&#09;</b>')
+      .append( $('<a>Planar</a>').click(planarView) )
+      .append('<b>&nbsp;&#09;</b>')
+      .append('<a id="help_atag" href="./help">Help</a>')
+    )
+  );
+}
+
+function updatePalette(){
+  paletteimg.loadPixels();
+
+  function writePixel(x, y, c){
+    if(x<0 || y<0)return;
+    const width = 20;
+    const index = (x + y * width) * 4;
+    const img = paletteimg.pixels;
+    img[index] = c.red;
+    img[index + 1] = c.green;
+    img[index + 2] = c.blue;
+    img[index + 3] = tweakables.transparency;//c.alpha;
+  }
+
+  function writeColor(x, y, c){
+    x *= 2;
+    y *= 2;
+    writePixel(x,y,c);
+    writePixel(x-1,y,c);
+    writePixel(x,y-1,c);
+    writePixel(x-1,y-1,c);
+  }
+
+  for(var i = 0; i < 100; i++){
+    writeColor(i%10,floor(i/10),color(palette[i%palette.length]));
+  }
+
+  paletteimg.updatePixels();
+  if(renderer3D)renderer3D.texture(paletteimg);
+  doUpdate();
 }
 
 function updateStats(data){

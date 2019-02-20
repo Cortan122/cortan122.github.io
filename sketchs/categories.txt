@@ -379,7 +379,7 @@
         ],
         "lines": {
             "html": 15,
-            "js": 301
+            "js": 387
         }
     },
     "pinball": {
@@ -439,11 +439,10 @@
         "name": "Polyhedrons",
         "time": 1488581760,
         "jsfiles": [
-            "sketch_projection.backup.js",
+            "polyhedronisme.min.js",
             "main.js",
             "rotator.js",
             "templates.js",
-            "tweakables.js",
             "input.js",
             "draw.js",
             "webgl.js",
@@ -451,8 +450,8 @@
             "operators.js"
         ],
         "lines": {
-            "html": 71,
-            "js": 2576
+            "html": 74,
+            "js": 2201
         }
     },
     "sphere": {
@@ -493,11 +492,13 @@
         "name": "Sortable json table",
         "time": 1520106900,
         "lines": {
-            "html": 43,
-            "js": 289
+            "html": 59,
+            "js": 1044
         },
         "jsfiles": [
             "ping.js",
+            "table.js",
+            "node_modules\/humanize-duration\/humanize-duration.js",
             "main.js"
         ]
     },
@@ -610,7 +611,7 @@
         ],
         "lines": {
             "html": 41,
-            "js": 680
+            "js": 682
         }
     }
 }

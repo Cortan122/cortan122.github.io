@@ -7,11 +7,10 @@
   "name": "Polyhedrons",
   "time": 1488581760,
   "jsfiles": [
-    "sketch_projection.backup.js",
+    "polyhedronisme.min.js",
     "main.js",
     "rotator.js",
     "templates.js",
-    "tweakables.js",
     "input.js",
     "draw.js",
     "webgl.js",
@@ -19,7 +18,7 @@
     "operators.js"
   ],
   "lines": {
-    "html": 71,
-    "js": 2576
+    "html": 74,
+    "js": 2201
   }
 }

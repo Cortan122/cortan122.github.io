@@ -6,11 +6,13 @@
   "name": "Sortable json table",
   "time": 1520106900,
   "lines": {
-    "html": 43,
-    "js": 289
+    "html": 59,
+    "js": 1044
   },
   "jsfiles": [
     "ping.js",
+    "table.js",
+    "node_modules/humanize-duration/humanize-duration.js",
     "main.js"
   ]
 }

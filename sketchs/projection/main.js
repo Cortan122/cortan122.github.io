@@ -80,8 +80,7 @@ function setup(){
   var t = getQueryParameterByName("s");
   if(t){template(t);$('#mainInput').val(t);}else{template('C');}
 
-  // bug: tweakables not showing up (for some reason)
-  // fix: this
+  // fix for: tweakables not showing up (for some reason)
   setTimeout(()=>{$('#pDiv').hide().show(0);},1);
 }
 
@@ -92,15 +91,13 @@ function initDOM(){
   var inputWidth = round(width-$('#mainInputText').width());
   $('#mainInputContainer')
     .append(`<input type="text" id="mainInput" style="width: ${inputWidth}px;">`)
-    .append($('<div id="errorIconAnchor" style="display: inline-block;margin: 0;"></div>')
-      .append('<div id="errorIcon" style="position:relative;left:-17px;top: 1px;color: white;font-weight:bold;">\u2713</div>')
-    );
+    .append(`<div id="errorIcon">⚠<select id="preset_list"></select></div>`)
   $('#mainInput').val('C').keyup(function(e){
     if(e.keyCode == 13){
       readRecipe();
     }
   });
-  $('#mainInput').on("input",e => $('#errorIcon').css('color','white').attr('title','').html('\u2713'));
+  $('#mainInput').on("input",e => $('#errorIcon').css('color','white').attr('title',''));
 
   $('#menuContainer').append(
     $('<tr><td>Palette:</td></tr>')
@@ -129,9 +126,7 @@ function initDOM(){
     $('<tr><td>Export:</td></tr>').append(
       $('<td></td>')
       .append( $('<a>OBJ</a>').click(()=>saveObj()) )
-      .append('<b>&nbsp;&#09;</b>')
       .append( $('<a>PNG</a>').click(savePng) )
-      .append('<b>&nbsp;&#09;</b>')
       .append('<a id="urlDispenser">URL</a>')
     )
   );
@@ -139,16 +134,26 @@ function initDOM(){
     $('<tr><td>View:</td></tr>').append(
       $('<td></td>')
       .append( $('<a>Front</a>').click(resetView) )
-      .append('<b>&nbsp;&#09;</b>')
       .append( $('<a>Face</a>').click(faceOnRotation) )
-      .append('<b>&nbsp;&#09;</b>')
       .append( $('<a>Vetr</a>').click(vertOnRotation) )
-      .append('<b>&nbsp;&#09;</b>')
-      .append( $('<a>Planar</a>').click(planarView) )
-      .append('<b>&nbsp;&#09;</b>')
+      .append( $('<a id="planar_atag">Planar</a>').click(planarView) )
       .append('<a id="help_atag" href="./help">Help</a>')
     )
   );
+
+  $.ajax("./examples.txt").done(data=>{
+    var t = $('#preset_list');
+    t.append(`<option value="" style="display:none"></option>`);
+    for(var line of data.split('\n')){
+      line = line.replace(/\s/g,'');
+      if(line.length==0)continue;
+      t.append(`<option value="${line}">${line}</option>`);
+    }
+    t.on('change',()=>{
+      $('#mainInput').val(t.val());
+      readRecipe();
+    });
+  });
 }
 
 function updatePalette(){
@@ -203,11 +208,14 @@ function updateStats(data){
 }
 
 function readRecipe(){
+  if($('#preset_list').val()!=$('#mainInput').val()){
+    $('#preset_list').val('');
+  }
   try{
     template($('#mainInput').val());
   }catch(r){
     //print(r);
-    $('#errorIcon').html('\u26A0').attr('title',r).css('color','red');
+    $('#errorIcon').attr('title',r).css('color','red');
   }
 }
 

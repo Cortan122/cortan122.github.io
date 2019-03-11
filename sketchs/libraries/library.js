@@ -244,7 +244,11 @@
       var b;
       //chrome: .rules
       //firefox: .cssRules
-      (b = a[i].rules)||(b = a[i].cssRules);
+      try{
+        (b = a[i].rules)||(b = a[i].cssRules);
+      }catch(e){
+        return false;
+      }
       for (var j = 0; j < b.length; j++) {
         if(b[j].selectorText == undefined)continue;
         if(!(string instanceof RegExp)){
@@ -293,7 +297,7 @@
         }.bind(p5.instance);
       })();
       p5.instance._draw.isNew = true;
-      p5.instance._drawEvents = [];  
+      p5.instance._drawEvents = [];
     }
     p5.instance._drawEvents.push(event);
   };
@@ -347,9 +351,9 @@
           var t = lib.getQueryParameterByName("tw_"+name);
           if(t){
             if(typeof tweakables[name] == 'number'){
-              tweakables[name] = parseFloat(t); 
+              tweakables[name] = parseFloat(t);
             }else if(typeof tweakables[name] == 'string'){
-              tweakables[name] = t; 
+              tweakables[name] = t;
             }else if(typeof tweakables[name] == 'boolean'){
               t = t.toLowerCase();
               tweakables[name] = (t == 'true'||t == '1');
@@ -588,7 +592,7 @@
           }
         })();
       }
-      
+
       mgr.buttonBoard = function(){
         var b = $('#buttonBoard');
         if(b.length == 0){
@@ -615,7 +619,7 @@
       }
 
       mgr.parseInputRom();
-      
+
       if(window.tweakables&&tweakables.buttonBoard!==undefined)mgr.buttonBoard();
 
     }
@@ -624,7 +628,7 @@
   lib.init3 = function(){
     if(lib.isInit3 == true){console.log("lib already init3alized");return;}
     lib.isInit3 = true;
-    
+
     if(window.tweakables && tweakables.buttonBoard!==undefined){
       $('body').prepend($('canvas'));
     }
@@ -723,15 +727,15 @@ Array.prototype.equals || (Array.prototype.equals = function(array) {
   // if the other array is a falsy value, return
   if(!array)return false;
 
-  // compare lengths - can save a lot of time 
+  // compare lengths - can save a lot of time
   if (this.length != array.length)return false;
 
   for(var i = 0, l=this.length; i < l; i++){
     // Check if we have nested arrays
     if(this[i] instanceof Array && array[i] instanceof Array) {
       // recurse into the nested arrays
-      if(!this[i].equals(array[i]))return false;       
-    }else if(this[i] != array[i]) { 
+      if(!this[i].equals(array[i]))return false;
+    }else if(this[i] != array[i]) {
       // Warning - two different object instances will never be equal: {x:20} != {x:20}
       return false;
     }
@@ -750,7 +754,7 @@ Object.assignAll || (Object.assignAll = function() {
 
 String.prototype.format || (String.prototype.format = function() {
   var args = arguments;
-  return this.replace(/{(\d+)}/g, function(match, number) { 
+  return this.replace(/{(\d+)}/g, function(match, number) {
     return typeof args[number] != 'undefined'
       ? args[number]
       : match

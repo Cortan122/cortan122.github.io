@@ -193,10 +193,11 @@ function onChangeDrawMode(name){
       a.addClass('deprecated');
       b.removeClass('deprecated');
     }
+    $('#errorIcon').css('color','white').attr('title','');
   }
   if(name==undefined||name=="useWebGL"){
     let a = $('#tw_shader');
-    let b = $('#tw_vertexLabels,#tw_vertexSize,#tw_drawInvisibleLines');
+    let b = $('#tw_vertexLabels,#tw_vertexSize,#tw_drawInvisibleLines,#planar_atag');
     if(tw.useWebGL){
       a.removeClass('deprecated');
       b.addClass('deprecated');

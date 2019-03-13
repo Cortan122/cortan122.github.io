@@ -184,8 +184,8 @@ function onChangeDrawMode(name){
     setTimeout(readRecipe,1);
   }
   if(name==undefined||name=="polyhedronisme"){
-    let a = $('#help_atag');
-    let b = $('#tw_hashSensitivity');
+    let a = $('#help_atag,.option_poly');
+    let b = $('#tw_hashSensitivity,.option_nonpoly');
     if(tw.polyhedronisme){
       a.removeClass('deprecated');
       b.addClass('deprecated');

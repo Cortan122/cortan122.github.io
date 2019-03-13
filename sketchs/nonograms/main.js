@@ -21,7 +21,7 @@ var isButtonSwitch = false;
 var jsonCache = undefined;
 var jsonCacheIndex = 0;
 
-//id: 2188,2856,7485,7486,7692,13236,13452,15368,16966,17571
+// id: 2188,7486,7692,13236,13452,15368
 var tweakables = {
   sizex:5,
   sizey:5,

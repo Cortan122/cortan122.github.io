@@ -16,3 +16,11 @@ qqJ37
 n18n18n9n9n9soxY9
 kUuuukD
 dtdtdtdtdtdtT
+
+!f(1)zudakI
+!f(2)zudakD
+!it(-.5)t(-1)C
+!x(-1,2)C
+!x(.25,.75)C
+!itt(-1.6)D
+!u t x k(1) polygon30

@@ -23,7 +23,7 @@ function AI_fillSeg(line,val,s,e){
   }
   return r;
 }
- 
+
 function AI_fillSpaces(line){
   for (var i = 0; i < line.spaces.length; i++) {
     var s = line.spaces[i];
@@ -192,22 +192,24 @@ function AI_line(line){
   var s = line.spaces[0];
   if(!s.empty&&!s.full){
     var t = line.t[0];
-    if(s.l==t){
-      return AI_fillSeg(line,1,s.s,s.e);
+    if(s.l==t || (line.t.length!=1 && s.l<t+1+line.t[1])){
+      var r = AI_line({t:[t],l:line.l.slice(s.s,s.e)});
+      if(r)return r;
     }
     var firstpos = line.states[0].s-s.s;
     if(firstpos<t-1||firstpos==0){
       var end = s.s+t;
       var r = AI_fillSeg(line,1,s.s+firstpos,end);
       if(firstpos==0)r = r || AI_fill(line,-1,(e,i)=>i==end);
-      if(r)return r; 
+      if(r)return r;
     }
   }
   var s = line.spaces[line.spaces.length-1];
   if(!s.empty&&!s.full){
     var t = line.t[line.t.length-1];
-    if(s.l==t){
-      return AI_fillSeg(line,1,s.s,s.e);
+    if(s.l==t || (line.t.length!=1 && s.l<t+1+line.t[line.t.length-2])){
+      var r = AI_line({t:[t],l:line.l.slice(s.s,s.e)});
+      if(r)return r;
     }
     var firstpos = s.e-line.states[line.states.length-1].e;
     if(firstpos<t-1||firstpos==0){
@@ -307,6 +309,10 @@ function AI_all(){
     r += t;
   }
   var time1 = (new Date).getTime();
-  console.log(`AI_all("${jsonCache[grid.id].name}") took ${time1-time} ms and ${r} steps`);
+  if(grid.id!=undefined){
+    console.log(`AI_all("${jsonCache[grid.id].name}") took ${time1-time} ms and ${r} steps`);
+  }else if(grid.seed!=undefined){
+    console.log(`AI_all(random(${grid.seed})) took ${time1-time} ms and ${r} steps`);
+  }
   return r;
 }

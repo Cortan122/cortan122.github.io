@@ -144,12 +144,21 @@ function initDOM(){
   $.ajax("./examples.txt").done(data=>{
     var t = $('#preset_list');
     t.append(`<option value="" style="display:none"></option>`);
+    var classes = [
+      `class="option_poly${tweakables.polyhedronisme?"":" deprecated"}"`,
+      `class="option_nonpoly${tweakables.polyhedronisme?" deprecated":""}"`
+    ];
     for(var line of data.split('\n')){
-      line = line.replace(/\s/g,'');
+      line = line.replace(/(^\s*)|(\s*$)/g,'');
       if(line.length==0)continue;
-      t.append(`<option value="${line}">${line}</option>`);
+      var bool;
+      if(bool = line[0]=='!'){
+        line = line.slice(1);
+      }
+      t.append(`<option value="${line}" ${classes[+bool]}>${line}</option>`);
     }
     t.on('change',()=>{
+      $('#errorIcon').css('color','white').attr('title','');
       $('#mainInput').val(t.val());
       readRecipe();
     });

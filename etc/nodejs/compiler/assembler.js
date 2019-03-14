@@ -342,13 +342,13 @@ function padOrAlignHelper(name,ops){
   }
   var char = "f0";
   var count = assembleSymbol(ops[0],2,e=>e);
-  var padlen = name=="_pad"?'padding length':'alignment target';
+  var padlen = name==".pad"?'padding length':'alignment target';
   if(typeof count == "string"){
     printError(`${padlen} must me a number (fatal)`);
     return;
   }
   if(count<0){
-    printError(`${padlen} must positive (fatal)`);
+    printError(`${padlen} must be positive (fatal)`);
     return;
   }
   if(count>0xffff){
@@ -697,7 +697,7 @@ function assembleInstruction(line){
 }
 
 function assembleLine(line){
-  var bool = true; 
+  var bool = true;
   if(line.match(/\S/)==undefined){
     //this is an empty line
     return;

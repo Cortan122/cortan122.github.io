@@ -1,5 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+const cp = require('child_process');
 const gApi = require('./googleApiWrapper.js');
 
+/** @type {Arch} */
 const Default = {
   "table":{
     "type":"Default",
@@ -15,23 +19,16 @@ const Default = {
   // "ramSize":0x10000,
 };
 
-/** @type {Arch} */
 var arch = Object.assign({},Default);
-
-/** @type {number} */
-var asyncCounter;
-var callback_global;
 
 /**
  * @param {string} name
  */
 function queryRegister(name){
   for(var arr of arch.registers){
-    if(arr.includes(name)){
-      var size = arr[arr.length-1];
-      let name = arr[0];
-      if(typeof size == 'string')throw 122;
-      if(typeof name != 'string')throw 122;
+    if(arr[0].includes(name)){
+      var size = arr[1];
+      let name = arr[0][0];
       return {size,name};
     }
   }
@@ -74,38 +71,63 @@ function queryInstruction(name){
 }
 
 /**
- * @param {string} name 
- * @param {()=>void} callback 
+ * @param {string} name
+ * @param {()=>void} callback
  */
-function init(name,callback){
-  arch = Object.assign(arch,require(name));
+function init(name,callback=()=>{}){
+  Object.assign(arch,require(name));
+  arch.name = name;
   if(!arch.instructionPointer){
-    var t = arch.registers[0][0];
-    if(typeof t == 'number')throw 122;
+    var t = arch.registers[0][0][0];
     arch.instructionPointer = t;
   }
   if(arch.ramSize == undefined){
     arch.ramSize = 1<<(queryRegisterLength(arch.instructionPointer)*8);
   }
-  arch.maxRegisterSize = Math.max( ...arch.registers.map(e=>e[e.length-1]).map(e=>typeof e=='number'?e:-1) );
+  arch.maxRegisterSize = Math.max( ...arch.registers.map(e=>e[1]) );
 
-  callback_global = callback;
-  asyncCounter = 1;
-  parseArchTable(arch);
-  asyncCounter--;
-  asyncEnd();
+  if(arch.table.arr){
+    callback();
+    return;
+  }
+  arch.table.arr = readTables()[name];
+  if(arch.table.arr){
+    callback();
+    return;
+  }
+
+  cp.execFileSync("node",[__filename,name]);
+  arch.table.arr = readTables()[name];
+  if(!arch.table.arr){
+    throw Error("the execFileSync trick did not work 😭");
+  }
+
+  callback();
 }
 
-function asyncEnd(){
-  if(asyncCounter!=0)return;
-  callback_global();
+function readTables(){
+  var p = path.join(__filename,"./tables.json");
+  if(!fs.existsSync(p))fs.writeFileSync(p,"{}");
+  return JSON.parse(fs.readFileSync(p,'utf-8'));
 }
 
-function parseArchTable(arch){
-  if(arch.table.arr)return;
+function parseArchTable(callback,name=undefined){
+  if(name){
+    Object.assign(arch,require(name));
+    arch.name = name;
+  }else{
+    name = arch.name;
+  }
+
+  const callback2 = ()=>{
+    var json = readTables();
+    json[name] = arch.table.arr;
+    var p = path.join(__filename,"./tables.json");
+    fs.writeFile(p,JSON.stringify(json),()=>callback());
+  };
+
   var type = arch.table.type.toLowerCase();
   if(type=="google"){
-    asyncCounter++;
     gApi.getSpreadsheetValues({spreadsheetId:arch.table.id,range:arch.table.range},(err,res)=>{
       if(err)throw err;
       const rows = res.data.values;
@@ -117,8 +139,7 @@ function parseArchTable(arch){
         return e;
       }));
       arch.table.arr = arr;
-      asyncCounter--;
-      setTimeout(asyncEnd,1);
+      setTimeout(callback2,1);
     });
   }else{
     //todo
@@ -133,21 +154,28 @@ var exportedObject = {
   queryRegisterName,
   queryInstruction,
   arch,
+  parseArchTable,
 };
 
 module.exports = exportedObject;
 
-/** 
+// @ts-ignore
+if(require.main == module){
+  parseArchTable(()=>{},process.argv[2]||"crtb.arch.js");
+}
+
+/**
  * @typedef {object} Arch
- * @property {{type:string,arr?:string[]}} table
- * @property {(string|number)[][]} registers
+ * @property {{type:string,id?:string,range?:string,arr?:string[]}} table
+ * @property {[string[],number][]} registers
  * @property {string=} instructionPointer
- * @property {string} endianness
+ * @property {"big"|"little"} endianness
  * @property {number=} ramSize
  * @property {number} startOfExecution
  * @property {number=} maxRegisterSize
- * @property {string[][]} additionalTableEntries
+ * @property {[RegExp,string][]} additionalTableEntries
  * @property {string[]} additionalEmulatorCode
  * @property {Object<string,string[]>} compoundRegisters
- * @property {(string|((...arr:string[])=>string))[][]} instructions
+ * @property {[string,((...arr:string[])=>string)][]} instructions
+ * @property {string=} name
  */

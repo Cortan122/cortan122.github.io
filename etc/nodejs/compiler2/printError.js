@@ -49,7 +49,7 @@ function colorHelper(name){
 }
 
 /**
- * @param {Token} token
+ * @param {BaseToken} token
  */
 function headerHelper(token){
   var filename = token.loc.file;
@@ -62,7 +62,7 @@ function headerHelper(token){
 }
 
 /**
- * @param {Token} token
+ * @param {BaseToken} token
  * @param {string} color
  */
 function lineHelper(token,color){
@@ -74,8 +74,8 @@ function lineHelper(token,color){
 }
 
 /**
- * @param {Token} token
- * @returns {Token[]}
+ * @param {BaseToken} token
+ * @returns {BaseToken[]}
  */
 function getIncludeStack(token){
   if(!token.includeStack)return [];
@@ -86,7 +86,7 @@ function getIncludeStack(token){
 
 /**
  * @param {string} string
- * @param {Token} token
+ * @param {BaseToken} token
  */
 function main(string,token){
   var opt = options;
@@ -149,13 +149,28 @@ function pulse(){
 
 /**
  * @param {string} string
- * @param {Token} token
+ * @param {BaseToken} token
+ * @param {BaseToken} lastToken
  */
-function printError(string,token){
+function printError(string,token,lastToken=null){
   var opt = options;
   if(opt==false)return;
+
+  var token1 = token;
+  if(lastToken){
+    token1 = {
+      includeStack:token.includeStack,
+      string:token.string,
+      loc:{
+        file:token.loc.file,
+        start:token.loc.start,
+        end:lastToken.loc.end,
+      }
+    };
+  }
+  var t = main(string,token1);
+
   const errorLevels = {error:2,warning:1,message:0};
-  var t = main(string,token);
   var i = errorLevels[t[1]];
   if(i<=opt.verbosity){
     if(opt.cache){

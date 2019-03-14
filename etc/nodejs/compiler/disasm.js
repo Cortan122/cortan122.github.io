@@ -78,6 +78,8 @@ Array.prototype.min = function(){
 };
 
 function tohex(num,len=2){
+  // if(num==undefined)num = 0xfacc;
+
   var s = num.toString(16);
   while(s.length<len){
     s = "0"+s;
@@ -272,7 +274,7 @@ function color(){
       if(ram[i+j]!=v)break;
     }
     var t = `${j} unexplored byte${j==1?"":"s"}`;
-    resultingLines[i] = 
+    resultingLines[i] =
       `${c.addr}${h(i,4)}\t${c.no}${h(v,2)}\t${c.invalid}${t}${c.no}`;
     return i+j-1;
   };
@@ -468,7 +470,7 @@ if(!useJsonOutput){
   }
 }else{
   var blocks = [];
-  var linetoblock = []; 
+  var linetoblock = [];
   xrefsarr = xrefsarr.filter(e=>e.t.startsWith('jmp'));
   var breaks = [];
   for(var ref of xrefsarr){
@@ -479,7 +481,7 @@ if(!useJsonOutput){
     breaks.push({v:end,t:'end'});
   }
   breaks = breaks.sort((a,b)=>a.v-b.v||b.t=='d');
-  
+
   var index = 0;
   var blockindex = 0;
   for(var brk of breaks){
@@ -499,7 +501,7 @@ if(!useJsonOutput){
   var code = resultingLines.slice(index);
   blocks.push({code,out:[],in:[]});
 
-  var previndex; 
+  var previndex;
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
     if(b.code.length){

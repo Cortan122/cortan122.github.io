@@ -9,14 +9,27 @@ const type = bin.parse(`S({
   globals:D(uint16),
 })`);
 
+//externs actually point to the address right after their destination (offset by 2)
+
+//should be named Object.map
+function sortObject(unordered,map=(e,k)=>e,filter=(e,k)=>true){
+  var ordered = {};
+  Object.keys(unordered).sort().forEach(function(key) {
+    if(filter(unordered[key],key))ordered[key] = map(unordered[key],key);
+  });
+  return ordered;
+}
+
 function encode(obj){
   if(typeof obj.code == "string"){
     obj.code = Buffer.from(obj.code,'hex');
   }
   var code = obj.code;
-  //delete obj.code;
 
-  obj.headerLength = 0xcafe;
+  obj.externs = sortObject(obj.externs,e=>e.sort((a,b)=>a-b),e=>e.length);
+  obj.globals = sortObject(obj.globals);
+
+  obj.headerLength = 0xf00d;
   var header = Buffer.from(bin.encode(type,obj),'hex');
   header.writeInt16BE(header.length,0);
 
@@ -51,6 +64,7 @@ function write(filename,data){
 
 module.exports = {decode,encode,read,write,startPos:4,entryPoint:"start"};
 
+// @ts-ignore
 if(require.main == module){
   var files = process.argv.slice(2);
   for(var name of files){

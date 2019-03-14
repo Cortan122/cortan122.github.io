@@ -68,7 +68,7 @@ const tokenTypeRom = {
 const tokenValueRom = {
   'number':(token)=>{
     var r;
-    var o = token.string; 
+    var o = token.string;
     if(o.startsWith("0x")){
       r = parseInt(o.substr(2),16);
     }else if(o.startsWith("0b")){
@@ -80,7 +80,7 @@ const tokenValueRom = {
     }else{
       r = parseInt(o);
     }
-    token.value = r; 
+    token.value = r;
   },
   'string':(token)=>{
     var o = token.string;
@@ -95,11 +95,11 @@ const tokenValueRom = {
         buf[bufferIndex] = hex;
         bufferIndex++;
       }else{
-        buf[bufferIndex] = char.charCodeAt(0);//todo:parseEncoding() 
+        buf[bufferIndex] = char.charCodeAt(0);//todo:parseEncoding()
         bufferIndex++;
       }
     }
-    token.value = buf.slice(0,bufferIndex); 
+    token.value = buf.slice(0,bufferIndex);
   },
   'char':(token)=>{
     var opt = options.interpretSingleQuotedStringsAs;
@@ -117,7 +117,7 @@ const tokenValueRom = {
         printError("warning: multi-character character constant",token);
       }
       token.value = token.value[0];
-    } 
+    }
   },
 };
 
@@ -333,9 +333,9 @@ function escapedCharToHex(h,e,inc){
 
 /**
  * @param {string} code
- * @param {number} index 
- * @param {RegExp} re1 
- * @param {RegExp=} re2 
+ * @param {number} index
+ * @param {RegExp} re1
+ * @param {RegExp=} re2
  */
 function doubleRegexMatch(code,index,re1,re2){
   if(re2==undefined){
@@ -432,7 +432,7 @@ function tokenize(code,Options){
             end:{...t.loc.end},
           },
         });
-      } 
+      }
     }
     res.push(e);
   });
@@ -456,7 +456,7 @@ function untokenize(tokens){
 }
 
 function getOptions(){
-  return Object.assign({},options);//todo: fixme: you can edit nested objects 
+  return options;
 }
 
 /**

@@ -14,7 +14,7 @@ function DefaultDict(defaultInit,from={}){
 }
 
 function format(_this,...args){
-  return _this.replace(/{(\d+)}/g, function(match, number) { 
+  return _this.replace(/{(\d+)}/g, function(match, number) {
     return typeof args[number] != 'undefined'
       ? args[number]
       : match
@@ -68,9 +68,8 @@ function getRegisterDeclarations(res=''){
   var fakeRegisters = getFakeRegisters();
 
   for(let e of arch.registers){
-    var size = e[e.length-1];
-    if(typeof size == 'string')throw 122;
-    var name = e[0];
+    var size = e[1];
+    var name = e[0][0];
     if(fakeRegisters[name]){
       res += fixIndent(`
         #define reg_${name} ${fakeRegisters[name]}
@@ -176,9 +175,8 @@ function getDumpableRegisters(){
   var fakeRegisters = getFakeRegisters();
   var dumpableRegisters = [];
   for(let e of arch.registers){
-    var name = e[0];
+    var name = e[0][0];
     if(name in fakeRegisters)continue;
-    if(typeof name == 'number')throw 122;
     dumpableRegisters.push(name);
   }
   return dumpableRegisters;

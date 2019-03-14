@@ -237,14 +237,14 @@ function endifDirectiveHelper(arr,i,env,bool,line){
     r.r = main(slice,env);
   }
   var nextString = arr[next].string;
-  
+
   let t = nextString.replace('elseif','if').replace('elif','if');
   let tr = directiveRom[t](arr,next,env,!bool);
   if(tr){
     r.i += tr.i;
     if(tr.r)r.r.push(...tr.r);
   }
-  
+
   return r;
 }
 
@@ -453,7 +453,7 @@ function stage2(tokens){
       // @ts-ignore
       e.value = Buffer.concat(arr);
     }else if(e.type=="identifier"){
-      while(tokens[i+1].string=="##"){
+      while(tokens[i+1] && tokens[i+1].string=="##"){
         if(tokens[i+2].type=="identifier" || tokens[i+2].type=="number"){
           e.string += tokens[i+2].string;
           i += 2;
@@ -527,7 +527,7 @@ function setOptions(Options){
 }
 
 function getOptions(){
-  return Object.assign({},options);//todo: fixme: you can edit nested arrays 
+  return options;
 }
 
 /**

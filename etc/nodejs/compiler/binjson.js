@@ -2,14 +2,15 @@ const arrayLengthLength = 4;
 const tempBuffer = Buffer.alloc(8);
 
 //todo: this is bad?
+//what is this for?
 var oldtoString = Array.prototype.toString;
 Array.prototype.toString = function(){
   return '['+oldtoString.call(this)+']';
 }
 
 function S(obj){
-  if(obj instanceof Object){
-    if(obj instanceof Array){
+  if(typeof obj == "object"){
+    if(Array.isArray(obj)){
       this.isAnonymous = true;
     }else{
       this.isAnonymous = false;
@@ -135,7 +136,7 @@ function encode(type,data){
   if(type instanceof D){
     return encode_D(type.type,data);
   }
-  if(type instanceof Array){
+  if(Array.isArray(type)){
     if(type.length != 1)throw `invalid type:${type}`;
     return encode_arr(type[0],data);
   }
@@ -156,7 +157,7 @@ function fromhex(str,pb,len=2,signed=false){
     var c = str.substr(pb[0],len);
     var num = parseInt(c,16);
     if( signed && num >= 1<<(len*4-1) ){
-      num = (1<<(len*4))-num; 
+      num = (1<<(len*4))-num;
     }
     pb[0] += len;
     return num;
@@ -266,7 +267,7 @@ function decode(type,data,pb){
   if(type instanceof D){
     return decode_D(type.type,data,pb);
   }
-  if(type instanceof Array){
+  if(Array.isArray(type)){
     if(type.length != 1)throw `invalid type:${type}`;
     return decode_arr(type[0],data,pb);
   }
@@ -307,7 +308,7 @@ function guess_obj(obj){
 }
 
 function guess(obj){
-  if(obj instanceof Array){
+  if(Array.isArray(obj)){
     return guess_arr(obj);
   }
   if(typeof obj == "string"){
@@ -320,25 +321,23 @@ function guess(obj){
     if(Number.isInteger(obj))return "int48";
     return "float64";
   }
-  if(obj instanceof Object){
+  if(typeof obj == "object"){
     return guess_obj(obj);
   }
   throw obj;//can not guess
 }
 
 function parse(type){
-  const __oldS = S;
-  const __oldD = D;
-  S = a=>new __oldS(a);
-  D = a=>new __oldD(a);
+  const vm = require('vm');
+  var sandbox = {};
+
+  sandbox.S = a=>new S(a);
+  sandbox.D = a=>new D(a);
   const __types = ["string","bool","uint8","int8","uint16","int16","uint24","int24","uint32","int32","uint40","int40","uint48","int48","float32","float64"];
-  for (var i = 0; i < __types.length; i++) {
-    eval(`var ${__types[i]} = "${__types[i]}";`);
+  for(var i = 0; i < __types.length; i++){
+    sandbox[__types[i]] = __types[i];
   }
-  //todo:eval is evil
-  var t = eval(type);
-  S = __oldS;
-  D = __oldD;
+  var t = vm.runInNewContext(type,sandbox);
   return t;
 }
 

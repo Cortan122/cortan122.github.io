@@ -40,8 +40,7 @@ type TokenOptions = {
   lineCommentSymbol?: string;
 };
 
-type Token = {
-  type: "string" | "number" | "char" | "identifier" | "lineComment" | "blockComment" | "operator" | "newline";
+type BaseToken = {
   string: string;
   loc: {
     file: string;
@@ -56,9 +55,15 @@ type Token = {
       index: number;
     };
   };
-  value?: number | Buffer;
   includeStack?: Token;
 };
+
+type Token = ({
+  type: "string" | "number" | "char" | "identifier" | "lineComment" | "blockComment" | "operator" | "newline";
+  value?: number | Buffer;
+} & BaseToken) |
+({type:"block",children:Token[],end?:Token} & BaseToken) |
+({type:"expression",p1?:Token,p2?:Token} & BaseToken);
 
 /*
 type Token = {

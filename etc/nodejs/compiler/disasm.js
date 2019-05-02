@@ -144,7 +144,7 @@ function disasm(ip){
   }
   line += "\t";
 
-  instruction = instruction.replace(/ip\+##/,tohex(size+ip+(ram[ip+1]<<8)+ram[ip+2],4));
+  instruction = instruction.replace(/ip\+##/,tohex((size+ip+(ram[ip+1]<<8)+ram[ip+2])&0xffff,4));
   instruction = instruction.replace(/ip\+#/,tohex(size+ip+parseNegative(ram[ip+1]),4));
   instruction = instruction.replace(/sp\+#/,()=>{
     var n = parseNegative(ram[ip+1]);

@@ -15,13 +15,16 @@ const defaultOptions = {
   verbosity:2,
   panicThreshold:1,
   quickPanic:false,
-  cache:false,
+  cache:true,
+  header:true,
 };
 /**@type {PrintErrorOptions} */
 var options = defaultOptions;
 
 var cache = [];
 var isPanicking = false;
+var panicMessageStack = [];
+var prevPulseMessage = '';
 
 /**
  * @param {string} str
@@ -56,9 +59,13 @@ function headerHelper(token){
   var headerColor = colorHelper("_header");
   var filenameString = headerColor;
   if(filename!=""){
+    filename = filename.replace(/^\0*/g,'');
     filenameString += filename+':';
   }
-  return `${filenameString}${token.loc.start.line}:${token.loc.start.col}:${colorReset}`;
+  if(options && options.header){
+    filenameString += `${token.loc.start.line}:${token.loc.start.col}:`;
+  }
+  return filenameString+colorReset;
 }
 
 /**
@@ -139,12 +146,24 @@ function flush(){
 
 function panic(){
   flush();
-  console.error("compilation aborted");
+  if(prevPulseMessage){
+    console.error(`compilation aborted (${prevPulseMessage} failed)`);
+  }else{
+    console.error("compilation aborted");
+  }
   process.exit(1);
 }
 
 function pulse(){
   if(isPanicking)panic();
+  panicMessageStack.pop();
+}
+
+/**
+ * @param {string} string
+ */
+function push(string){
+  panicMessageStack.push(string);
 }
 
 /**
@@ -183,6 +202,7 @@ function printError(string,token,lastToken=null){
     }
   }
   if(i>opt.panicThreshold){
+    prevPulseMessage = panicMessageStack[panicMessageStack.length-1];
     if(opt.quickPanic){
       panic();
     }else{
@@ -192,8 +212,7 @@ function printError(string,token,lastToken=null){
 }
 
 function getOptions(){
-  if(!options)return options;
-  return Object.assign({},options);//todo: fixme: you can edit nested objects
+  return options;
 }
 
 /**
@@ -204,7 +223,7 @@ function setOptions(Options){
     options = false;
     return;
   }
-  options = Object.assign(defaultOptions,Options);
+  options = Object.assign({},defaultOptions,Options);
 }
 
 process.on('exit', (code)=>{
@@ -214,4 +233,5 @@ process.on('exit', (code)=>{
 printError.getOptions = getOptions;
 printError.setOptions = setOptions;
 printError.pulse = pulse;
+printError.push = push;
 module.exports = printError;

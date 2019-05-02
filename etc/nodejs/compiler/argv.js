@@ -38,7 +38,7 @@ function parseArgv(argv,rom){
     };
   }
   for (var i = 2; i < argv.length; i++) {
-    var str = argv[i];      
+    var str = argv[i];
     if(str=='--'){
       candoop=false;
     }else if(str[0]=='-'&&candoop){

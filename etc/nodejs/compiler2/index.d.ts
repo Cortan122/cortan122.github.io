@@ -28,6 +28,7 @@ type PrintErrorOptions = false | {
   panicThreshold?: 0|1|2,
   quickPanic?: boolean,
   cache?: boolean,
+  header?: boolean,
 };
 
 type TokenOptions = {
@@ -36,8 +37,15 @@ type TokenOptions = {
   filename?: string | false;
   comments?: boolean;
   newlines?: boolean;
+  backslashNewlines?: boolean;
   operators?: string[];
   lineCommentSymbol?: string;
+};
+
+type CLIToken = {
+  str: string;
+  loc: number;
+  flags?: {[x: string]: string};
 };
 
 type BaseToken = {
@@ -58,6 +66,7 @@ type BaseToken = {
   includeStack?: Token;
 };
 
+
 type Token = ({
   type: "string" | "number" | "char" | "identifier" | "lineComment" | "blockComment" | "operator" | "newline";
   value?: number | Buffer;
@@ -66,73 +75,73 @@ type Token = ({
 ({type:"expression",p1?:Token,p2?:Token} & BaseToken);
 
 /*
-type Token = {
-  type: "identifier" | "lineComment" | "blockComment" | "operator" | "newline";
-  string: string;
-  loc: {
-    file: string;
-    end: {
-      line: number;
-      col: number;
-      index: number;
+  type Token = {
+    type: "identifier" | "lineComment" | "blockComment" | "operator" | "newline";
+    string: string;
+    loc: {
+      file: string;
+      end: {
+        line: number;
+        col: number;
+        index: number;
+      };
+      start: {
+        line: number;
+        col: number;
+        index: number;
+      };
     };
-    start: {
-      line: number;
-      col: number;
-      index: number;
+    value?: number | Buffer;
+  } | {
+    type: "string";
+    string: string;
+    loc: {
+      file: string;
+      end: {
+        line: number;
+        col: number;
+        index: number;
+      };
+      start: {
+        line: number;
+        col: number;
+        index: number;
+      };
     };
+    value: Buffer;
+  } | {
+    type: "number";
+    string: string;
+    loc: {
+      file: string;
+      end: {
+        line: number;
+        col: number;
+        index: number;
+      };
+      start: {
+        line: number;
+        col: number;
+        index: number;
+      };
+    };
+    value: number;
+  } | {
+    type: "char";
+    string: string;
+    loc: {
+      file: string;
+      end: {
+        line: number;
+        col: number;
+        index: number;
+      };
+      start: {
+        line: number;
+        col: number;
+        index: number;
+      };
+    };
+    value: number | Buffer;
   };
-  value?: number | Buffer;
-} | {
-  type: "string";
-  string: string;
-  loc: {
-    file: string;
-    end: {
-      line: number;
-      col: number;
-      index: number;
-    };
-    start: {
-      line: number;
-      col: number;
-      index: number;
-    };
-  };
-  value: Buffer;
-} | {
-  type: "number";
-  string: string;
-  loc: {
-    file: string;
-    end: {
-      line: number;
-      col: number;
-      index: number;
-    };
-    start: {
-      line: number;
-      col: number;
-      index: number;
-    };
-  };
-  value: number;
-} | {
-  type: "char";
-  string: string;
-  loc: {
-    file: string;
-    end: {
-      line: number;
-      col: number;
-      index: number;
-    };
-    start: {
-      line: number;
-      col: number;
-      index: number;
-    };
-  };
-  value: number | Buffer;
-};
 */

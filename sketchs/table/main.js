@@ -34,6 +34,15 @@ function setup() {
       firstHeaderName:'index',
       // defaultSortDirection:'-3',
     }).init();
+    $('head').append('<style>#myTable{margin-bottom: 300px;}</style>');
+    $('body').css({'position':'relative'});
+    var f = ()=>{
+      if(totals[6]==undefined)return setTimeout(f,1);
+      var b = $(`<b>${humanizeDuration(totals[6],{ units: ['h','m'] })}</b>`);
+      b.css({'position':'absolute','top':$('#myTable').innerHeight(),'left':0,'margin-top':8});
+      $('body').append(b);
+    };
+    setTimeout(f,1);
   }else{
     Table().init();
   }

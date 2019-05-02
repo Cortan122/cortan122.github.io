@@ -197,27 +197,6 @@ directiveRom["error"] = directiveRom["warning"] = directiveRom["message"];
 directiveRom["undef"] = directiveRom["undefine"];
 
 /**
- * @param {Token[]} tokens
- * @param {(string:string,token:Token)=>void} err
- */
-function bracketLookup(tokens,err=(a,b)=>{},op='(',ed=')',start=0,level=0){
-  var errIndex = -1;
-  for(var i = start; i < tokens.length; i++){
-    var b = tokens[i].string;
-    if(b==op){
-      level++;
-      errIndex = i;
-    }
-    if(b==ed){
-      level--;
-      if(level==0)return i;
-    }
-  }
-  err(`error: no '${ed}' was found to match this '${op}'`,tokens[errIndex]);
-  return -1;
-}
-
-/**
  * @param {Token[]} arr
  * @param {number} i
  * @param {PreprocessorEnvironment} env
@@ -444,7 +423,7 @@ function stage2(tokens){
     if(e.type=="string"){
       var arr = [e.value];
       let t = tokens[i+1];
-      while(t.type=="string"){
+      while(tokens[i+1] && t.type=="string"){
         arr.push(t.value);
         e.string += ' '+t.string;
         i++;
@@ -454,7 +433,7 @@ function stage2(tokens){
       e.value = Buffer.concat(arr);
     }else if(e.type=="identifier"){
       while(tokens[i+1] && tokens[i+1].string=="##"){
-        if(tokens[i+2].type=="identifier" || tokens[i+2].type=="number"){
+        if(tokens[i+2] && (tokens[i+2].type=="identifier" || tokens[i+2].type=="number") ){
           e.string += tokens[i+2].string;
           i += 2;
         }else{
@@ -474,10 +453,12 @@ function stage2(tokens){
  * @param {Token[]} tokens
  * @param {PreprocessorOptions} Options
  */
-function preprocess(tokens,Options={}){
-  options = Object.assign({},defaultOptions,Options);
+function preprocess(tokens,Options=null){
+  if(Options)options = Object.assign({},defaultOptions,Options);
+  printError.push("preprocessor");
   var r = main(tokens);
   r = stage2(r);
+  printError.pulse();
   return r;
 }
 
@@ -501,7 +482,7 @@ function simplifyFilename(name){
 }
 
 /**
- * @param {string} name
+ * @param {string|0} name
  * @param {PreprocessorEnvironment=} env
  * @param {Token=} includeStack
  */
@@ -509,12 +490,12 @@ function include(name,env={},includeStack=undefined){
   var code = fs.readFileSync(name,'utf-8');
   var opt = lexer.getOptions();
   var prevName = opt.filename;
-  opt.filename = simplifyFilename(name);
+  opt.filename = name==0?"stdin":simplifyFilename(name);
   var r = lexer.tokenize(code,opt);
   opt.filename = prevName;
   lexer.tokenize('',opt);
   var newEnv = Object.assign({},env);
-  newEnv.__FILE__ = path.resolve(name).replace(/\\/g,'/');
+  newEnv.__FILE__ = name==0?"stdin":path.resolve(name).replace(/\\/g,'/');
   if(includeStack)newEnv.__includeStack__я = includeStack;
   return main(r,newEnv);
 }
@@ -531,17 +512,30 @@ function getOptions(){
 }
 
 /**
- * @param {string} name
+ * @param {string|0} name
  * @param {PreprocessorOptions} Options
  */
-function preprocessFile(name,Options={}){
-  options = Object.assign({},defaultOptions,Options);
+function preprocessFile(name,Options=null){
+  if(Options)options = Object.assign({},defaultOptions,Options);
+  printError.push("preprocessor");
   var r = include(name);
   r = stage2(r);
+  printError.pulse();
   return r;
 }
 
-module.exports = {preprocess,preprocessFile,getOptions,setOptions};
+/**
+ * @param {(string|0)[]} filenames
+ * @param {PreprocessorOptions} options
+ * @returns {Token[]}
+ */
+function preprocessFiles(filenames,options=null){
+  var t = filenames.map(e=>preprocessFile(e,options));
+  var r = [].concat(...t);
+  return r;
+}
+
+module.exports = {preprocess,preprocessFile,preprocessFiles,getOptions,setOptions};
 
 // @ts-ignore
 if(require.main == module){

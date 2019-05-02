@@ -62,6 +62,12 @@ const tokenTypeRom = {
   'char':(code,index)=>{
     return stringMatch(code,index,"'");
   },
+  '_backslash':(code,index)=>{
+    if(options.backslashNewlines && stringCompare(code,index,'\\\n')){
+      return "\\";
+    }
+    return "";
+  },
 };
 
 /**@type {Object.<string,(token:{string:string,type:string,value?})=>void>} */
@@ -177,6 +183,7 @@ const defaultOptions = {
     '...',
   ],
   lineCommentSymbol:'//',
+  backslashNewlines:true,
 };
 var options = defaultOptions;
 
@@ -237,7 +244,7 @@ function getLineString(lineNumber,filename){
   if(lineNumber==1){
     return res;
   }
-  throw 'hi'+lineNumber;
+  throw Error('hi'+lineNumber);
 }
 
 /**
@@ -363,6 +370,7 @@ function main(code){
   if(!filename){
     filename = "";
   }
+  if(globalCode[filename])filename = '\0'+filename;
   globalCode[filename] = code;
   var tokens = [];
   line = 1;
@@ -370,6 +378,17 @@ function main(code){
   main:for(var i = 0; i < code.length; i++){
     var char = code[i];
     if(char=='\n'){
+      if( !(options.backslashNewlines && tokens[tokens.length-1].string=='\\') ){
+        tokens.push({
+          type:'newline',
+          string:'\n',
+          loc:{
+            file:filename,
+            start:{line,col,index:i},
+            end:{line,col,index:i},
+          },
+        });
+      }
       line++;
       col = 1;
       continue;
@@ -399,10 +418,11 @@ function main(code){
       continue main;
     }
     if(!char.match(/\s/)){
-      printError(`error: stray ‘${char}’ in program`);
+      printError(`error: stray '${char}' in program`);
     }
     col++;
   }
+  // @ts-ignore
   return tokens;
 }
 
@@ -413,30 +433,15 @@ function main(code){
  */
 function tokenize(code,Options){
   if(Options)setOptions(Options);
+  require('./printError.js').push('lexer');
 
   var r = main(code);
-  var specialArray = [];
+  var specialArray = ['_backslash'];
   if(!options.comments)specialArray.push("blockComment","lineComment");
-  var res = [];
-  r.map((e,i,r)=>{
-    if(specialArray.includes(e.type))return;
-    if(options.newlines && i!=0){
-      var t = r[i-1];
-      if(t.loc.end.line!=e.loc.start.line || t.loc.file!=e.loc.file){
-        res.push({
-          type:'newline',
-          string:'\n',
-          loc:{
-            file:t.loc.file,
-            start:{...t.loc.end},
-            end:{...t.loc.end},
-          },
-        });
-      }
-    }
-    res.push(e);
-  });
+  if(!options.newlines)specialArray.push("newline");
+  var res = r.filter(e=>!specialArray.includes(e.type));
 
+  require('./printError.js').pulse();
   return res;
 }
 
@@ -448,8 +453,8 @@ function untokenize(tokens){
   var r = "";
   var tempBool = false;
   for(var t of tokens){
-    if(t.type=="identifier" && tempBool)r += ' ';
-    tempBool = t.type=="identifier";
+    if((t.type=="identifier"||t.type=="number") && tempBool)r += ' ';
+    tempBool = (t.type=="identifier"||t.type=="number");
     r += t.string;
   }
   return r;
@@ -475,5 +480,5 @@ if(require.main == module){
   var buff = fs.readFileSync('../compiler/examples/token2.crtc')
   var r = tokenize(buff.toString());
   console.dir(r,{depth:null});
-  // console.log(untokenize(r));
+  console.log(untokenize(r));
 }

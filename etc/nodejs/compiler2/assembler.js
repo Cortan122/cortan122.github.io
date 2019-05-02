@@ -13,12 +13,20 @@ const orderOfOperations = [
   [['*'],'LtR'],
 ];
 const initPointer = crto.startPos;
+/**@type {{[x:string]:number}} */
+const instructionRom = {};
+/**@type {{[x:string]:number[]}} */
+const instructionSizes = {};
+/**@type {{[x:string]:number[]}} */
+const relativeJumps = {};
 
 var undefinedTokensGlobalArray = [];
 var buffer = Buffer.alloc(65536,0);
 var pointer = 0;
+var crtoPreference_relative = true;//true|false|null
+var crtoPreference_movable = true;
 var crtoFlag_movable = true;
-/**@type {{[x: string]:{v:number,type?:"label"|"extern"}}} */
+/**@type {{[x: string]:{v:number|Token,type?:"label"|"extern"}}} */
 var env = {};
 /**@type {{ pointer: number; value: Token; size: number; valueTokens: Token[]; }[]} */
 var backfill = [];
@@ -32,32 +40,33 @@ var globals = {};
 /**@type {{[x: string]:(ops:Token[],self:Token)=>void}} */
 const directiveRom = {
   "define":(ops,self)=>{
-    if(!directiveArgCheck(".define",self,2,ops))return;
+    if(!directiveArgCheck(".define",self,2,ops,true))return;
     var name = ops[0];
-    var val = ops[1];
     if(name.type!="identifier")return printError(`error: labels must be identifiers`,name);
     if(env[name.string]!=undefined)printError(`warning: redefining ${name.string}`,name);
-    if(val.type!="number" || val.value instanceof Buffer)return unexpected(val);
-    env[name.string] = {v:val.value};
-    return true;
+    env[name.string] = evalExpression(parseExpression(ops.slice(1)),env);
   },
   "byte":(ops,self)=>{
-    if(!directiveArgCheck(".byte",self,1,ops))return;
+    if(!directiveArgCheck(".byte",self,1,ops,true))return;
+    var e = evalExpression(parseExpression(ops),env);
+    if(e==null)return;
     pointer = emitNumber({
       pointer,
-      value:ops[0],
+      value:e.v,
       size:1,
-      valueTokens:[ops[0]],
-    },backfill);
+      valueTokens:ops,
+    },backfill,e);
   },
   "word":(ops,self)=>{
-    if(!directiveArgCheck(".word",self,1,ops))return;
+    if(!directiveArgCheck(".word",self,1,ops,true))return;
+    var e = evalExpression(parseExpression(ops),env);
+    if(e==null)return;
     pointer = emitNumber({
       pointer,
-      value:ops[0],
+      value:e.v,
       size:2,
-      valueTokens:[ops[0]],
-    },backfill);
+      valueTokens:ops,
+    },backfill,e);
   },
   "extern":(ops,self)=>{
     if(!directiveArgCheck(".extern",self,1,ops,true))return;
@@ -75,9 +84,10 @@ const directiveRom = {
       if(name.type!="identifier")return printError(`error: labels must be identifiers`,name);
       if(env[name.string]==undefined)return printError(`error: ${name.string} is not defined`,name);
       if(env[name.string].type!="label")return printError(`error: ${name.string} is not a label`,name);
-      globals[name.string] = env[name.string].v;
+      var t = env[name.string].v;
+      if(typeof t != "number")return printError(`error: ${name.string} is not yet known`,name);
+      globals[name.string] = t;
     }
-    return true;
   },
   "pad":(ops,self)=>{
     var t = padOrAlignHelper(".pad",ops,self);
@@ -107,6 +117,10 @@ const directiveRom = {
   "undefine":(ops,self)=>{
     if(!directiveArgCheck(".undefine",self,1,ops,true))return;
     doBackfill();
+    if(ops[0].string=='*' || ops[0].string=='.*'){
+      Object.keys(env).map(e=>delete env[e]);
+      return true;
+    }
     for(var i = 0; i < ops.length; i++){
       var name = ops[i];
       if(name.type!="identifier")return printError(`error: labels must be identifiers`,name);
@@ -124,7 +138,6 @@ const directiveRom = {
         delete env[name.string];
       }
     }
-    return true;
   },
 };
 
@@ -216,7 +229,7 @@ function parseBlocks(tokens){
     }else if(!")}]".includes(char)){
       res.push(t);
     }else{
-      printError('error: ?',t);
+      printError(`error: there is no match for this '${t.string}'`,t);
     }
   }
   return res;
@@ -336,6 +349,7 @@ function parseExpressionSignature(tokens){
 
 /**
  * @param {Token[]} tokens
+ * @returns {{s:string,v:(number | Token)[],valueTokens:Token[][]}}
  */
 function parseInstructionSignature(tokens){
   const breakExpressions = tokens=>{
@@ -384,7 +398,7 @@ function parseInstructionSignature(tokens){
   }
 
   //fix for: "mov sp -1" is interpreted as "mov sp-1"
-  if(instructionSizes && instructionSizes[mnemonic][0]==2 && first && !second){
+  if(instructionSizes[mnemonic] && instructionSizes[mnemonic][0]==2 && first && !second){
     var ind = realTokens.findIndex(e=>e.string=='-');
     if(ind!=-1){
       let t = realTokens.slice();
@@ -467,18 +481,25 @@ function parseLine(tokens){
 
 /**
  * @param {Token} token
- * @param {{[x: string]:{v:number,type?:"label"|"extern"}}} env
+ * @param {{[x: string]:{v:number|Token,type?:"label"|"extern"}}} env
  * @returns {{v:Token | number,type?:"label"|"extern"}}
  */
 function evalExpression(token,env){
   if(!token)return null;
 
   if(token.type=="identifier"){
-    if(env[token.string]==undefined){
+    if(token.string=="this"){
+      token.string = `this ${pointer}`;
+      return {v:pointer,type:"label"};
+    }else if(token.string.startsWith("this ")){
+      return {v:parseInt(token.string.slice(5)),type:"label"};
+    }else if(env[token.string]==undefined){
       undefinedTokensGlobalArray.push(token.string);
       return {v:token};
     }
-    return env[token.string];
+    let t = env[token.string];
+    if(typeof t.v == "number")return t;
+    return evalExpression(t.v,env);
   }else if(token.type=="number"){
     if(token.value instanceof Buffer)throw 122;
     return {v:token.value};
@@ -500,7 +521,7 @@ function evalExpression(token,env){
           crtoFlag_movable = false;
         }
       }else if(t1.type=="label" || t2.type=="label"){
-        if(token.string=='+' || token.string=='-'){
+        if(token.string=='+' || (t1.type=="label" && token.string=='-')){
           return {v,type:"label"};
         }else if(crtoFlag_movable){
           printError(`warning: address link broken (position independent code impossible)`,token);
@@ -602,7 +623,9 @@ function emitNumber(e,backfill,exp=undefined){
   if(valType=="label"){
     addresses.push(pointer);
     if(valueSize==1 && crtoFlag_movable){
-      printError(`warning: address assigned to 8bit value (position independent code impossible)`,t1,t2);
+      if(crtoPreference_movable){
+        printError(`warning: address assigned to 8bit value (position independent code impossible)`,t1,t2);
+      }
       crtoFlag_movable = false;
     }
   }
@@ -630,7 +653,82 @@ function emitNumber(e,backfill,exp=undefined){
 }
 
 /**
+ * @param {string} sig
+ * @param {number | Token} val
+ * @param {string} valType
+ * @param {BaseToken[]} line
+ * @param {number} nLabels
+ * @returns {{opcode: number,size: number,value: number | Token,rel?: boolean;}}
+ */
+function pickAlternativeInstruction(sig,val,valType,line,nLabels){
+  var arr = [];
+  /**
+   * @param {number} opcode
+   * @param {number} size
+   * @param {number | Token} value
+   */
+  const push = (opcode,size,value,rel=false)=>{
+    var price = size;
+    if(value==null)price = 0xfffff;
+    if(opcode!=undefined)arr.push({opcode,size,value,price,rel});
+  };
+  /**
+   * @param {number|Token} a
+   */
+  const sub = (a,b=0)=>{
+    if(typeof a == "number"){
+      if(valType!="label")return null;
+      return a-pointer-b;
+    }
+    let ts = lexer.tokenize(` -this `);
+    let t = Object.assign({}, ts[0], {type: "expression", p1:a, p2:ts[1]});
+    pointer += b;
+    let e = evalExpression(t,env);
+    pointer -= b;
+    if(e==null)return null;
+    return e.v;
+  };
+
+  var relativeSignature = (relativeJumps[sig] || []);
+  if(sig.includes('*')){
+    push(relativeSignature[0],1,sub(val,2),true);
+    push(relativeSignature[1],2,sub(val,3),true);
+    push(instructionRom[sig.replace('*','#')],1,val);
+    push(instructionRom[sig.replace('*','##')],2,val);
+  }else if(instructionRom[sig]){
+    return {opcode:instructionRom[sig],size:0,value:null};
+  }
+  if(arr.length==0){
+    printError(`error: invalid instruction (${sig})`,line[nLabels*2],line[line.length-1]);
+    return null;
+  }
+
+  arr.map(e=>{
+    var {size,value,rel} = e;
+    if(!(typeof value == "number" && Math.abs(value)<256) && size==1){
+      e.price |= 0b10000000;
+    }
+    if(typeof value == "number" && (value<-128 || value>127) && size==1 && rel==true){
+      //todo: this is not only for rel==true, it also needs to trigger for [sp+0xff] (same for emitNumber)
+      e.price |= 0b10000000;
+    }
+    if(size==1 && valType=="label" && crtoPreference_movable && rel==false){
+      e.price |= 0b01000000;
+    }
+    if(crtoPreference_relative!==null && rel!=crtoPreference_relative){
+      e.price |= 0b00100000;
+    }
+  });
+
+  arr.sort((a,b)=>a.price-b.price);
+  if(arr[0].opcode==0x72)console.log(arr,sig);
+  return arr[0];
+}
+
+/**
  * @param {{ sig: string, val: (number|Token)[], valueTokens:Token[][] }} arr
+ * @param {BaseToken[] | Token[]} line
+ * @param {number} nLabels
  */
 function emitInstruction(arr,line,nLabels){
   if(arr.val.length>1){
@@ -639,7 +737,6 @@ function emitInstruction(arr,line,nLabels){
     return;
   }
   var {sig,val:[val],valueTokens} = arr;
-  if(typeof sig != "string" || typeof val == "string")throw 122;
   if(val && typeof val != "number"){
     let t = evalExpression(val,env);
     if(t==null){
@@ -649,27 +746,11 @@ function emitInstruction(arr,line,nLabels){
     var valType = t.type;
   }
 
-  var valueSize = 0;
-  if(sig.includes('*')){
-    let t1 = sig.replace('*','#');
-    let t2 = sig.replace('*','##');
-    if(typeof val == "number" && Math.abs(val)<256 && instructionRom[t1]!=undefined){
-      sig = t1;
-      valueSize = 1;
-    }else if(instructionRom[t2]!=undefined){
-      sig = t2;
-      valueSize = 2;
-    }else{
-      sig = t1;
-      valueSize = 1;
-    }
-  }
-  if(instructionRom[sig]==undefined){
-    printError(`error: invalid instruction (${sig})`,line[nLabels*2],line[line.length-1]);
-    return;
-  }
-  //todo: something about relative jumps
-  buffer[pointer] = instructionRom[sig];
+  var t = pickAlternativeInstruction(sig,val,valType,line,nLabels);
+  if(t.rel)valType = undefined;
+  var valueSize = t.size;
+  val = t.value;
+  buffer[pointer] = t.opcode;
   pointer++;
 
   if(val==null)return;
@@ -698,7 +779,7 @@ function main(tokens){
   var lines = splitLines(tokens);
   buffer.fill(0);
   pointer = initPointer;
-  env = {};
+  env = {this:{v:-1,type:"label"}};
   backfill = [];
   addresses = [];
   externs = [];
@@ -734,6 +815,7 @@ function main(tokens){
       pointer += parsed.r.length;
     }else if(parsed.r!=null){
       var nLabels = parsed.labels.length;
+      // console.log(buffer.slice(initPointer,pointer).toString('hex'));
       emitInstruction(parsed.r,line,nLabels);
     }
   }
@@ -743,13 +825,17 @@ function main(tokens){
   return buffer.slice(initPointer,pointer);
 }
 
-function assemble(filename){
-  var r = preprocessor.preprocessFile(filename,{});
-  var code = main(r);
+/**
+ * @param {Token[]} tokens
+ */
+function assemble_unencoded(tokens){
+  printError.push("assembler");
+  var code = main(tokens);
   var realExterns = {};
   externs.map(e=>{
     realExterns[e.name.string] = e.arr;
   });
+  printError.pulse();
   return {
     code,
     pos:initPointer,
@@ -759,65 +845,115 @@ function assemble(filename){
   };
 }
 
-archer.init("./crtb.arch.js");
-const arch = archer.arch;
-arch.table.arr = arch.table.arr.map((e,i)=>e==""?"illegal":e);
-lexer.setOptions({
-  "comments":false,
-  "filename":"list of instructions",
-  "lineCommentSymbol":";",
-  "newlines":true,
-  "operators":[
-    ',',
-    '|',
-    '&',
-    '^',
-    '*',
-    '+',
-    '-',
-    '(',
-    ')',
-    '[',
-    ']',
-    '#',
-    '##',
-    '.',
-    ':',
-    '.*',
-  ],
-});
-const tokenizedInstructions = splitLines(lexer.tokenize(arch.table.arr.join('\n')));
-const parsedInstructions = tokenizedInstructions.map(e=>parseInstructionSignature(e).s);
-const instructionRom = {};
-parsedInstructions.map((e,i)=>instructionRom[e] = i);
-lexer.getOptions().filename = "extra instructions";
-for(let rule of arch.additionalTableEntries){
-  arch.table.arr.map((e,i)=>{
-    return {m:e.match(rule[0]),i,e:e.replace(rule[0],rule[1])};
-  }).filter(e=>e.m).map(e=>{
-    instructionRom[parseInstructionSignature(lexer.tokenize(e.e)).s] = e.i;
-  });
+/**
+ * @param {...string|0} filenames
+ */
+function assembleFile_unencoded(...filenames){
+  return assemble_unencoded(preprocessor.preprocessFiles(filenames));
 }
-var instructionSizes = {};
-for(let k in instructionRom){
-  let arr = k.split('_');
-  let t = instructionSizes[arr[0]];
-  if(!t)instructionSizes[arr[0]] = t = [];
-  if(!t.includes(arr.length-1)){
-    t.push(arr.length-1);
-    t.sort();
+
+/**
+ * @param {Token[]} tokens
+ * @returns {Buffer}
+ */
+function assemble(tokens){
+  return crto.encode(assemble_unencoded(tokens));
+}
+
+/**
+ * @param {...string|0} filenames
+ */
+function assembleFile(...filenames){
+  return assemble(preprocessor.preprocessFiles(filenames));
+}
+
+function init(){
+  archer.init("./crtb.arch.js");
+  const arch = archer.arch;
+  arch.table.arr = arch.table.arr.map((e,i)=>e==""?"illegal":e);
+  lexer.setOptions({
+    "comments":false,
+    "filename":"list of instructions",
+    "lineCommentSymbol":";",
+    "newlines":true,
+    "operators":[
+      ',',
+      '|',
+      '&',
+      '^',
+      '*',
+      '+',
+      '-',
+      '(',
+      ')',
+      '[',
+      ']',
+      '#',
+      '##',
+      '.',
+      ':',
+      '.*',
+    ],
+  });
+  const tokenizedInstructions = splitLines(lexer.tokenize(arch.table.arr.join('\n')));
+  const parsedInstructions = tokenizedInstructions.map(e=>parseInstructionSignature(e).s);
+  parsedInstructions.map((e,i)=>instructionRom[e] = i);
+  lexer.getOptions().filename = "extra instructions";
+  for(let rule of arch.additionalTableEntries){
+    arch.table.arr.map((e,i)=>{
+      return {m:e.match(rule[0]),i,e:e.replace(rule[0],rule[1])};
+    }).filter(e=>e.m).map(e=>{
+      instructionRom[parseInstructionSignature(lexer.tokenize(e.e)).s] = e.i;
+    });
+  }
+  for(let k in instructionRom){
+    let arr = k.split('_');
+    let t = instructionSizes[arr[0]];
+    if(!t)instructionSizes[arr[0]] = t = [];
+    if(!t.includes(arr.length-1)){
+      t.push(arr.length-1);
+      t.sort();
+    }
+  }
+  for(let k in instructionRom){
+    let t = k.match(/^([a-z]+)_##$/i);
+    if(!t)continue;
+    let name = t[1];
+    let r = [];
+    for(let hash of ['#','##']){
+      let regex = RegExp(`^${name}_\\(${arch.instructionPointer}\\+${hash}\\)$`,"i");
+      let t = Object.entries(instructionRom).filter(e=>e[0].match(regex))[0];
+      r.push(t?t[1]:undefined);
+    }
+    if(r.length)relativeJumps[`${name}_*`] = r;
   }
 }
+
+init();
+
+module.exports = {
+  assemble_unencoded,
+  assembleFile_unencoded,
+  assemble,
+  assembleFile,
+};
 
 // @ts-ignore
 if(require.main == module){
   // const file = '../compiler/examples/helloworld.crta';
-  // const file = '../compiler/examples/snake.crta';
-  const file = '../compiler/lib/mult.crta';
-  let r = assemble(process.argv[2] || file);
+  const file = '../compiler/examples/snake.crta';
+  // const file = '../compiler/lib/mult.crta';
+  let r = assembleFile_unencoded(process.argv[2] || file);
   console.dir(r.code.toString('hex'));
   let o = crto.encode(r);
   require('fs').writeFileSync('../compiler/examples/snake2.crto',o);
+  require('child_process').execFileSync("node",[
+    "../compiler/linker.js",
+    '../compiler/examples/snake2.crto',
+    "-o",
+    '../compiler/examples/out.crtb',
+  ]);
 }
 
 //node assembler.js ./examples\snake.crta -o ./examples\snake.crto
+//node cli.js assemble ../compiler/examples/snake.crta -o ../compiler/examples/snake2.crto

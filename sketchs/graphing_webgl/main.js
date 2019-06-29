@@ -136,14 +136,14 @@ function updateShader(){
   }
   console.error = old;
   noStroke();
-  isDirty = true; 
+  isDirty = true;
   updateCode();
 }
 
 function draw(){
   if(!isDirty&&tweakables.cacheFrames)return;
   isDirty = false;
-  if(myShader == undefined)return; 
+  if(myShader == undefined)return;
   myShader.setUniform('uTime',frameCount/60);
   myShader.setUniform('uBounds',bounds);
   quad(-1,-1,1,-1,1,1,-1,1);

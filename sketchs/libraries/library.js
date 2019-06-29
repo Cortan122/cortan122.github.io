@@ -1,23 +1,23 @@
 (function(){
   var lib = {};
 
-  lib.sleep = function (ms) {
+  lib.sleep = function(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
   };
 
-  lib.clone = function (obj) {
+  lib.clone = function(obj){
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
-    for (var attr in obj) {
+    for (var attr in obj){
       if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
     }
     return copy;
   };
 
-  lib.arrayDeepCopy = function (a){
+  lib.arrayDeepCopy = function(a){
     if(a == undefined)return undefined;
     var r = [];
-    for (var i = 0; i < a.length; i++) {
+    for (var i = 0; i < a.length; i++){
       if(Array.isArray(a[i])){
         r.push(arrayDeepCopy(a[i]));
       }else{
@@ -27,11 +27,11 @@
     return r;
   };
 
-  lib.getRandomInt = function (min, max) {
+  lib.getRandomInt = function(min, max){
     return Math.floor(random(0,1) * (max - min)) + min;
   };
 
-  lib.round10 = function (value,exp){
+  lib.round10 = function(value,exp){
     exp = Math.pow(10,exp);//(10**exp);
     return floor(value/exp)*exp;
     /*value = +value;
@@ -42,7 +42,7 @@
     return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));*/
   };
 
-  lib.getSumOfArray = function (numArray) {
+  lib.getSumOfArray = function(numArray){
     if(numArray[0] instanceof p5.Vector){
       var r = createVector(0,0,0);
       numArray.map(e => r=r.add(e));
@@ -53,29 +53,29 @@
     return r;
   };
 
-  lib.getAverageOfArray = function (numArray) {
+  lib.getAverageOfArray = function(numArray){
     return getSumOfArray(numArray)/numArray.length;
   };
 
-  lib.getMaxOfArray = function (numArray) {
+  lib.getMaxOfArray = function(numArray){
     return Math.max.apply(null, numArray);
   };
 
-  lib.getMinOfArray = function (numArray) {
+  lib.getMinOfArray = function(numArray){
     return Math.min.apply(null, numArray);
   };
 
-  lib.modulo = function (a,b){
+  lib.modulo = function(a,b){
     return a - b * floor(a/b);
   };
 
   try{
-    lib.delayEval = async function (ms,str) {
+    lib.delayEval = async function(ms,str){
       await sleep(ms);
       eval(str);//setTimeout()
     };
 
-    lib.delayApply = async function (ms,f,_this,args) {
+    lib.delayApply = async function(ms,f,_this,args){
       await sleep(ms);
       f.apply(_this,args);//setTimeout()
     };
@@ -183,7 +183,7 @@
     '\'': 222,
     '\"': 222
   };
-  lib.getKeyCodeOf = function (argument) {
+  lib.getKeyCodeOf = function(argument){
     if(typeof argument == 'number'){
       if(Number.isInteger(argument)){return argument;}else{return undefined;}
     }
@@ -211,7 +211,7 @@
   var isGithub = lib.isGithub = window.location.href.includes("cortan122.github.io");
   var isLocalhost = lib.isLocalhost = window.location.href.includes("localhost");
 
-  lib.sendRequest = function (url,func,type,b,cache,data){
+  lib.sendRequest = function(url,func,type,b,cache,data){
     if(cache === undefined){cache = true;}
     if(b === undefined){b = true;}
     if(type === undefined){type = "GET";data = undefined;}
@@ -230,17 +230,17 @@
       xmlHttp.setRequestHeader('Last-Modified','{now} GMT');
       xmlHttp.setRequestHeader('Cache-Control','max-age=0, no-cache, must-revalidate, proxy-revalidate');
     }
-    xmlHttp.onreadystatechange = function() {
-      if (xmlHttp.readyState === 4) {
+    xmlHttp.onreadystatechange = function(){
+      if (xmlHttp.readyState === 4){
         func(xmlHttp.responseText);
       }
     }
     xmlHttp.send(data);
   };
 
-  lib.styleExists = function (string) {
+  lib.styleExists = function(string){
     var a = document.styleSheets;
-    for (var i = 0; i < a.length; i++) {
+    for (var i = 0; i < a.length; i++){
       var b;
       //chrome: .rules
       //firefox: .cssRules
@@ -249,7 +249,7 @@
       }catch(e){
         return false;
       }
-      for (var j = 0; j < b.length; j++) {
+      for (var j = 0; j < b.length; j++){
         if(b[j].selectorText == undefined)continue;
         if(!(string instanceof RegExp)){
           if(b[j].selectorText == string)return b[j];
@@ -262,19 +262,19 @@
     return undefined;
   };
 
-  lib.isMouseOverCanvas = function (c) {
+  lib.isMouseOverCanvas = function(c){
     //if(document.activeElement != document.body)return false;//fixme:unclear function name
     if(c == undefined)c = window.canvas;
     var box = c.getBoundingClientRect();
     return (mouseX>=0 && mouseX<=box.width && mouseY<=box.height && mouseY>=0);
   };
 
-  lib.isFocusedOnCanvas = function (){
+  lib.isFocusedOnCanvas = function(){
     return document.activeElement == document.body;
   };
 
-  lib.getQueryParameterByName = function(name, url) {
-    if (!url) {
+  lib.getQueryParameterByName = function(name, url){
+    if (!url){
       url = window.location.href;
     }
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -285,12 +285,12 @@
     return decodeURIComponent(results[2].replace(/\+/g, " "));
   };
 
-  lib.addDrawEvent = function (event){
+  lib.addDrawEvent = function(event){
     //var p5.instance._draw = p5.instance._draw;
     if(!p5.instance._draw.isNew){
-      p5.instance._draw = (function() {
+      p5.instance._draw = (function(){
         var cached_function = p5.instance._draw;
-        return function() {
+        return function(){
           if(this._drawEvents)this._drawEvents.map(e => e());
           var result = cached_function.apply(this, arguments); // use .apply() to call it
           return result;
@@ -306,7 +306,7 @@
     if(lib.isInit == true){console.log("lib already init1alized");return;}
     lib.isInit = true;
     //Object.assign(window,lib);
-    for (var i in lib) {
+    for (var i in lib){
       if((window[i] === undefined)&&(lib[i] instanceof Function))window[i] = lib[i];
     }
     if(window.lib === undefined)window.lib = lib;
@@ -314,9 +314,9 @@
     if(window.setup == undefined){
       window.setup = lib.init2;
     }else{
-      window.setup = (function() {
+      window.setup = (function(){
         var cached_function = window.setup;
-        return function() {
+        return function(){
           lib.init2();
           var result = cached_function.apply(this, arguments); // use .apply() to call it
           return result;
@@ -346,7 +346,7 @@
 
       twr.getQuery = function(){
         var keys = Object.keys(tweakables);
-        for (var i = 0; i < keys.length; i++) {
+        for (var i = 0; i < keys.length; i++){
           var name = keys[i];
           var t = lib.getQueryParameterByName("tw_"+name);
           if(t){
@@ -362,7 +362,7 @@
         }
       };
 
-      twr.initTweakables = (function (){
+      twr.initTweakables = (function(){
         try{
           if(localStorage[this.name]){
             var t = JSON.parse(localStorage[this.name]);//var t = {};
@@ -395,7 +395,7 @@
 
       twr.isTweakablesShown = false;
 
-      twr.toggleTweakables = (function () {
+      twr.toggleTweakables = (function(){
         var isTweakablesShown = this.isTweakablesShown;
         pdiv = $('#pDiv');
         var a = width;
@@ -409,12 +409,12 @@
         this.events.forEach(e => e("isTweakablesShown"));
       }).bind(twr);
 
-      twr.displayTweakables = (function () {
+      twr.displayTweakables = (function(){
         var onChangeTweakable = this.onChangeTweakable;
         pdiv = $('#pDiv');
         var keys = Object.keys(tweakables);
         if(tweakables.metaSort)keys = keys.sort();
-        for (var i = 0; i < keys.length; i++) {
+        for (var i = 0; i < keys.length; i++){
           var name = keys[i];
           var text = $('<p>'+name+':'+'</p>');
           text.addClass('tweakables');
@@ -459,20 +459,20 @@
           .keyup(resizeTextbox)
           .change(resizeTextbox)
           .click(resizeTextbox)
-          .each(function(i,e) {
+          .each(function(i,e){
             resizeTextbox.call(e);
           });
       }).bind(twr);
 
-      twr.onChangeTweakable = (function (name) {
+      twr.onChangeTweakable = (function(name){
         this.events.forEach(e => e(name));
         var resizeTextbox = this.resizeTextbox;
         localStorage[this.name] = JSON.stringify(tweakables);
         if(tweakables.metaResize)
-          $(".input.tweakables").each(function(i,e) {resizeTextbox.call(e);});
+          $(".input.tweakables").each(function(i,e){resizeTextbox.call(e);});
       }).bind(twr);
 
-      twr.makeEnum = function (name,rom) {
+      twr.makeEnum = function(name,rom){
         $('#tw_'+name).find('input,select').remove();
         var s = $(`
           <select>
@@ -484,7 +484,7 @@
         s.val(tweakables[name]);
       };
 
-      twr.resizeTextbox = function () {
+      twr.resizeTextbox = function(){
         var t = 10;
         this.style.width = 0;
         var newWidth = this.scrollWidth + t;
@@ -500,8 +500,8 @@
 
     if(window.inputRom && !window.parseInputRom){
       var mgr = lib.inputManager = {};
-      mgr.parseInputRom = function () {
-        for (var i = 0; i < inputRom.length; i++) {
+      mgr.parseInputRom = function(){
+        for (var i = 0; i < inputRom.length; i++){
           var t;
           (t = inputRom[i].keys) || (t = inputRom[i].key);
           if(t.length == undefined){inputRom[i].key = getKeyCodeOf(t);inputRom[i].keys = undefined;continue;}
@@ -509,19 +509,19 @@
           if(t.length == 0)throw 'waaat';
           inputRom[i].keys = [];
           inputRom[i].key = undefined;
-          for (var j = 0; j < t.length; j++) {
+          for (var j = 0; j < t.length; j++){
             inputRom[i].keys[j] = getKeyCodeOf(t[j]);
           }
         }
       }
 
-      mgr.trueinput = function (i) {
+      mgr.trueinput = function(i){
         try{
           eval(inputRom[i].action);
         }catch(e){alert(e.stack);}
       }
 
-      mgr.longinput = (function (d){
+      mgr.longinput = (function(d){
         if(this.timer[d] > 0){
           this.timer[d]--;
         }else{
@@ -531,24 +531,24 @@
 
       mgr.timer = [];
 
-      mgr.shortinput = (function (d){
+      mgr.shortinput = (function(d){
         this.trueinput(d);
         this.timer[d] = tweakables.inputRepeatDelay;
       }).bind(mgr);
 
-      mgr.keyPressed = (function (){
+      mgr.keyPressed = (function(){
         if(!isFocusedOnCanvas())return;
-        for (var i = 0; i < inputRom.length; i++) {
+        for (var i = 0; i < inputRom.length; i++){
           if(inputRom[i].keys == undefined && inputRom[i].key != undefined){
             if(keyCode == inputRom[i].key){this.shortinput(i);return;}
           } else if(inputRom[i].keys != undefined){
             if(!inputRom[i].simultaneous){
-              for (var j = 0; j < inputRom[i].keys.length; j++) {
+              for (var j = 0; j < inputRom[i].keys.length; j++){
                 if(keyCode == inputRom[i].keys[j]){this.shortinput(i);return;}
               }
             }else{
               if(inputRom[i].keys[inputRom[i].keys.length - 1] != keyCode)continue;
-              for (var j = inputRom[i].keys.length - 2; j >= 0; j--) {
+              for (var j = inputRom[i].keys.length - 2; j >= 0; j--){
                 if(!keyIsDown(inputRom[i].keys[j])){j = -2;break;}
               }
               if(j == -1){this.shortinput(i);return;}
@@ -557,19 +557,19 @@
         }
       }).bind(mgr);
 
-      mgr.updateKeyboard = (function (){
+      mgr.updateKeyboard = (function(){
         if(!isFocusedOnCanvas())return;
-        for (var i = 0; i < inputRom.length; i++) {
+        for (var i = 0; i < inputRom.length; i++){
           if(!inputRom[i].repeatable)continue;
           if(inputRom[i].keys == undefined && inputRom[i].key != undefined){
             if(keyIsDown(inputRom[i].key)){this.longinput(i);continue;}
           } else if(inputRom[i].keys != undefined){
             if(!inputRom[i].simultaneous){
-              for (var j = 0; j < inputRom[i].keys.length; j++) {
+              for (var j = 0; j < inputRom[i].keys.length; j++){
                 if(keyIsDown(inputRom[i].keys[j])){this.longinput(i);break;}
               }
             }else{
-              for (var j = inputRom[i].keys.length - 1; j >= 0; j--) {
+              for (var j = inputRom[i].keys.length - 1; j >= 0; j--){
                 if(!keyIsDown(inputRom[i].keys[j])){j = -2;break;}
               }
               if(j == -1){this.longinput(i);continue;}
@@ -583,9 +583,9 @@
       if(window.keyPressed == undefined){
         window.keyPressed = mgr.keyPressed;
       }else{
-        window.keyPressed = (function() {
+        window.keyPressed = (function(){
           var cached_function = window.keyPressed;
-          return function() {
+          return function(){
             lib.inputManager.keyPressed();
             var result = cached_function.apply(this, arguments); // use .apply() to call it
             return result;
@@ -599,7 +599,7 @@
           b = $('<div id="buttonBoard"></div>');
           $('body').append(b);
         }
-        for (var i = 0; i < inputRom.length; i++) {
+        for (var i = 0; i < inputRom.length; i++){
           var t = inputRom[i];
           var d = t.description;
           let l = i;
@@ -626,7 +626,7 @@
   };
 
   lib.init3 = function(){
-    if(lib.isInit3 == true){console.log("lib already init3alized");return;}
+    if(lib.isInit3 == true)return console.log("lib already init3alized");
     lib.isInit3 = true;
 
     if(window.tweakables && tweakables.buttonBoard!==undefined){
@@ -635,6 +635,7 @@
 
     if(window.tweakables && window.tweakables.showFPS !== undefined && window.$){
       if($("#frDiv").length == 0)$("body").append("<div id='frDiv'></div>");
+      if(lib.tweaker==undefined)return console.log("lib.tweaker is not defined");
       lib.tweaker.events.push(e=>{
         if(e != "showFPS")return;
         if(tweakables.showFPS){
@@ -643,7 +644,7 @@
           $("#frDiv").css('display','none');
         }
       });
-      lib.addDrawEvent(function() {
+      lib.addDrawEvent(function(){
         if(tweakables.showFPS)$("#frDiv").html('FPS: '+floor(frameRate()));
       });
     }
@@ -658,16 +659,16 @@
 
 })();
 
-Array.prototype.remove || (Array.prototype.remove = function(e) {
+Array.prototype.remove || (Array.prototype.remove = function(e){
   var index = this.indexOf(e);
-  if (index > -1) {
+  if (index > -1){
     this.splice(index, 1);
   }
   return this;
 });
 Object.defineProperty(Array.prototype,"remove",{enumerable: false});
 
-Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e) {
+Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e){
   var index = this.indexOf(e);
   if(index == this.length-1){
     this.pop();
@@ -678,9 +679,9 @@ Array.prototype.remove_fast || (Array.prototype.remove_fast = function(e) {
 });
 Object.defineProperty(Array.prototype,"remove_fast",{enumerable: false});
 
-Array.prototype.shuffle || (Array.prototype.shuffle = function() {
+Array.prototype.shuffle || (Array.prototype.shuffle = function(){
   var j, x, i;
-  for (i = this.length; i; i--) {
+  for (i = this.length; i; i--){
     j = Math.floor(/*Math.*/random() * i);
     x = this[i - 1];
     this[i - 1] = this[j];
@@ -690,8 +691,8 @@ Array.prototype.shuffle || (Array.prototype.shuffle = function() {
 });
 Object.defineProperty(Array.prototype,"shuffle",{enumerable: false});
 
-Array.prototype.diff || (Array.prototype.diff = function(a) {
-  return this.filter(function(i) {return a.indexOf(i) < 0;});
+Array.prototype.diff || (Array.prototype.diff = function(a){
+  return this.filter(function(i){return a.indexOf(i) < 0;});
 });
 Object.defineProperty(Array.prototype,"diff",{enumerable: false});
 
@@ -710,20 +711,20 @@ Array.prototype.sum || (Array.prototype.sum = function(a){
 });
 Object.defineProperty(Array.prototype,"sum",{enumerable: false});
 
-Array.prototype.flatten || (Array.prototype.flatten = function() {
+Array.prototype.flatten || (Array.prototype.flatten = function(){
   var arr = this;
-  return arr.reduce(function (flat, toFlatten) {
+  return arr.reduce(function(flat, toFlatten){
     return flat.concat(Array.isArray(toFlatten) ? toFlatten.flatten() : toFlatten);
   }, []);
 });
 Object.defineProperty(Array.prototype,"flatten",{enumerable: false});
 
-Array.prototype.copy || (Array.prototype.copy = function() {
+Array.prototype.copy || (Array.prototype.copy = function(){
   return this.slice();
 });
 Object.defineProperty(Array.prototype,"copy",{enumerable: false});
 
-Array.prototype.equals || (Array.prototype.equals = function(array) {
+Array.prototype.equals || (Array.prototype.equals = function(array){
   // if the other array is a falsy value, return
   if(!array)return false;
 
@@ -732,10 +733,10 @@ Array.prototype.equals || (Array.prototype.equals = function(array) {
 
   for(var i = 0, l=this.length; i < l; i++){
     // Check if we have nested arrays
-    if(this[i] instanceof Array && array[i] instanceof Array) {
+    if(this[i] instanceof Array && array[i] instanceof Array){
       // recurse into the nested arrays
       if(!this[i].equals(array[i]))return false;
-    }else if(this[i] != array[i]) {
+    }else if(this[i] != array[i]){
       // Warning - two different object instances will never be equal: {x:20} != {x:20}
       return false;
     }
@@ -744,7 +745,7 @@ Array.prototype.equals || (Array.prototype.equals = function(array) {
 });
 Object.defineProperty(Array.prototype,"equals",{enumerable: false});
 
-Object.assignAll || (Object.assignAll = function() {
+Object.assignAll || (Object.assignAll = function(){
   var ks = Object.getOwnPropertyNames(b);
   for(var i of ks){
     a[i] = b[i];
@@ -752,9 +753,9 @@ Object.assignAll || (Object.assignAll = function() {
   return a;
 });
 
-String.prototype.format || (String.prototype.format = function() {
+String.prototype.format || (String.prototype.format = function(){
   var args = arguments;
-  return this.replace(/{(\d+)}/g, function(match, number) {
+  return this.replace(/{(\d+)}/g, function(match, number){
     return typeof args[number] != 'undefined'
       ? args[number]
       : match
@@ -763,7 +764,7 @@ String.prototype.format || (String.prototype.format = function() {
 });
 
 if(window.p5){
-  p5.Vector.angleBetween || (p5.Vector.angleBetween = function (v1, v2) {
+  p5.Vector.angleBetween || (p5.Vector.angleBetween = function(v1, v2){
     var angle = Math.acos(v1.dot(v2) / (v1.mag() * v2.mag()));
     return angle;
   });
@@ -772,7 +773,7 @@ if(window.p5){
     return v.copy().sub(this).magSq();
   };
 
-  p5.Vector.prototype.floor = function() {
+  p5.Vector.prototype.floor = function(){
     this.x = floor(this.x);
     this.y = floor(this.y);
     this.z = floor(this.z);
@@ -794,52 +795,52 @@ if(window.p5){
     return v1.equals(v2);
   }
 
-  p5.Vector.convert = function(v) {
+  p5.Vector.convert = function(v){
     return createVector(v.x||v[0],v.y||v[1],v.z||v[2]);
   }
 
   Object.defineProperty(p5.Color.prototype, "red", {
-    get: function() {
+    get: function(){
       return this._getRed();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "blue", {
-    get: function() {
+    get: function(){
       return this._getBlue();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "green", {
-    get: function() {
+    get: function(){
       return this._getGreen();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "alpha", {
-    get: function() {
+    get: function(){
       return this._getAlpha();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "brightness", {
-    get: function() {
+    get: function(){
       return this._getBrightness();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "hue", {
-    get: function() {
+    get: function(){
       return this._getHue();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "lightness", {
-    get: function() {
+    get: function(){
       return this._getLightness();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "saturation", {
-    get: function() {
+    get: function(){
       return this._getSaturation();
     }, configurable: true, enumerable: false
   });
   Object.defineProperty(p5.Color.prototype, "negative", {
-    get: function() {
+    get: function(){
       //return color('rgba({0},{1},{2},{3})'.format(this.maxes.rgb[0]-this.red,this.maxes.rgb[1]-this.green,this.maxes.rgb[2]-this.blue,this.alpha));
       var c = color('#fff');
       c._array = this._array.map(e => 1-e);

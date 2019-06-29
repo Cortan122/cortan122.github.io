@@ -114,7 +114,7 @@ bool parseArgv(int argc,char *argv[]){
   if(argc > 1){
     bool hasSeenFilename = false;
     bool hasSeenInitcmd = false;
-    for (int i = 1; i < argc; i++){
+    for(int i = 1; i < argc; i++){
       string arg = argv[i];
       if(arg == "--batch"){
         ret = false;
@@ -291,7 +291,7 @@ static bool runCommand(string str){
     str++;
     for(size_t i = 0; i < numIterations; i++){
       if(runCommand( str.slice(0,tlen-1) )){
-        //return true; //this results in 'q' being interpreted as 'exit(0)' 
+        //return true; //this results in 'q' being interpreted as 'exit(0)'
         break; //this results in 'q' being interpreted as 'break'
       }
       if(!keepRunning)return false;

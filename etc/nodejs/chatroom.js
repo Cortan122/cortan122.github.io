@@ -7,7 +7,7 @@ const net = require('net');
 const connections = [];
 
 function pushConnection(c){
-  for (var i = 0; i <= connections.length; i++) {
+  for(var i = 0; i <= connections.length; i++){
     var t = connections[i];
     if(t==undefined){
       connections[i] = c;
@@ -30,7 +30,7 @@ const server = net.createServer(c=>{
     popConnection(index);
   });
   c.write(`hello №${index}\n`);
-  for (var con of connections) {
+  for(var con of connections){
     if(con==c)continue;
     c.pipe(con,{end:false});
     con.pipe(c,{end:false});

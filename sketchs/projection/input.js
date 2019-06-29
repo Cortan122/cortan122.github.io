@@ -21,7 +21,7 @@ function mousePressed() {
 }
 
 function mouseDragged(){
-  if(!isDraggable)return; 
+  if(!isDraggable)return;
   var currentMousePos = createVector(mouseX,mouseY);
   var mouseMovement = createVector(currentMousePos.x - lastMousePos.x,currentMousePos.y - lastMousePos.y,0);
   if(mouseMovement.equals(0,0,0))return;

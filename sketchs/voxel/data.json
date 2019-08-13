@@ -1,0 +1,16 @@
+{
+  "categories": [
+    "Unfinished"
+  ],
+  "name": "Voxel Ploter",
+  "time": 1565626440,
+  "jsfiles": [
+    "OrbitControls.js",
+    "VoxelWorld.js",
+    "main.js"
+  ],
+  "lines": {
+    "html": 17,
+    "js": 1352
+  }
+}

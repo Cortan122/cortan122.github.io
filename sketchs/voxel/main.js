@@ -1,4 +1,4 @@
-var scene, camera, controls, renderer, prevMesh, world, texture;
+var scene, camera, controls, renderer, prevMeshes = [], world, texture, geometry, geometrycenter;
 
 var tweakables = {
   fov: 75,
@@ -6,6 +6,9 @@ var tweakables = {
   bgColor: 'lightblue',
   color: 'none',
   material: 'Lambert',
+  outline: true,
+  outlineColor: 'black',
+  outlineScale: 1.1,
   metaStart: true,
 };
 
@@ -13,11 +16,13 @@ var tweakables = {
 var f = function(y,z,x){
   x *= 1.3;y *= 1.3;z *= 1.3;
   var t = (x**2+9/4*y**2+z**2-1)**3-x**2*z**3-9/200*y**2*z**3 < 0;
-  if(t)return z*256;
+  if(t)return (z/1.3 - 1)/2*256 - 50;
   return 0;
 }
 
 function populateWorld(world, f){
+  geometry = undefined;
+
   const startTime = Date.now();
 
   const t = world.cellSize-1;
@@ -36,20 +41,38 @@ function populateWorld(world, f){
 function makeMesh(scene, world){
   const startTime = Date.now();
 
-  if(prevMesh)scene.remove(prevMesh);
-  const {positions, normals, indices, uvs} = world.generateGeometryDataForCell(0, 0, 0);
-  const geometry = new THREE.BufferGeometry();
+  prevMeshes.map(e=>scene.remove(e));
+  if(geometry == undefined){
+    const {positions, normals, indices, uvs} = world.generateGeometryDataForCell(0, 0, 0);
+    geometry = new THREE.BufferGeometry();
+    geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+    geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
+    geometry.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+    geometry.setIndex(indices);
+    geometrycenter = new THREE.Vector3();
+    geometry.computeBoundingBox();
+    geometry.boundingBox.getCenter(geometrycenter);
+    geometry.center();
+  }
   var t = {color: tweakables.color};
   if(tweakables.color == 'none')t = {map: texture};
   const material = new THREE[`Mesh${tweakables.material}Material`](t);
 
-  geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-  geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
-  geometry.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
-  geometry.setIndex(indices);
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.renderOrder = 1;
   scene.add(mesh);
-  prevMesh = mesh;
+
+  const outlineMaterial1 = new THREE.MeshBasicMaterial({color: tweakables.outlineColor, depthTest: false});
+  const outlineMesh1 = new THREE.Mesh(geometry, outlineMaterial1);
+  outlineMesh1.scale.multiplyScalar(tweakables.outlineScale);
+  if(!tweakables.outline)outlineMesh1.visible = false;
+  outlineMesh1.renderOrder = 0;
+  scene.add(outlineMesh1);
+
+  outlineMesh1.position.copy(geometrycenter);
+  mesh.position.copy(geometrycenter);
+
+  prevMeshes = [outlineMesh1,mesh];
 
   const deltaTime = Date.now() - startTime;
   if(deltaTime > 1000/60)console.log(`makeMesh took ${deltaTime}ms`);
@@ -81,6 +104,9 @@ function setup(){
   }
   addLight(-1,  2,  4);
   addLight( 1, -1, -2);
+
+  var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+  scene.add( light );
 
   const loader = new THREE.TextureLoader();
   texture = loader.load('texture.png');
@@ -115,7 +141,7 @@ function onChangeTw(name){
     camera.updateProjectionMatrix();
   }else if(name=='bgColor'){
     scene.background = new THREE.Color(tw.bgColor);
-  }else if(name=='material' || name=='color'){
+  }else if(name=='material' || name=='color' || name=="outline" || name=="outlineColor" || name=="outlineScale"){
     makeMesh(scene, world);
   }else if(name=='cellSize'){
     const {cellSize} = tw;

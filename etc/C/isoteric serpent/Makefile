@@ -6,7 +6,7 @@ CC=gcc -m32
 LD=ld -melf_i386
 ISOGEN=mkisofs
 
-all: basekernel.iso configurator.js
+all: snake.iso configurator.js
 	node configurator.js
 
 basekernel.img: bootblock kernel
@@ -31,17 +31,18 @@ bootblock.elf: bootblock.o
 	${CC} ${KERNEL_CCFLAGS} $< -o $@
 
 image: basekernel.img
-	rm -rf image
-	mkdir image image/boot
+	rm -rf image/boot image/configurator.js
+	mkdir -p image image/boot
 	cp basekernel.img image/boot
+	cp configurator.js image
 
-basekernel.iso: image
+snake.iso: image
 	${ISOGEN} -input-charset utf-8 -iso-level 2 -J -R -o $@ -b boot/basekernel.img image
 
 clean:
-	rm -rf basekernel.img *.o *.elf kernel bootblock image basekernel.img basekernel.iso
+	rm -rf basekernel.img *.o *.elf kernel bootblock basekernel.img snake.iso
 
 run: all
-	qemu-system-i386 -cdrom basekernel.iso -soundhw pcspk
+	qemu-system-i386 -cdrom snake.iso # -soundhw pcspk
 
 .PHONY: all run clean

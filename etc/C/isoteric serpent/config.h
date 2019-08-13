@@ -7,5 +7,8 @@ extern bool usePixelMultiplier;
 extern bool centerScreen;
 extern bool loopAround;
 extern bool permadeath;
+extern bool useSound;
+extern bool debugVideoInfo;
+extern bool startWithTutorial;
 
 extern void loadConfig();

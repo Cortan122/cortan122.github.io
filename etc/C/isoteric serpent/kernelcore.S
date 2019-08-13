@@ -84,6 +84,65 @@ memdone:
 # Now, set the video mode using VBE interrupts.
 # Keep trying until we find one that works.
 
+# todo: skip pick_video_mode if running in an emulator
+# jmp video_deprecated
+
+pick_video_mode:
+  mov	%ds, %ax		 # Set up the extra segment
+	mov	%ax, %es		 # with the data segment
+  push %es
+  mov $0x4F00, %ax
+  mov $(vbe_info_block-_start), %di
+  int $0x10
+  pop %es
+  cmp $0x004f, %ax # BIOS doesn't support VBE?
+  jne	video_deprecated
+
+  mov $0, %dx
+.find_mode:
+  mov $(vbe_info_block_video_modes-_start), %bx
+  add %dx, %bx
+  mov (%bx), %bx
+  add $2, %dx
+  cmp $0xFFFF, %bx # end of list?
+	je  video_deprecated
+
+  push %es
+	mov	$0x4f01, %ax # get VBE mode info
+	mov	$(video_info-_start),%di
+	mov	%bx, %cx
+	int	$0x10
+	pop %es
+  cmp $0x004f, %ax
+  jne	.find_mode
+
+  cmpb $32, (video_bpp-_start)
+  je  .correct_bpp
+  cmpb $24, (video_bpp-_start)
+  jne .find_mode
+.correct_bpp:
+
+  # check if 16:9
+  push %dx
+  mov (video_xres-_start), %ax
+  mov $9, %cx
+  mul %cx
+  shr $4, %ax
+  pop %dx
+  cmp %ax, (video_yres-_start)
+  jne .find_mode
+
+  # If we make it here, we've found the correct mode!
+  push %es
+	mov	$0x4f02, %ax
+	or  $0x4000, %bx # enable LFB
+	mov $0, %di      # not sure if some BIOSes need this... anyway it doesn't hurt
+	int $0x10
+	pop %es
+  cmp $0x004f, %ax
+  je	videodone
+
+video_deprecated:
 # These are documented on page 30 of the VESA-BIOS manual:
 # interrupt 0x10
 # ax = 0x4f02 "Set VBE Mode"
@@ -97,21 +156,6 @@ memdone:
 #    D15    = 0 Clear display memory.
 #    ES:DI  = Pointer to CRCTCInfoBlock structure.
 
-jmp video800
-# jmp video1024
-
-video1280:
- 	mov	$0x4f02, %ax
- 	mov	$0x411b, %bx
-	int	$0x10
-	cmp	$0x004f, %ax
-	je	videodone
-video1024:
- 	mov	$0x4f02, %ax
- 	mov	$0x4118, %bx
-	int	$0x10
-	cmp	$0x004f, %ax
-	je	videodone
 video800:
 	mov	$0x4f02, %ax
  	mov	$0x4115, %bx
@@ -124,7 +168,19 @@ video640:
 	int	$0x10
 	cmp	$0x004f, %ax
 	je	videodone
-video640_lowcolor:
+video1280:
+ 	mov	$0x4f02, %ax
+ 	mov	$0x411b, %bx
+	int	$0x10
+	cmp	$0x004f, %ax
+	je	videodone
+video1024:
+ 	mov	$0x4f02, %ax
+ 	mov	$0x4118, %bx
+	int	$0x10
+	cmp	$0x004f, %ax
+	je	videodone
+video640_16bitcolor:
 	mov	$0x4f02, %ax
 	mov	$0x4111, %bx
 	int	$0x10
@@ -150,6 +206,8 @@ videodone:
 	mov	%bx, %cx
 	int	$0x10
 
+  mov %bx, (video_mode-_start)
+
 # In order to use video resolutions higher than 640x480,
 # we must enable the A20 address line. The following
 # code works on motherboards with "FAST A20", which should
@@ -157,6 +215,7 @@ videodone:
 inb $0x92, %al
 orb $2, %al
 outb %al, $0x92
+
 
 # Finally, we are ready to enter protected mode.
 # To do this, we disable interrupts so that
@@ -215,7 +274,7 @@ bios_putchar:
 	pop	%ax
 	ret
 
-# The video_info structure is filled in by a BIOS
+# The video_info (ModeInfoBlock) structure is filled in by a BIOS
 # call above, and is used to record the basic video
 # layout for the graphics subsystem.  See page 30
 # of the VBE specification for an explanation of this structure.
@@ -235,7 +294,11 @@ video_xres:
 .global video_yres
 video_yres:
 	.word	0
-	.byte	0,0,0,0,0,0,0,0,0
+	.byte	0,0,0
+.global video_bpp
+video_bpp:
+  .byte 0
+  .byte 0,0,0,0,0
 	.byte	0,0,0,0,0,0,0,0,0
 .global video_buffer
 video_buffer:
@@ -248,6 +311,18 @@ video_buffer:
 .rept 190
 	.byte	0
 .endr
+
+.align 4
+vbe_info_block:
+  .ascii "VBE2" # indicate support for VBE 2.0+
+.global vbe_info_block_video_modes
+vbe_info_block_video_modes:
+.rept 508
+  .byte	0	# reserve space for the table below
+.endr
+
+.global video_mode
+video_mode: .word	0
 
 .align 4
 videomsg:

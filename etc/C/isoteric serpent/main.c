@@ -220,19 +220,19 @@ static void stop_playing_sound(){
   outb(inb(0x61)&0xfc, 0x61);
 }
 
-static uint reamaining_duration = 0;
-
-void play_sound(uint frequency, uint duration){
-  reamaining_duration = duration;
-  start_playing_sound(frequency);
-}
+static uint8_t video_pixel_bytes;
 
 void plot_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b){
   if(x >= video_xres || y >= video_yres)return;
-  uint8_t *v = video_buffer + (video_xres * y + x) * 3;
-  v[2] = r;
-  v[1] = g;
-  v[0] = b;
+  uint8_t *v = video_buffer + video_xbytes*y + x*video_pixel_bytes;
+  if(video_pixel_bytes==2){
+    v[1] = (r&0b11111000) | (g>>5);
+    v[0] = (g&0b111)<<5 | (b&0b11111000)>>3;
+  }else{
+    v[2] = r;
+    v[1] = g;
+    v[0] = b;
+  }
 }
 
 static uint kernel_timer = 0;
@@ -244,8 +244,6 @@ void interrupt_handler(int i, int code){
     goto ret;
   }
   if(i==32){
-    if(reamaining_duration==0)stop_playing_sound();
-    else reamaining_duration--;
     kernel_timer++;
     if(kernel_timer>=50){
       kernel_timer -= 50;
@@ -267,9 +265,14 @@ void interrupt_handler(int i, int code){
 void syscall_handler(){};
 
 bool drawDebugLines;
+bool useSound;
+bool debugVideoInfo;
+bool startWithTutorial;
+uint8_t soundToPlay = 0;
 
 int kernel_main(){
   loadConfig();
+  video_pixel_bytes = video_bpp/8;
 
   for(int i = 0; i < MAX(video_xres,video_yres) && drawDebugLines; i++){
     plot_pixel(i,i,255,0,0);
@@ -289,21 +292,34 @@ int kernel_main(){
  	outb(IRQ0_frequency&0xff, 0x40);
  	outb(IRQ0_frequency>>8, 0x40);
 
-  // for(int i = 100; i < 1000; i++){
-  //   start_playing_sound(i);
-  //   for(int j = 0; j < 10000; j++)iowait();
-  // }
-  // stop_playing_sound();
-
   userspace_main();
-
-  // play_sound(200, 49);
 
   pic_init(32,40);
   asm("sti");
   pic_enable(32-32);
   pic_enable(33-32);
-  while(1)asm("hlt");
+  while(!useSound)asm("hlt");
+
+  soundToPlay = 1;
+  while(1){
+    switch(soundToPlay){
+      case 2:
+        for(int i = 220; i < 440; i+=8){start_playing_sound(i);asm("hlt");}
+        for(int i = 440; i > 220; i-=8){start_playing_sound(i);asm("hlt");}
+        break;
+      case 1:
+        for(int i = 100; i < 1000; i+=2){
+          start_playing_sound(i);
+          asm("hlt");
+        }
+        break;
+      case 0:
+        asm("hlt");
+        continue;
+    }
+    soundToPlay = 0;
+    stop_playing_sound();
+  }
 
   return 0;
 }

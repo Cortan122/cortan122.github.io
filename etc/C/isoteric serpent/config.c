@@ -11,4 +11,7 @@ void loadConfig(){
   centerScreen = configString[i++]-'0';
   loopAround = configString[i++]-'0';
   permadeath = configString[i++]-'0';
+  useSound = configString[i++]-'0';
+  debugVideoInfo = configString[i++]-'0';
+  startWithTutorial = configString[i++]-'0';
 }

@@ -3,15 +3,17 @@
 #include "palette.c"
 
 extern void plot_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
+extern uint8_t soundToPlay;
 
 uint8_t dirArr[0x100];
 uint8_t pixelArr[0x10000];
 int mult;
 int screenOffset_x = 0;
 int screenOffset_y = 0;
+bool isPaused = 0;
 
 void pixel(uint16_t pos, uint8_t colorid){
-  pixelArr[pos] = colorid;
+  if(!isPaused)pixelArr[pos] = colorid;
   uint32_t c = palette[colorid];
   int x0 = (pos%0x100)*mult + screenOffset_x;
   int y0 = (pos/0x100)*mult + screenOffset_y;
@@ -43,9 +45,25 @@ char* sprintint(uint16_t t,char* str){
   if(t==0){
     return str+1;
   }
-  str[0] = t%10+'0';
+  str[0] = "0123456789abcdef"[t%10];
   t = t/10;
   return sprintint(t,str-1);
+}
+
+char* sprintint16(uint16_t t,char* str){
+  if(str==0){
+    str = sprintint_buffer+5;
+    if(t==0){
+      str[0] = '0';
+      return str;
+    }
+  }
+  if(t==0){
+    return str+1;
+  }
+  str[0] = "0123456789abcdef"[t%16];
+  t = t/16;
+  return sprintint16(t,str-1);
 }
 
 const uint8_t charSize = 6;
@@ -60,6 +78,7 @@ bool centerScreen;
 bool loopAround;
 bool permadeath;
 uint16_t initPos_text = 12;
+uint16_t initPos_text_save;
 
 uint8_t cursorX = 0;
 uint8_t cursorY = 0;
@@ -254,6 +273,12 @@ void printString(char* str){
   while(1){
     char c = str[0];
     if(c=='\0')return;
+    if(c=='\n'){
+      cursorX = 0;
+      cursorY++;
+      str++;
+      continue;
+    }
     printChar(c);
     cursorX++;
     str++;
@@ -318,6 +343,7 @@ bool isTileEmpty(int x,int y){
 }
 
 void incrementScore(int ax){
+  if(ax==1)soundToPlay = 2;
   score = score+ax;
   cursorY = 1;
   cursorX = 7;
@@ -489,8 +515,48 @@ void redrawTimer(int ax){
   printString("    ");
 }
 
+void pause(){
+  isPaused = 1;
+  for(int i = 0; i < 65536; i++)pixel(i,0);
+  initPos_text_save = initPos_text;
+  initPos_text = 0;
+}
+
+void listVideoModes(){
+  pause();
+  int i = 0;
+  int x = 0;
+  cursorY = 0;
+  while(vbe_info_block_video_modes[i] != 0xffff && i < 205){
+    if(vbe_info_block_video_modes[i]==0){i++;continue;}
+    cursorX = x;
+    printString(sprintint16(vbe_info_block_video_modes[i], 0));
+    i++;
+    cursorY++;
+    if(cursorY==17){
+      x += 5;
+      cursorY = 0;
+    }
+  }
+}
+
+void tutorial(){
+  pause();
+  cursorX = cursorY = 0;
+  printString("wasd: Movement\n");
+  printString("ESC: Reboot\n");
+  printString("t: Show this tutorial\n");
+  printString("v: [DEBUG] List video modes\n");
+  printString("\nPress any key to start the game\n");
+}
+
 void getInput(uint8_t c){
-  if(c=='w' || c==KEY_UP){
+  if(isPaused){
+    isPaused = 0;
+    for(int i = 0; i < 65536; i++)pixel(i,pixelArr[i]);
+    initPos_text = initPos_text_save;
+    return;
+  }else if(c=='w' || c==KEY_UP){
     move(0, 0xff);
   }else if(c=='a' || c==KEY_LEFT){
     move(0xff, 0);
@@ -498,12 +564,19 @@ void getInput(uint8_t c){
     move(0, 1);
   }else if(c=='d' || c==KEY_RIGHT){
     move(1, 0);
+  }else if(c==0x1b){
+    reboot();
+  }else if(c=='v'){
+    return listVideoModes();
+  }else if(c=='t'){
+    return tutorial();
   }else return;
 
   redrawTimer(0);
 }
 
 void userspace_timer(){
+  if(isPaused)return;
   rngState++;
   redrawTimer(timer+1);
 }
@@ -545,5 +618,15 @@ void userspace_main(){
     plot_pixel(screenOffset_x, i, 0,255,255);
   }
 
+  if(startWithTutorial)return tutorial();
   restart();
+
+  if(debugVideoInfo){
+    cursorY = 5; // cursorX = 0; printString("Video:");
+    cursorY++; cursorX = 0; printString("mode 0x"); printString(sprintint16(video_mode, 0));
+    cursorY++; cursorX = 0; printString("xbytes "); printString(sprintint(video_xbytes, 0));
+    cursorY++; cursorX = 0; printString("xres   "); printString(sprintint(video_xres, 0));
+    cursorY++; cursorX = 0; printString("yres   "); printString(sprintint(video_yres, 0));
+    cursorY++; cursorX = 0; printString("bpp    "); printString(sprintint(video_bpp, 0));
+  }
 }

@@ -1,6 +1,6 @@
 {
   "mandelbrot":{
-    "code":"//templateName:mandelbrot\nconst vec2 p = vec2(-0.74364388703, 0.13182590421);\nconst float r = 1.0;\nconst int I = 50;\n\nvec2 c = p + vPos * r, z = c;\nfloat n = 0.0;\nfor (int i = I;i > 0;i--) {\n  if(z.x*z.x+z.y*z.y > 4.0) {\n    n = float(i)/float(I);\n    break;\n  }\n  z = vec2(z.x*z.x-z.y*z.y, 2.0*z.x*z.y) + c;\n} \ngl_FragColor = color(n);"
+    "code":"//templateName:mandelbrot\nconst vec2 p = vec2(-0.74364388703, 0.13182590421);\nconst float r = 1.0;\nconst int I = 50;\n\nvec2 c = p + vPos * r, z = c;\nfloat n = 0.0;\nfor(int i = I; i > 0; i--){\n  if(z.x*z.x+z.y*z.y > 4.0){\n    n = float(i)/float(I);\n    break;\n  }\n  z = vec2(z.x*z.x-z.y*z.y, 2.0*z.x*z.y) + c;\n} \ngl_FragColor = color(n);"
   },
   "radial":{
     "code":"//templateName:radial\nfloat i = 1.0/uTime/10.0;\nfloat n = floor(map(mod(atan(vPos.x,vPos.y)/pi/2.0,i),0.0,i,0.0,2.0));\ngl_FragColor = color(n);"

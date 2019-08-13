@@ -24,7 +24,7 @@ var inputRom = [
 
 function setup(){
   createCanvas(500, 500);
-  $.ajax("examples.json").done(e => {examples = e;updateCode()});
+  $.ajax("examples.json").done(e => {examples = e;updateCode();examplesEnum()});
   updateCode();
   $('body').append("<textarea></textarea>");
   var b = $('<button value="undefined" id="runButton">run</button>');
@@ -42,8 +42,14 @@ function setup(){
   updateTextarea();
 }
 
+function examplesEnum(){
+  var arr = Object.keys(examples);
+  arr.push("random");
+  lib.tweaker.makeEnum("templateName",arr);
+}
+
 function updateTextarea(name){
-  if(name!="inlineTextarea"&&name!="isTweakablesShown"&&name!=undefined)return;
+  if(name!="inlineTextarea" && name!="twr.makeEnum" && name!=undefined)return;
   if(inlineTextarea){
     var t = width;
     if(lib.tweaker.isTweakablesShown){
@@ -75,7 +81,7 @@ function updateCode(){
     $('textarea').val(str);
   }
   makeSystem(str);
-  isDirty = true; 
+  isDirty = true;
 }
 
 function makeSystem(str){

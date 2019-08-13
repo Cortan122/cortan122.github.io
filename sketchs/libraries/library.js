@@ -306,10 +306,14 @@
     if(lib.isInit == true){console.log("lib already init1alized");return;}
     lib.isInit = true;
     //Object.assign(window,lib);
-    for (var i in lib){
-      if((window[i] === undefined)&&(lib[i] instanceof Function))window[i] = lib[i];
+    for(var i in lib){
+      if(window[i] == undefined && lib[i] instanceof Function)window[i] = lib[i];
     }
-    if(window.lib === undefined)window.lib = lib;
+    if(window.lib == undefined)window.lib = lib;
+    if(window.canvas == undefined && !window.p5 && window.$ && window.draw){
+      window.canvas = $('<canvas tabindex="0"></canvas>').appendTo('body')[0];
+      window.canvas.width = window.canvas.height = 500;
+    }
 
     if(window.setup == undefined){
       window.setup = lib.init2;
@@ -374,7 +378,7 @@
         if(!$('#pDiv').length){
           $('body').append('<ul id="pDiv" style="display: inline-block;list-style-type:none;font-size: 20;text-decoration:;position: absolute;left: -500px;overflow-y: scroll;resize: vertical;height: 95%;margin-top: 0px;"><li style="margin-top: 20px;" class="tweakables"></li></ul>');
         }
-        if(!styleExists(/.*\.tweakables/)){
+        if(!lib.styleExists(/.*\.tweakables/)){
           $('head').append('<style>:not(li).tweakables {display: inline-block; *display: inline; zoom: 1; vertical-align: top;margin: 0;}.input.tweakables {width: 50;}.checkbox.tweakables {position: relative;margin: 0;top: 5px;}li.tweakables {margin-bottom: 5px;}</style>')
         }
         //tweakables = Object.assign({metaResize:true,metaStart:false,metaSort:false},tweakables);
@@ -398,7 +402,7 @@
       twr.toggleTweakables = (function(){
         var isTweakablesShown = this.isTweakablesShown;
         pdiv = $('#pDiv');
-        var a = width;
+        var a = canvas.width;
         if(isTweakablesShown){
           pdiv.css('left','-'+a+'px').css('display','none');
         }else{
@@ -406,7 +410,7 @@
         }
         this.isTweakablesShown = !isTweakablesShown;
 
-        this.events.forEach(e => e("isTweakablesShown"));
+        this.events.forEach(e => e("twr.isTweakablesShown"));
       }).bind(twr);
 
       twr.displayTweakables = (function(){
@@ -482,6 +486,7 @@
         s.on('change',()=>{tweakables[name] = s.val();lib.tweaker.onChangeTweakable(name)});
         s.appendTo('#tw_'+name);
         s.val(tweakables[name]);
+        this.events.forEach(e => e("twr.makeEnum"));
       };
 
       twr.resizeTextbox = function(){
@@ -627,6 +632,7 @@
 
   lib.init3 = function(){
     if(lib.isInit3 == true)return console.log("lib already init3alized");
+    if(lib.isInit2 != true)return console.log("lib init3alized out of order");
     lib.isInit3 = true;
 
     if(window.tweakables && tweakables.buttonBoard!==undefined){

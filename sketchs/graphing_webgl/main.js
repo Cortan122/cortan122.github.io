@@ -93,7 +93,7 @@ function _updateCode(){
 }
 
 function updateTextarea(name){
-  if(name!="inlineTextarea"&&name!="isTweakablesShown"&&name!=undefined)return;
+  if(name!="inlineTextarea" && name!="twr.isTweakablesShown" && name!="twr.makeEnum" && name!=undefined)return;
   if(tweakables.inlineTextarea){
     var t = width;
     if(lib.tweaker.isTweakablesShown){

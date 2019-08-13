@@ -301,7 +301,7 @@
         ],
         "lines": {
             "html": 17,
-            "js": 383
+            "js": 280
         }
     },
     "maze": {
@@ -347,7 +347,7 @@
         ],
         "lines": {
             "html": 60,
-            "js": 695
+            "js": 701
         }
     },
     "pathfinding": {
@@ -379,7 +379,7 @@
         ],
         "lines": {
             "html": 15,
-            "js": 387
+            "js": 386
         }
     },
     "pinball": {
@@ -450,8 +450,8 @@
             "operators.js"
         ],
         "lines": {
-            "html": 74,
-            "js": 2201
+            "html": 100,
+            "js": 2286
         }
     },
     "sphere": {
@@ -493,7 +493,7 @@
         "time": 1520106900,
         "lines": {
             "html": 59,
-            "js": 1044
+            "js": 1048
         },
         "jsfiles": [
             "ping.js",
@@ -566,7 +566,7 @@
         ],
         "lines": {
             "html": 37,
-            "js": 264
+            "js": 270
         }
     },
     "url": {
@@ -581,6 +581,22 @@
         "lines": {
             "html": 20,
             "js": 84
+        }
+    },
+    "voxel": {
+        "categories": [
+            "Unfinished"
+        ],
+        "name": "Voxel Ploter",
+        "time": 1565626440,
+        "jsfiles": [
+            "OrbitControls.js",
+            "VoxelWorld.js",
+            "main.js"
+        ],
+        "lines": {
+            "html": 17,
+            "js": 1352
         }
     },
     "water": {
@@ -611,7 +627,7 @@
         ],
         "lines": {
             "html": 41,
-            "js": 682
+            "js": 683
         }
     }
 }

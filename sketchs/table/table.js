@@ -83,7 +83,7 @@ function Table({
           }
           row.append(t);
         }
-      } 
+      }
     }
     $('body').append(table);
 
@@ -165,7 +165,7 @@ function Table({
       }).catch(function(error){
         cell.html('timeout');
         cell.removeClass('ping_checking').addClass("ping_error");
-      });}, 10); 
+      });}, 10);
       cell.addClass('ping_checking ping');
       return 'checking';
     },
@@ -214,6 +214,7 @@ function Table({
     jq.html(str);
   }
 
+  var sortMemory = -1;
   function sortTable(n,dir_force=''){
     // console.log(`sortTable(${n})`);
 
@@ -222,19 +223,13 @@ function Table({
     var m = rows.map((e,i)=>{
       return {e,i,s:e.getElementsByTagName("td")[n].innerHTML.toLowerCase()};
     });
-    var dir = true;
+    var dir = sortMemory != n;
     m = m.sort((a,b)=>a.s<b.s?-1:1);
-    if(dir_force==''){
-      if(m.map(e=>e.i).join()==m.map((e,i)=>i).join()){
-        dir = false;
-        m = m.reverse();
-      }
-    }else{
-      dir = dir_force=='asc';
-      if(!dir)m = m.reverse();
-    }
+    if(dir_force)dir = dir_force=='asc';
+    if(!dir)m = m.reverse();
     m.map(e=>table.append(e.e));
     updateArrows(n,dir);
+    sortMemory = dir?n:-1;
   }
 
   function init(){

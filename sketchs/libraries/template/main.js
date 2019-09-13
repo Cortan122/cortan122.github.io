@@ -1,2 +1,2 @@
-function setup() {}
-function draw() {}
+function setup(){}
+function draw(){}

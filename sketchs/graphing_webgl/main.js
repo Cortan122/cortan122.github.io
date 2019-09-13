@@ -16,7 +16,7 @@ var tweakables = {
   inlineTextarea:false,
   cacheFrames:true,
   showFPS:true,
-  metaStart:true
+  metaStart:true,
 };
 
 var inputRom = [
@@ -26,7 +26,7 @@ var inputRom = [
   {keys:['D','right'],action:'move(1)',repeatable:true},
   {keys:['R'],action:'resetView()'},
   {keys:['O','T'],action:'lib.tweaker.toggleTweakables()'},
-  {keys:['Enter'],action:'updateShader()'}
+  {keys:['Enter'],action:'updateShader()'},
 ];
 
 function setup(){
@@ -152,6 +152,7 @@ function draw(){
 function resetView(){
   bounds = [-.1,-.1,.1,.1];
   isDirty = true;
+  frameCount = 0;
 }
 
 function move(dir){
@@ -174,7 +175,7 @@ function moveB(v){
 
 function mouseWheel(event) {
   if(!isMouseOverCanvas())return;
-  if(!isFocusedOnCanvas())return;
+  if(!isFocusedOnCanvas())return;//todo: maybe unnecessary
   var t = 2**(event.delta*tweakables.scrollSpeed);
   var center = createVector(bounds[0]+bounds[2],bounds[1]+bounds[3]).mult(.5);
   moveB(center.mult(-1));

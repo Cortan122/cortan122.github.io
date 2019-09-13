@@ -102,8 +102,8 @@ function setup(){
     light.position.set(x, y, z);
     scene.add(light);
   }
-  addLight(-1,  2,  4);
-  addLight( 1, -1, -2);
+  addLight(4, 2, -1);
+  addLight(-2, -1, 1);
 
   var light = new THREE.AmbientLight( 0x404040 ); // soft white light
   scene.add( light );

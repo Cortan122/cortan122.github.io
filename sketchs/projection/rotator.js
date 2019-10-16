@@ -106,9 +106,9 @@ rotator.inverse = function(m){
 //Extra
 rotator.isCoplanar = function(p0,p1,p2,p3){
   var m = [
-    [p1.x-p0.x,p2.x-p0.x,p3.x-p0.x],
-    [p1.y-p0.y,p2.y-p0.y,p3.y-p0.y],
-    [p1.z-p0.z,p2.z-p0.z,p3.z-p0.z]
+    [p1.x-p0.x, p2.x-p0.x, p3.x-p0.x],
+    [p1.y-p0.y, p2.y-p0.y, p3.y-p0.y],
+    [p1.z-p0.z, p2.z-p0.z, p3.z-p0.z]
   ];
   return round10(this.determinant(m),-10)==0;//floating point errors
 }

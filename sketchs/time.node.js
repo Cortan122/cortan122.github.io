@@ -1,5 +1,5 @@
 var fs = require('fs');
- 
+
 fs.readFile('dir.txt', 'utf8', function(err, contents) {
   if(err)throw err;
   var arr = contents.split('\n');
@@ -16,7 +16,7 @@ fs.readFile('dir.txt', 'utf8', function(err, contents) {
     fs.readFile(arrN[t]+'/data.json', 'utf8', function(err, contents) {
       if(err)return;
       var j = JSON.parse(contents);
-      if(arrT[t]!=1539451560){
+      if(arrT[t]!=1539451560 && false){
         j.time = arrT[t];
       }
       var arr = {};
@@ -47,4 +47,3 @@ fs.readFile('dir.txt', 'utf8', function(err, contents) {
     if (err) throw err;
   });
 });
- 

@@ -49,6 +49,11 @@ function main(){
     $('#cursor').css({left:t.x, top:t.y, height: t.height});
     lasttime = Date.now();
   };
+
+  if(window.location.search != ""){
+    $('#tb').val(decodeURI(window.location.search.slice(1)));
+  }
+
   $('#tb').on('change', f).on('keyup', f);
   f();
   $('body').on('click', () => $('#tb').focus());

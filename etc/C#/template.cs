@@ -33,7 +33,6 @@ namespace Шаблон {
         string tempstr2 = upperBound != int.MaxValue? " <= " + upperBound: "";
         Console.Write($"Введите {name} ({tempstr1}int{tempstr2}): ");
       } while (!int.TryParse(Console.ReadLine(), out r) || r < lowerBound || r > upperBound);
-      Log($"{name} = {r}");
       return r;
     }
 
@@ -54,7 +53,6 @@ namespace Шаблон {
         string tempstr2 = upperBound != char.MaxValue? " <= " + upperBound: "";
         Console.Write($"Введите {name} ({tempstr1}char{tempstr2}): ");
       } while (!char.TryParse(Console.ReadLine(), out r) || r < lowerBound || r > upperBound);
-      Log($"{name} = {r}");
       return r;
     }
 
@@ -75,7 +73,6 @@ namespace Шаблон {
         string tempstr2 = upperBound != double.MaxValue? " <= " + upperBound: "";
         Console.Write($"Введите {name} ({tempstr1}double{tempstr2}): ");
       } while (!double.TryParse(Console.ReadLine(), out r) || r < lowerBound || r > upperBound);
-      Log($"{name} = {r}");
       return r;
     }
 
@@ -104,83 +101,36 @@ namespace Шаблон {
         // if Console.IsOutputRedirected is True Console.ReadKey() throws an exeption
         if (Console.IsOutputRedirected)return;
         Console.WriteLine("Нажмите Enter чтобы повторить");
-        if (Console.ReadKey().Key != ConsoleKey.Enter)break;
+        if (Console.ReadKey(true).Key != ConsoleKey.Enter)break;
       }
     }
 
     /// <summary>
-    /// Безопасно совершает некую операцию f() над какимто файлом.
-    /// Если произошла ошибка вызывает error(ошибка) или (если error == null) завершает программу.
+    /// Открывает текстовый файл, считывает весь текст файла в строку и затем закрывает файл.
+    /// если неполучилось возвращает null
     /// </summary>
-    static T CatchFileExeptions<T>(Func<T> f, Action<string> error = null) {
-      if (error == null)error = (e) => {
-        Console.WriteLine(e);
-        Log("FileExeption: " + e);
-        Exit();
-      };
+    static string TryReadAllText(string path){
       try {
-        return f();
+        return File.ReadAllText(path);
       } catch (FileNotFoundException) {
-        error("Файл не существует");
+        Console.WriteLine("Файл не существует");
       } catch (IOException) {
-        error("Ошибка ввода-вывода");
+        Console.WriteLine("Ошибка ввода-вывода");
       } catch (System.Security.SecurityException) {
-        error("Ошибка безопасности");
+        Console.WriteLine("Ошибка безопасности");
       } catch (UnauthorizedAccessException) {
-        error("У вас нет разрешения на создание/чтение файла");
+        Console.WriteLine("У вас нет разрешения на создание/чтение файла");
       }
-      return default(T);
-    }
-
-    // Перегрузка наслучай, если f ничего не возвращает.
-    static void CatchFileExeptions(Action f, Action<string> error = null) {
-      CatchFileExeptions(() => { f(); return 1; }, error);
-    }
-
-    static readonly string logFilePath = CatchFileExeptions(() => {
-      // if we are compiled with VS $pwd is going to end in "Debug"
-      // and we need to create log.txt in the sln directory
-      if (Directory.GetCurrentDirectory().EndsWith("Debug"))return "../../../log.txt";
-      // but if we are compiled with mono we can just create it in $pwd
-      return "log.txt";
-    });
-
-    /// <summary>
-    /// Записавает строку в log.txt.
-    /// </summary>
-    static void Log(string s, bool alsoLogToConsole = false) {
-      if (alsoLogToConsole)Console.WriteLine(s);
-      CatchFileExeptions(() => File.AppendAllText(logFilePath, s + Environment.NewLine));
-    }
-
-    static void Exit() {
-      Log("exiting");
-      Environment.Exit(0);
-    }
-
-    /// <summary>
-    /// Предлогает пользователю выбрать одну из функций в funcs и вызывает выбраную функцию.
-    /// </summary>
-    static void Menu(Action[] funcs) {
-      Console.WriteLine("Выберите функцию");
-      for (var i = 0; i < funcs.Length; i++) {
-        Console.WriteLine($"{i+1}. {funcs[i].Method.Name}");
-      }
-      var ind = ReadInt("номер функции", 1, funcs.Length) - 1;
-      funcs[ind]();
+      return null;
     }
 
     static Random rng = new Random();
 
     static void Main() {
-      Log("starting");
       Loop(() => {
         var n = ReadInt(1, 1000);
-        Console.WriteLine(n);
-        Menu(new Action[]{Exit});
         // your code goes here
       });
-      Exit();
     }
   }
 }

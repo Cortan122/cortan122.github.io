@@ -94,10 +94,9 @@ namespace Шаблон {
     /// <summary>
     /// Запускает f() и предлогает пользователю повторить.
     /// </summary>
-    static void Loop(Action f, bool forever = false) {
+    static void Loop(Action f) {
       while (true) {
         f();
-        if (forever)continue;
         // if Console.IsOutputRedirected is True Console.ReadKey() throws an exeption
         if (Console.IsOutputRedirected)return;
         Console.WriteLine("Нажмите Enter чтобы повторить");

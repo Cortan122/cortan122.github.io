@@ -5,7 +5,7 @@ __puts_loop:
 mov [0] ax
 mov al [ax]
 print al
-test al ;this is supposed to remember the resalt 
+test al ;this is supposed to remember the result
 mov ax [0]
 add ax 01
 jnz __puts_loop

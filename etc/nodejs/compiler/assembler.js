@@ -61,7 +61,7 @@ const instructionRom = {
     var count = t[0];
     var char = t[1];
     ip += count;
-    resault += char.repeat(count);
+    result += char.repeat(count);
   },
   ".align":ops=>{
     var t = padOrAlignHelper(".align",ops);
@@ -76,7 +76,7 @@ const instructionRom = {
     var diff = target-(ip&(target-1));
     if(diff==target)return true;//nothing to do here
     ip += diff;
-    resault += char.repeat(diff);
+    result += char.repeat(diff);
   },
   ".extern":ops=>{
     if(!directiveArgCheck(".extern",1,ops,true))return;
@@ -108,12 +108,12 @@ const instructionRom = {
   ".byte":ops=>{
     if(!directiveArgCheck(".byte",1,ops))return;
     ip += 1;
-    resault += assembleSymbol(ops[0],1);
+    result += assembleSymbol(ops[0],1);
   },
   ".word":ops=>{
     if(!directiveArgCheck(".word",1,ops))return;
     ip += 2;
-    resault += assembleSymbol(ops[0],2);
+    result += assembleSymbol(ops[0],2);
   },
   "mov":ops=>{
     if(!directiveArgCheck("mov",2,ops))return;
@@ -285,7 +285,7 @@ const registerRom = [
 const registerLengthRom = [2,2,1,1,1,1,1,2];
 const abs = Math.abs;
 
-var resault = "";
+var result = "";
 var ip = crto.startPos;
 var envlabels = {};
 var unevaluatedStatements = [];
@@ -442,9 +442,9 @@ function setHexLabel(name){
     return;
   }
   for (var i = 0; i < diff; i++) {
-    resault += "f0";
+    result += "f0";
   }
-  resault += " ";
+  result += " ";
   ip = num;
   return;
 }
@@ -457,12 +457,12 @@ function setLabel(name){
   if(!isLegalLabelName(name))return;
   var hex = tohex(ip,4);
   envlabels[name] = "0x"+hex;
-  resault = resault.replace(new RegExp("\\{ф"+name+"\\}","g"),hex);
+  result = result.replace(new RegExp("\\{ф"+name+"\\}","g"),hex);
 }
 
 function reeval(){
   var oldpointer = pointer;
-  resault = resault.replace(/{ы([0-9]+)}/g,(a,b)=>{
+  result = result.replace(/{ы([0-9]+)}/g,(a,b)=>{
     var int = parseInt(b);
     var stat = unevaluatedStatements[int];
     pointer = stat.p;
@@ -477,7 +477,7 @@ function reeval(){
     }*/
     return str;
   });
-  resault = resault.replace(/{э([^{}э]+)э([0-9]+)}/g,(a,b,c)=>{
+  result = result.replace(/{э([^{}э]+)э([0-9]+)}/g,(a,b,c)=>{
     var name = b;
     var pointer = parseInt(c);
     var t = externs[name];
@@ -579,14 +579,14 @@ function assembleOpcode(code,syms,len){
   if(len==0){
     directiveArgCheck(assembleOpcode.caller.name,0,syms);
     ip++;
-    resault += tohex(code,2);
+    result += tohex(code,2);
     return;
   }
   if(len==undefined)throw "oh noo";
   if(!directiveArgCheck(assembleOpcode.caller.name,1,syms))return;
   ip += 1+len;
-  resault += tohex(code,2);
-  resault += assembleSymbol(syms[0],len);
+  result += tohex(code,2);
+  result += assembleSymbol(syms[0],len);
 }
 
 function assembleJump(code,ops){
@@ -619,26 +619,26 @@ function assembleJump(code,ops){
         var string = assembleSymbol(`${target}-0d${ip+3}`,2);
         if(code==0x70||code==0x72){
           ip += 3;
-          resault += tohex(code+1,2)+string;
+          result += tohex(code+1,2)+string;
           return;
         }
         string = assembleSymbol(`${target}-0d${ip+5}`,2);
         ip += 5;
-        resault += tohex(code^0b1,2)+"0371"+string;
+        result += tohex(code^0b1,2)+"0371"+string;
       }else{
         var diff = parseInt(target,16)-ip-2;
         if(diff>=-128&&diff<=127){
           ip += 2;
-          resault += tohex(code,2)+tohex(diff,2);
+          result += tohex(code,2)+tohex(diff,2);
           return;
         }
         if(code==0x70||code==0x72){
           ip += 3;
-          resault += tohex(code+1,2)+tohex(diff-1,4);
+          result += tohex(code+1,2)+tohex(diff-1,4);
           return;
         }
         ip += 5;
-        resault += tohex(code^0b1,2)+"0371"+tohex(diff-3,4);
+        result += tohex(code^0b1,2)+"0371"+tohex(diff-3,4);
       }
       return;
     }
@@ -726,8 +726,8 @@ function assembleLine(line){
       throw "that should never happen";
     }
 
-    resault += line;
-    resault += "00";
+    result += line;
+    result += "00";
     ip += line.length/2+1;
   }else if(line.startsWith("0x")){
     line = line.substr(2);
@@ -737,22 +737,22 @@ function assembleLine(line){
       if(line.length%2==1){
         line = '0'+line;
       }
-      resault += line;
+      result += line;
       ip += line.length/2;
     }
   }else{
     bool = assembleInstruction(line);
   }
 
-  if(line.match(/\S/)&&bool)resault += ' ';
+  if(line.match(/\S/)&&bool)result += ' ';
 }
 
 function finish(){
   var extension = path.extname(outputFilename);
   if(extension=='.crtb'){
     if(Object.keys(externs).length==0){
-      resault = "f0".repeat(startPos) + resault;
-      var buff = Buffer.from(resault, 'hex');
+      result = "f0".repeat(startPos) + result;
+      var buff = Buffer.from(result, 'hex');
       var addr = globals[crto.entryPoint];
       if(addr!=undefined&&addr>crto.startPos){
         buff[0] = 0xf1;
@@ -770,7 +770,7 @@ function finish(){
         pos:startPos,
         externs,
         globals,
-        code:resault
+        code:result
       });
       cp.exec("node linker.js "+printer.argvToString([tmpfile,"-o",outputFilename]),(a,b,c)=>{
         if(a)throw a;
@@ -785,7 +785,7 @@ function finish(){
       pos:startPos,
       externs,
       globals,
-      code:resault
+      code:result
     });
   }else{
     //todo: guess
@@ -804,16 +804,16 @@ function main(code){
 
   reeval();
 
-  resault = resault.replace(/{ф([a-zA-Z_$][a-zA-Z0-9_$]*)}/,(a,b)=>{
+  result = result.replace(/{ф([a-zA-Z_$][a-zA-Z0-9_$]*)}/,(a,b)=>{
     console.error(`error:"${b}" was never defined`);
     return "DEAD";//a.replace('ф','');
   });
 
-  console.log(resault);
+  console.log(result);
   //console.log(envlabels);
 
-  resault = resault.replace(/[ \n]/g,"");
-  if(resault.match(/[^0-9a-fA-F]/)==null){
+  result = result.replace(/[ \n]/g,"");
+  if(result.match(/[^0-9a-fA-F]/)==null){
     finish();
   }else{
     console.log('unevals:');

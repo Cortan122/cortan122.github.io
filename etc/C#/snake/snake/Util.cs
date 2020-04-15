@@ -1,4 +1,4 @@
-﻿//#define useFConsole 
+﻿//#define useFConsole
 
 using System;
 using System.IO;

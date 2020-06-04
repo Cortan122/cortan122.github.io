@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Задание с Экзаменационной Контрольной Работы №1
+/// Задание с Контрольной Работы №4
 /// </summary>
 /// <remarks>
 /// <para>Автор: Борисов Костя</para>
 /// <para>Группа: БПИ199</para>
-/// <para>Дата: 23.10.2019</para>
+/// <para>Дата: 06.06.2020</para>
 /// <para>Вариант: 0</para>
 /// </remarks>
 namespace Шаблон {
@@ -93,14 +93,33 @@ namespace Шаблон {
 
     /// <summary>
     /// Запускает f() и предлогает пользователю повторить.
+    /// В Console.ReadKey он игнорирует клавиши модификаторы
     /// </summary>
     static void Loop(Action f) {
       while (true) {
-        f();
+        try {
+          f();
+        } catch (Exception e) {
+          Console.ForegroundColor = ConsoleColor.DarkRed;
+          Console.WriteLine($"поизашёл эксепшен: {e.Message}");
+          Console.ResetColor();
+        }
         // if Console.IsOutputRedirected is True Console.ReadKey() throws an exeption
         if (Console.IsOutputRedirected)return;
         Console.WriteLine("Нажмите Enter чтобы повторить");
-        if (Console.ReadKey(true).Key != ConsoleKey.Enter)break;
+
+        // тут мы игнорируем нажатия на winkey и fn, чтобы можно было брать скрины через Win+Shift+S
+        ConsoleKey theKey = ConsoleKey.LeftWindows;
+        while (
+          theKey == ConsoleKey.LeftWindows ||
+          theKey == ConsoleKey.RightWindows ||
+          theKey == (ConsoleKey)255 // это fn (у меня)
+        ) {
+          theKey = Console.ReadKey(true).Key;
+        }
+
+        if (theKey != ConsoleKey.Enter)break;
+        Console.Clear(); // мне так посоветовал сделать Сагалов
       }
     }
 
@@ -108,7 +127,9 @@ namespace Шаблон {
     /// Открывает текстовый файл, считывает весь текст файла в строку и затем закрывает файл.
     /// если неполучилось возвращает null
     /// </summary>
-    static string TryReadAllText(string path){
+    /// <param name="file">The file to open for reading.</param>
+    /// <returns>A string containing all lines of the file.</returns>
+    static string TryReadAllText(string path) {
       try {
         return File.ReadAllText(path);
       } catch (FileNotFoundException) {
@@ -123,7 +144,43 @@ namespace Шаблон {
       return null;
     }
 
+    /// <summary>
+    /// Creates a new file, writes the specified string to the file, and then closes the file.
+    /// If the target file already exists, it is overwritten.
+    /// If we faild to write to this file returns false, else returns true.
+    /// </summary>
+    /// <returns>удолось ли нам записать в файл</returns>
+    /// <param name="encoding">The encoding to apply to the string.</param>
+    /// <param name="path">The file to write to.</param>
+    /// <param name="text">The string to write to the file.</param>
+    static bool TryWriteAllText(string path, string text, Encoding encoding = null) {
+      if (encoding == null)encoding = new UTF8Encoding(true);
+      try {
+        File.WriteAllText(path, text, encoding);
+        return true;
+      } catch (FileNotFoundException) {
+        Console.WriteLine($"Файл не существует (имя файла = {path})");
+      } catch (IOException) {
+        Console.WriteLine($"Ошибка ввода-вывода (имя файла = {path})");
+      } catch (System.Security.SecurityException) {
+        Console.WriteLine($"Ошибка безопасности (имя файла = {path})");
+      } catch (UnauthorizedAccessException) {
+        Console.WriteLine($"У вас нет разрешения на чтение файла (имя файла = {path})");
+      }
+      return false;
+    }
+
     static Random rng = new Random();
+
+    /// <summary>
+    /// генерирует рандомный дабл в промежутке
+    /// </summary>
+    /// <param name="minimum">минимальное возможное значение дабла</param>
+    /// <param name="maximum">максимальное возможное значение дабла</param>
+    /// <returns>сгенирированый дабл</returns>
+    static double RandomDouble(double minimum, double maximum) {
+      return rng.NextDouble() * (maximum - minimum) + minimum;
+    }
 
     static void Main() {
       Loop(() => {

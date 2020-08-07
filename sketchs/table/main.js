@@ -38,6 +38,14 @@ function setup() {
     $('body').css({'position':'relative'});
     var f = ()=>{
       if(totals[6]==undefined)return setTimeout(f,1);
+
+      var rows = $('table#myTable tr').slice(1);
+      for(var i = 0; i < rows.length; i++){
+        var cells = rows.eq(i).children();
+        var T = i => cells.eq(i).children("div").eq(0).text();
+        if(T(7) == "true" && T(8) == "true")totals[6] += parseInt(T(6));
+      }
+
       var b = $(`<b>${humanizeDuration(totals[6],{ units: ['h','m'] })}</b>`);
       b.css({'position':'absolute','top':$('#myTable').innerHeight(),'left':0,'margin-top':8});
       $('body').append(b);

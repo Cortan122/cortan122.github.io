@@ -201,6 +201,7 @@ function Table({
 
   function updateArrows2(jq){
     var str = jq.html();
+    str = str.replace("&nbsp;", "\u00a0");
     if(str.includes(ARROWS[0])||str.includes(ARROWS[1])){
       str = str.substr(0,str.length-2);
     }
@@ -210,7 +211,7 @@ function Table({
   function updateArrows1(jq,dir){
     updateArrows2(jq);
     var str = jq.html();
-    str = str+" "+ARROWS[+dir];
+    str = str+"&nbsp;"+ARROWS[+dir];
     jq.html(str);
   }
 

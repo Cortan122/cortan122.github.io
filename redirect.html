@@ -1,3 +1,11 @@
 <script>
-  window.location = "magnet:?xt=urn:btih:"+window.location.search.slice(1);
+  var trackers = [
+    "http://nyaa.tracker.wf:7777/announce",
+    "udp://open.stealth.si:80/announce",
+    "udp://tracker.opentrackr.org:1337/announce",
+    "udp://tracker.coppersurfer.tk:6969/announce",
+    "udp://exodus.desync.com:6969/announce",
+  ];
+  window.location = "magnet:?xt=urn:btih:"+window.location.search.slice(1) +
+    "&tr=" + trackers.map(e=>encodeURIComponent(e)).join('&tr=');
 </script>

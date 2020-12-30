@@ -53,6 +53,15 @@
   body {
     padding: 0;
   }
+
+  @keyframes rotate {
+    from {transform: rotate3d(0, 1, 0, 0deg);}
+    to {transform: rotate3d(0, 1, 0, 90deg);}
+  }
+
+  .rotating {
+    animation: 1s linear 0s infinite alternate rotate;
+  }
 </style>
 
 <div id="tester"></div>

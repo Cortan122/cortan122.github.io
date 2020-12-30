@@ -65,6 +65,13 @@ function main(){
     window.requestAnimationFrame(loop);
   };
   window.requestAnimationFrame(loop);
+
+  window.addEventListener('keydown', event => {
+    if(event.ctrlKey && event.code == "KeyS"){
+      $('.inner').toggleClass("rotating");
+      event.preventDefault();
+    }
+  });
 }
 
 $(main);

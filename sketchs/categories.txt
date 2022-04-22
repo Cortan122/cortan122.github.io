@@ -57,6 +57,20 @@
             "js": 791
         }
     },
+    "colorshift": {
+        "categories": [
+            "Unfinished"
+        ],
+        "name": "Color shift",
+        "time": 1638277740,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 80,
+            "js": 78
+        }
+    },
     "compiler": {
         "categories": [
             "Simulations",
@@ -176,7 +190,7 @@
         "categories": [
             "Unfinished"
         ],
-        "name": "Template",
+        "name": "Glyph Furnace",
         "time": 1568386200,
         "jsfiles": [
             "main.js"
@@ -478,8 +492,8 @@
             "main.js"
         ],
         "lines": {
-            "html": 71,
-            "js": 66
+            "html": 80,
+            "js": 78
         }
     },
     "sphere": {
@@ -521,7 +535,7 @@
         "time": 1520106900,
         "lines": {
             "html": 59,
-            "js": 1048
+            "js": 1057
         },
         "jsfiles": [
             "ping.js",

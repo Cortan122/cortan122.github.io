@@ -2,13 +2,13 @@
   "categories": [
     "Unfinished"
   ],
-  "name": "Glyph Furnace",
-  "time": 1568386200,
+  "name": "Color shift",
+  "time": 1638277740,
   "jsfiles": [
     "main.js"
   ],
   "lines": {
-    "html": 16,
-    "js": 90
+    "html": 80,
+    "js": 78
   }
 }

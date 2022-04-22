@@ -26,6 +26,12 @@ function setup() {
       filePath:"../../private/anime/list.php",
       defaultSortDirection:'-3',
     }).init();
+  }else if(getQueryParameterByName('dz2022')=="true"){
+    Table({
+      colFormat:["num","text","text","text","img","text","text","text","num"],
+      filePath:"../../private/anime/list/index_dz2022.php",
+      defaultSortDirection:'-3',
+    }).init();
   }else if(getQueryParameterByName('list')=="true"){
     Table({
       colFormat:["num","text","num","img","link mal","text","duration","bool","bool","bool"],

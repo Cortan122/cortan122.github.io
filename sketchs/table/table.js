@@ -1,6 +1,6 @@
 function Table({
   hiddenCols = ["category","categories",'jsfiles'],
-  colFormat = ["link","text","time",".js num4"],
+  colFormat = ["link/","text","time",".js num4"],
   filePath = "../categories.php",
   defaultSortDirection = "1",
   firstHeaderName = "path",
@@ -110,6 +110,7 @@ function Table({
   let linkOffset = filePath.substr(0,filePath.lastIndexOf('/')+1);
   const formatFunctionRom = {
     "link":(a,cell,args) => "<a href="+(a.startsWith("http")?"":linkOffset)+a+">"+(args?args.join(' '):a)+"</a>",
+    "link/": (a,cell,args) => "<a href="+(a.startsWith("http")?"":linkOffset)+a+"/ >"+(args?args.join(' '):a)+"</a>",
     "img": a => `<img class="poster" src="${a}"><img class="poster zoom" src="${a}">`,
     "bool": (a,cell) => {
       incrementTotal(+!!a,cell);
@@ -175,7 +176,7 @@ function Table({
     if(format[0] == '.'){
       var t = text[format.substr(1).split(' ')[0]];
       var func = formatFunctionRom[format.substr(1).split(' ')[1]];
-      return func(t);
+      return func(t, cell);
     }
     var args = format.split(' ');
     if(args.length > 1){

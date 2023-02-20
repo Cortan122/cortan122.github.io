@@ -402,7 +402,7 @@
       twr.toggleTweakables = (function(){
         var isTweakablesShown = this.isTweakablesShown;
         pdiv = $('#pDiv');
-        var a = canvas.offsetWidth;
+        var a = window.canvas.offsetWidth || 500;
         if(isTweakablesShown){
           pdiv.css('left','-'+a+'px').css('display','none');
         }else{

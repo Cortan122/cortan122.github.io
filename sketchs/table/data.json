@@ -1,13 +1,13 @@
 {
   "categories": [
-    "Unfinished",
+    "UI generators",
     "Images"
   ],
   "name": "Sortable json table",
   "time": 1520106900,
   "lines": {
     "html": 59,
-    "js": 1057
+    "js": 1064
   },
   "jsfiles": [
     "ping.js",

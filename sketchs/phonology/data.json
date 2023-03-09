@@ -1,6 +1,7 @@
 {
   "categories": [
-    "Failures"
+    "Failures",
+    "UI generators"
   ],
   "name": "Unicode Diacritics Experement",
   "time": 1503314100,

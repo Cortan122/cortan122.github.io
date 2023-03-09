@@ -65,7 +65,7 @@ function buildTree(data,root){
     var div = createElement('div');
     div.addClass('Content');
     if(dat.c.length == 0){
-      div.html("<a class=\"ContentL\" href="+dat.p+" onclick="+'goto("'+dat.p+'")'+">"+(dat.name||dat.p)+"</a>");
+      div.html("<a class=\"ContentL\" href="+dat.p+"/index.html onclick="+'goto("'+dat.p+'")'+">"+(dat.name||dat.p)+"</a>");
       //div.elt.setAttribute('onclick',"goto('"+dat.p+"')");
     }else{
       div.html(dat.name||dat.p);
@@ -73,7 +73,7 @@ function buildTree(data,root){
     li.child(div);
     if(dat.c.length > 0){
       buildTree(dat,li);
-    } 
+    }
   }
   return root;
 }

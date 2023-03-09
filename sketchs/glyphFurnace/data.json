@@ -1,8 +1,10 @@
 {
   "categories": [
-    "Unfinished"
+    "Unfinished",
+    "Images",
+    "UI generators"
   ],
-  "name": "Glyph Furnace",
+  "name": "Glyph Furnace (SVG generator)",
   "time": 1568386200,
   "jsfiles": [
     "main.js"

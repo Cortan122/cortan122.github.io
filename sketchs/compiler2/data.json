@@ -3,7 +3,9 @@
     "Simulations",
     "Toys",
     "Games",
-    "Unfinished"
+    "Unfinished",
+    "Compily stuff",
+    "Somewhat impressive"
   ],
   "name": "Compiler 2",
   "time": 1501184580,
@@ -17,7 +19,7 @@
     "subPixelText.js"
   ],
   "lines": {
-    "html": 27,
+    "html": 43,
     "js": 1335
   }
 }

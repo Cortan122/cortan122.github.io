@@ -1,6 +1,6 @@
 {
   "categories": [
-    "Unfinished"
+    "UI generators"
   ],
   "name": "Color shift",
   "time": 1638277740,
@@ -8,7 +8,7 @@
     "main.js"
   ],
   "lines": {
-    "html": 80,
-    "js": 78
+    "html": 16,
+    "js": 170
   }
 }

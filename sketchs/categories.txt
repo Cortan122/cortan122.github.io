@@ -204,8 +204,8 @@
             "main.js"
         ],
         "lines": {
-            "html": 16,
-            "js": 90
+            "html": 37,
+            "js": 192
         }
     },
     "gradient": {

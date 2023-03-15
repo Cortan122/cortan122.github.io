@@ -76,7 +76,48 @@ const rom = {
 
       return svgBackgroud("#706C50") + svgPath(path1, tw.stroke, "#BDBAAD", 'round') + svgPath(path2, tw.stroke, "#fff", 'round');
     }
-  }
+  },
+  "karma": {
+    setup() {
+      slider(100, 500, 130, "pixels");
+      slider(0, 50, 10, "gap");
+      slider(0, 20, 10, "stroke");
+      slider(0, 100, 51, "progress");
+      slider(0, 360, 0, "angle");
+      slider(1, 10, 4, "symmetry")[0].step = 1;
+    },
+    draw() {
+      var number = Math.round(tw.progress * (2**tw.symmetry-1) / 100).toString(2).padStart(tw.symmetry, "0");
+
+      var path = '';
+      var size = tw.pixels;
+      var r0 = size/2 - tw.gap;
+      var r1 = r0 / (1 + 1/Math.sin(Math.PI / tw.symmetry));
+      for(var i = 0; i < tw.symmetry; i++){
+        var angle = i*360/tw.symmetry + tw.angle + (tw.symmetry == 4 ? 45 : 0);
+        if(number[i] == "0"){
+          var center = polarToCartesian(size/2, size/2, r0-r1, angle);
+          path += describeArc(center.x, center.y, r1, 0, 360);
+        }else{
+          var start = polarToCartesian(size/2, size/2, r0, angle);
+          if(tw.symmetry % 2 == 1){
+            var char1 = number[(i + (tw.symmetry+1)/2) % tw.symmetry] == "1";
+            var char2 = number[(i + (tw.symmetry-1)/2) % tw.symmetry] == "1";
+            var delta = r1 / Math.tan(Math.PI / tw.symmetry);
+            if(char1 && char2)delta = tw.stroke / 2;
+          }else{
+            var delta = r0 - 2*r1;
+          }
+          var end = polarToCartesian(size/2, size/2, -delta, angle);
+          path += ["M", end.x, end.y, "L", start.x, start.y].join(' ')+'\n';
+        }
+      }
+
+      path += describeArc(size/2, size/2, r0, 0, 360);
+
+      return svgBackgroud("#000") + svgPath(path, tw.stroke, "#fff");
+    }
+  },
 };
 
 function polarToCartesian(centerX, centerY, radius, angleInDegrees){

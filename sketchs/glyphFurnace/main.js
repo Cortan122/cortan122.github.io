@@ -163,7 +163,7 @@ function svgPath(path, width, color="black", linecap="butt"){
 }
 
 function slider(min, max, value, name){
-  var res = $(`<input type="range" min="${min}" max="${max}" class="slider">`);
+  var res = $(`<input draggable="false" type="range" min="${min}" max="${max}" class="slider">`);
 
   var tr = $('<tr>').appendTo('#sliders');
   $(`<td class="name">${name}</td>`).appendTo(tr);

@@ -2,6 +2,9 @@ precision highp float;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform sampler2D uTex;
+uniform sampler2D uFlagTex;
+uniform int uColorspace;
+uniform int uMode;
 
 const float PI = 3.1415926535897932384626433;
 
@@ -137,6 +140,47 @@ vec3 rotateluv(vec3 color, float a){
   return luv2rgb(luv);
 }
 
+vec3 rotate_in_selected_colorspace(vec3 color, float a){
+  if(uColorspace == 0){
+    return rotatehsv(color, a);
+  }else if(uColorspace == 1){
+    return rotatelab(color, a);
+  }else if(uColorspace == 2){
+    return rotateluv(color, a);
+  }
+}
+
+vec3 rgb2LUV(vec3 color){
+  if(uColorspace == 0){
+    return rgb2hsv(color);
+  }else if(uColorspace == 1){
+    return rgb2lab(color);
+  }else if(uColorspace == 2){
+    return rgb2luv(color);
+  }
+}
+
+vec3 LUV2rgb(vec3 color){
+  if(uColorspace == 0){
+    return hsv2rgb(color);
+  }else if(uColorspace == 1){
+    return lab2rgb(color);
+  }else if(uColorspace == 2){
+    return luv2rgb(color);
+  }
+}
+
+vec3 merge_colors(vec3 color, vec3 flagColor){
+  vec3 colorHsv = rgb2hsv(color);
+  vec3 colorC = rgb2LUV(color);
+  vec3 flagColorC = rgb2LUV(flagColor);
+  vec3 baseColor = vec3(2., 208., 165.)/255.;
+  vec3 baseColorC = rgb2LUV(baseColor);
+
+  colorC = colorC + (flagColorC - baseColorC)*colorHsv.y;
+  return LUV2rgb(colorC);
+}
+
 void main(){
   vec2 pos = gl_FragCoord.xy/uResolution;
   pos.y = 1.-pos.y;
@@ -144,7 +188,14 @@ void main(){
 
   vec2 cpos = pos-.5;
   float a = atan(cpos.x, cpos.y)/PI/2. + .25;
-  color = rotatehsv(color, a + uTime);
+
+  if(uMode == 0){
+    color = rotate_in_selected_colorspace(color, a + uTime);
+  }else if(uMode == 1){
+    color = rotate_in_selected_colorspace(color, uTime);
+  }else if(uMode == 2){
+    color = merge_colors(color, texture2D(uFlagTex, pos).rgb);
+  }
 
   gl_FragColor = vec4(color, 1.0);
 }

@@ -1,15 +1,42 @@
 <style>
-  body,form {margin: 0;}
-  #glCanvas {
-    /* transform: scaleY(-1); */
-    border: 4px solid grey;
-    touch-action: pinch-zoom;
-    -ms-touch-action: pinch-zoom;
-    user-select: none;
+  body {
+    --chain-offset: 15px;
+    margin: 20px;
+    background-color: var(--bg-color);
+    color: var(--fg-color);
   }
 </style>
 
-<canvas id="glCanvas" width="512" height="512"></canvas>
-<br>
+<link rel="stylesheet" href="../glyphFurnace/style.css" />
+<link rel="stylesheet" href="style.css" />
+
+<div class="csh-container">
+  <div class="gf-border">
+    <canvas id="glCanvas" width="512" height="512"></canvas>
+  </div>
+
+  <div class="gf-flex gf-flex-vert">
+    <div class="gf-chainable">
+      <div class="gf-chain"></div>
+      <div class="gf-chain"></div>
+      <div class="gf-border"></div>
+      <div id="image-1"></div>
+    </div>
+
+    <div class="gf-chainable csh-hidden">
+      <div class="gf-chain"></div>
+      <div class="gf-chain"></div>
+      <div class="gf-border"></div>
+      <div id="image-2"></div>
+    </div>
+  </div>
+
+  <div class="gf-chainable">
+    <div class="gf-chain"></div>
+    <div class="gf-chain"></div>
+    <div class="gf-border"></div>
+    <table id="sliders"></table>
+  </div>
+</div>
 
 <script src="main.js"></script>

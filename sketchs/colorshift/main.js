@@ -1,5 +1,7 @@
 'use strict';
 const creationTime = Date.now();
+const tw = {};
+var time_offset = 0;
 
 const vsSource = `
   attribute vec4 aVertexPosition;
@@ -126,9 +128,10 @@ function addDummyQuad(gl, shader){
 function draw(obj){
   const {gl, canvas, uResolution, uTime} = obj;
   const initTime = Date.now();
+  const time_value = time_offset + (initTime-creationTime)/1000*tw.speed;
 
   gl.uniform2f(uResolution, canvas.width+2, canvas.height+2);
-  gl.uniform1f(uTime, (initTime-creationTime)/1000);
+  gl.uniform1f(uTime, time_value);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -147,6 +150,142 @@ function setDPI(canvas) {
   canvas.height = Math.ceil(canvas.height * scaleFactor);
 }
 
+let file_upload_id_counter = 0;
+function makeImageInput(base_element, caption, default_value, callback = ()=>{}){
+  const id = `file-upload-${file_upload_id_counter++}`;
+  base_element.classList.add("csh-file");
+
+  const title = document.createElement("span");
+  title.classList.add("csh-input-title");
+  title.innerText = caption;
+  base_element.appendChild(title);
+
+  const button = document.createElement("button");
+  button.setAttribute("type", "button");
+  const label = document.createElement("label");
+  label.setAttribute("for", id);
+  label.innerText = "Choose file";
+  button.appendChild(label);
+  base_element.appendChild(button);
+
+  const input = document.createElement("input");
+  input.setAttribute("type", "file");
+  input.setAttribute("id", id);
+  input.classList.add("csh-fake-file-input");
+  base_element.appendChild(input);
+
+  const image = document.createElement("img");
+  image.setAttribute("src", default_value);
+  image.classList.add("csh-preview");
+  base_element.appendChild(image);
+
+  input.addEventListener("dragover", () => base_element.classList.add("csh-dragging"));
+  input.addEventListener("drop", () => base_element.classList.remove("csh-dragging"));
+  input.addEventListener("dragleave", () => base_element.classList.remove("csh-dragging"));
+
+  input.addEventListener("change", event => {
+    const fileName = URL.createObjectURL(event.target.files[0]);
+    image.setAttribute("src", fileName);
+    callback(fileName);
+  });
+
+  // this fixes a race condition. i have not idea why it does that...
+  function listener() {
+    callback(default_value);
+    image.removeEventListener("load", listener);
+  }
+  image.addEventListener("load", listener);
+  return image;
+}
+
+function slider(min, max, value, name, callback = ()=>{}, map=null){
+  const base_element = document.getElementById("sliders");
+  const mapped_value = v => map ? map[v] : v;
+
+  const input = document.createElement("input");
+  input.setAttribute("draggable", "false");
+  input.setAttribute("type", "range");
+  input.setAttribute("min", min);
+  input.setAttribute("max", max);
+  input.setAttribute("id", "slider_"+name);
+  input.setAttribute("title", name);
+  input.setAttribute("step", Math.min(1, (max-min)/100));
+  input.setAttribute("value", value);
+  if(map){
+    input.setAttribute("min", 0);
+    input.setAttribute("max", map.length-1);
+    input.setAttribute("step", 1);
+  }
+
+  input.classList.add("slider");
+
+  const tr = document.createElement("tr");
+  const td_name = document.createElement("td");
+  td_name.innerText = name;
+  td_name.classList.add("name");
+  tr.appendChild(td_name);
+
+  const td_res = document.createElement("td");
+  td_res.appendChild(input);
+  tr.appendChild(td_res);
+
+  const td_text = document.createElement("td");
+  td_text.classList.add("text");
+  td_text.innerText = mapped_value(value);
+  tr.appendChild(td_text);
+  base_element.appendChild(tr);
+
+  var prevValue = tw[name] = value;
+  var update = () => {
+    if(prevValue == input.value)return;
+    var new_value = +input.value
+    callback(prevValue, new_value);
+    tw[name] = prevValue = new_value;
+    td_text.innerText = mapped_value(new_value);
+  };
+
+  input.addEventListener('change', update);
+  input.addEventListener('mousemove', update);
+
+  return input;
+}
+
+function setupInputs(gl, shaderProgram){
+  const img1 = document.getElementById("image-1");
+  makeImageInput(img1, "Image №1", "example-51051.png", file=>{
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, loadTexture(gl, file));
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uTex'), 0);
+  });
+
+  const img2 = document.getElementById("image-2");
+  makeImageInput(img2, "Image №2", "bi.png", file=>{
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, loadTexture(gl, file));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uFlagTex'), 1);
+  });
+
+  slider(.2, 2.2, .5, "speed", (old, val) => {
+    const initTime = Date.now();
+    const dt = (initTime-creationTime)/1000;
+    time_offset = time_offset + dt*old - dt*val;
+  });
+
+  slider(0, 2, 0, "colorspace", (_, val) => {
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uColorspace'), val);
+  }, ["hsv", "lab", "luv"]);
+
+  slider(0, 2, 0, "mode", (_, val) => {
+    gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uMode'), val);
+    if(val == 2){
+      img2.parentElement.classList.remove("csh-hidden");
+    }else{
+      img2.parentElement.classList.add("csh-hidden");
+    }
+  }, ["radial", "solid", "merge"]);
+}
+
 function main(fsSource){
   const canvas = document.querySelector("canvas");
   setDPI(canvas);
@@ -158,10 +297,7 @@ function main(fsSource){
   gl.useProgram(shaderProgram);
   addDummyQuad(gl, shaderProgram);
   gl.clearColor(1.0, 0.0, 1.0, 1.0);
-
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, loadTexture(gl, "example-51051.png"));
-  gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uTex'), 0);
+  setupInputs(gl, shaderProgram);
 
   draw({gl, canvas, uResolution, uTime});
 }

@@ -1,0 +1,49 @@
+.csh-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: 25px;
+  row-gap: 50px;
+}
+
+.csh-file {
+  position: relative;
+  text-align: center;
+}
+
+.csh-fake-file-input {
+  opacity: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.csh-preview {
+  width: 87px;
+  height: 87px;
+  display: block;
+  transition: transform 0.3s;
+  image-rendering: pixelated;
+}
+
+.csh-dragging {
+  transform: scale(0.9);
+}
+
+.csh-input-title {
+  display: block;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+.csh-hidden :not(.gf-chain) {
+  pointer-events: none;
+  filter: brightness(50%);
+}
+
+.csh-hidden .gf-border {
+  filter: hue-rotate(-145deg) brightness(50%) !important;
+}

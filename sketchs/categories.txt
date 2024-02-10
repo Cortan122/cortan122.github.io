@@ -67,8 +67,8 @@
             "main.js"
         ],
         "lines": {
-            "html": 16,
-            "js": 170
+            "html": 43,
+            "js": 306
         }
     },
     "compiler": {
@@ -205,7 +205,7 @@
         ],
         "lines": {
             "html": 37,
-            "js": 192
+            "js": 233
         }
     },
     "gradient": {
@@ -657,6 +657,23 @@
         "lines": {
             "html": 25,
             "js": 1419
+        }
+    },
+    "wasm_demo": {
+        "categories": [
+            "Unfinished",
+            "Toys",
+            "Math"
+        ],
+        "name": "Wasm Demo",
+        "time": 1707586629,
+        "jsfiles": [
+            "external\/library_webgl.js",
+            "rlgl.js"
+        ],
+        "lines": {
+            "html": 27,
+            "js": 122
         }
     },
     "water": {

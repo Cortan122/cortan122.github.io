@@ -1,0 +1,17 @@
+{
+  "categories": [
+    "Unfinished",
+    "Toys",
+    "Math"
+  ],
+  "name": "Wasm Demo",
+  "time": 1707586629,
+  "jsfiles": [
+    "external/library_webgl.js",
+    "rlgl.js"
+  ],
+  "lines": {
+    "html": 27,
+    "js": 122
+  }
+}

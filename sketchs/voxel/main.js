@@ -109,7 +109,7 @@ function setup(){
   scene.add( light );
 
   const loader = new THREE.TextureLoader();
-  texture = loader.load('texture.png');
+  texture = loader.load('genderfluid.png');
   texture.magFilter = THREE.NearestFilter;
   texture.minFilter = THREE.NearestFilter;
 

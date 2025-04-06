@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 /// Задание с Контрольной Работы №4
 /// </summary>
 /// <remarks>
-/// <para>Автор: Борисов Костя</para>
-/// <para>Группа: БПИ199</para>
 /// <para>Дата: 06.06.2020</para>
 /// <para>Вариант: 0</para>
 /// </remarks>

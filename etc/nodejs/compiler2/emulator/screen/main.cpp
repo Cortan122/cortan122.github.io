@@ -1,3 +1,4 @@
+#include <cstdio>
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
 #include <SFML/Graphics.hpp>
@@ -76,7 +77,7 @@ uint8_t SFKeyToChar(uint8_t keycode,bool shift){
     case sf::Keyboard::F14: return '\0';
     case sf::Keyboard::F15: return '\0';
     case sf::Keyboard::Pause: return '\0';
-    
+
     default:
       if(keycode<26){
         return keycode+(shift?'A':'a');
@@ -129,10 +130,11 @@ void zoom(sf::RenderWindow& window, int zoomLevel, float x, float y){
 int main(){
   srand((int)time(NULL));
   uint8_t* buffer = GetMappedMemoryPointer();
+  printf("buffer = %p\n", buffer);
 
   sf::RenderWindow window(sf::VideoMode(256, 256), "SFML works!");
   window.setFramerateLimit(60);
-  
+
   sf::Texture texture;
   sf::Sprite sprite;
   sprite.setScale(1,1);
@@ -181,7 +183,7 @@ int main(){
     makePixels(buffer,buffer[0xe0],buffer[0xe1]<<8);
     texture.update(pixels);
     sprite.setTexture(texture);
-    
+
     window.clear();
     window.draw(sprite);
     window.display();

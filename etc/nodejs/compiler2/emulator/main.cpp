@@ -4,7 +4,7 @@
 #include <string.h>
 #include "main.hpp"
 
-const char * filename = "./examples/out.crtb";
+const char * filename = "/mnt/c/driveB/apache/www/etc/C/emulator/examples/out.crtb";
 char currantCommand_initial[] = "0(cls)";
 char * currantCommand = &currantCommand_initial[0];
 

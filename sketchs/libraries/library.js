@@ -348,6 +348,27 @@
 
       twr.events = [];
 
+      twr.default_tweakables = Object.assign({}, window.tweakables);
+
+      twr.diffTweakables = function() {
+        var prams = {};
+        for (var k in window.tweakables) {
+          if (window.tweakables[k] != lib.tweaker.default_tweakables[k] && lib.tweaker.default_tweakables[k] !== undefined) {
+            prams[`tw_${k}`] = window.tweakables[k];
+          }
+        }
+        return prams;
+      }
+
+      twr.share = function() {
+        var prams = twr.diffTweakables();
+        var queryString = new URLSearchParams(prams).toString();
+        if (queryString == "") return;
+
+        window.history.replaceState(prams, "", "?" + queryString);
+        navigator.clipboard.writeText(window.location);
+      }
+
       twr.getQuery = function(){
         var keys = Object.keys(tweakables);
         for (var i = 0; i < keys.length; i++){
@@ -451,9 +472,14 @@
           //tweakables[name]
         }
         var li = $("<li></li>");
-        var button = $('<button value="undefined">reset</button>');
-        button.on('mousedown',new Function('localStorage["'+this.name+'"] = "";'));
+        var button = $('<button>reset</button>');
+        button.on('mousedown', new Function('localStorage["'+this.name+'"] = "";'));
         li.append(button);
+
+        var share = $('<button>share</button>');
+        share.on('mousedown', twr.share);
+        share.css("margin-left", "1em");
+        li.append(share);
         pdiv.append(li);
 
         var resizeTextbox = this.resizeTextbox;

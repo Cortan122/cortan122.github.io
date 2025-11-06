@@ -1,4 +1,35 @@
 {
+    "flowchart": {
+        "categories": [
+            "Compily stuff",
+            "Toys"
+        ],
+        "name": "Flowchart",
+        "time": 1534594320,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 106,
+            "js": 426
+        }
+    },
+    "nonograms": {
+        "categories": [
+            "Games",
+            "Somewhat impressive"
+        ],
+        "name": "Nonograms + AI",
+        "time": 1503661680,
+        "jsfiles": [
+            "main.js",
+            "AI.js"
+        ],
+        "lines": {
+            "html": 60,
+            "js": 701
+        }
+    },
     "1": {
         "category": "Simulations",
         "name": "Rockets",
@@ -177,21 +208,6 @@
             "js": 133
         }
     },
-    "flowchart": {
-        "categories": [
-            "Compily stuff",
-            "Toys"
-        ],
-        "name": "Flowchart",
-        "time": 1534594320,
-        "jsfiles": [
-            "main.js"
-        ],
-        "lines": {
-            "html": 106,
-            "js": 426
-        }
-    },
     "glyphFurnace": {
         "categories": [
             "Unfinished",
@@ -358,6 +374,20 @@
             "js": 122
         }
     },
+    "mental_spirals": {
+        "categories": [
+            "Art"
+        ],
+        "name": "Mental Spirals",
+        "time": 1762392508,
+        "jsfiles": [
+            "main.js"
+        ],
+        "lines": {
+            "html": 16,
+            "js": 2
+        }
+    },
     "network": {
         "categories": [
             "Failures",
@@ -371,22 +401,6 @@
         "lines": {
             "html": 17,
             "js": 257
-        }
-    },
-    "nonograms": {
-        "categories": [
-            "Games",
-            "Somewhat impressive"
-        ],
-        "name": "Nonograms + AI",
-        "time": 1503661680,
-        "jsfiles": [
-            "main.js",
-            "AI.js"
-        ],
-        "lines": {
-            "html": 60,
-            "js": 701
         }
     },
     "pathfinding": {

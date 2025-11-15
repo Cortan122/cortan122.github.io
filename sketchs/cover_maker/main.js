@@ -13,6 +13,8 @@ var tweakables = {
   topText: "John Johnson",
   bottomText: "Hello World",
   numberText: "7",
+  numberX: 510,
+  numberY: 560,
   hideEverything: false,
   showFPS: false,
   metaStart: true,
@@ -99,7 +101,7 @@ function draw() {
 
   ctx.textBaseline = "alphabetic";
   ctx.font = `bold ${tweakables.numberFontSize}px Theano Didot`;
-  ctx.fillText(tweakables.numberText, 510, 560);
+  ctx.fillText(tweakables.numberText, tweakables.numberX, tweakables.numberY);
 
   ctx.textBaseline = "top";
   ctx.font = `bold ${tweakables.topFontSize}px Theano Didot`;

@@ -1,0 +1,14 @@
+{
+  "categories": [
+    "Unfinished"
+  ],
+  "name": "Cover Maker",
+  "time": 1763178055,
+  "jsfiles": [
+    "main.js"
+  ],
+  "lines": {
+    "html": 25,
+    "js": 124
+  }
+}

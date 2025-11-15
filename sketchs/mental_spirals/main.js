@@ -20,7 +20,6 @@ var tweakables = {
 
 var inputRom = [
   {keys:['T'], action: 'lib.tweaker.toggleTweakables()'},
-  {keys:['S'], action: 'share()'},
 ];
 
 function setup() {

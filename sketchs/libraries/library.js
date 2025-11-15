@@ -397,7 +397,9 @@
           localStorage[this.name] = JSON.stringify(tweakables);
         }catch(e){localStorage[this.name] = '';}
         if(!$('#pDiv').length){
-          $('body').append('<ul id="pDiv" style="display: inline-block;list-style-type:none;font-size: 20;text-decoration:;position: absolute;left: -500px;overflow-y: scroll;resize: vertical;height: 95%;margin-top: 0px;"><li style="margin-top: 20px;" class="tweakables"></li></ul>');
+          var main = $('main');
+          if (!main.length) main = $('body');
+          main.append('<ul id="pDiv" style="display: inline-block;list-style-type:none;font-size: 20;text-decoration:;position: absolute;left: -500px;overflow-y: scroll;resize: vertical;height: 95%;margin-top: 0px;"><li style="margin-top: 20px;" class="tweakables"></li></ul>');
         }
         if(!lib.styleExists(/.*\.tweakables/)){
           $('head').append('<style>:not(li).tweakables {display: inline-block; *display: inline; zoom: 1; vertical-align: top;margin: 0;}.input.tweakables {width: 50;}.checkbox.tweakables {position: relative;margin: 0;top: 5px;}li.tweakables {margin-bottom: 5px;}</style>')

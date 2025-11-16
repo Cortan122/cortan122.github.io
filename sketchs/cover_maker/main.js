@@ -15,6 +15,7 @@ var tweakables = {
   numberText: "7",
   numberX: 510,
   numberY: 560,
+  invert: false,
   hideEverything: false,
   showFPS: false,
   metaStart: true,
@@ -67,24 +68,29 @@ function draw() {
   if (userImage) {
     image(userImage, 0, 0, width, height);
   } else {
-    background("#666");
+    background(tweakables.invert ? "#ddd" : "#666");
   }
 
   if (tweakables.hideEverything) return;
 
+  if (tweakables.invert) {
+    var colors = ["#afafaf", "#d8d8d8", "white"];
+  } else {
+    var colors = ["black", "#272727", "#505050"];
+  }
   const grad = ctx.createLinearGradient(0,0, 0,height);
-  grad.addColorStop(0, "black");
-  grad.addColorStop(45/700, "#505050");
-  grad.addColorStop(90/700, "black");
-  grad.addColorStop(460/700, "#272727");
-  grad.addColorStop(580/700, "#505050");
-  grad.addColorStop(1, "#272727");
+  grad.addColorStop(0, colors[0]);
+  grad.addColorStop(45/700, colors[2]);
+  grad.addColorStop(90/700, colors[0]);
+  grad.addColorStop(460/700, colors[1]);
+  grad.addColorStop(580/700, colors[2]);
+  grad.addColorStop(1, colors[1]);
 
 
   ctx.shadowOffsetX = -tweakables.shadowOffset;
   ctx.shadowOffsetY = tweakables.shadowOffset;
   ctx.shadowBlur = tweakables.shadowBlur;
-  ctx.shadowColor = 'white';
+  ctx.shadowColor = tweakables.invert ? 'black' : 'white';
   ctx.fillStyle = grad;
   ctx.textAlign = "center";
 

@@ -5,9 +5,8 @@
     "Math"
   ],
   "name": "Wasm Demo",
-  "time": 1707586629,
+  "time": 1707586303,
   "jsfiles": [
-    "external/library_webgl.js",
     "rlgl.js"
   ],
   "lines": {

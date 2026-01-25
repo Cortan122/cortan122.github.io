@@ -3,12 +3,12 @@
     "Unfinished"
   ],
   "name": "Cover Maker",
-  "time": 1763178055,
+  "time": 1763167495,
   "jsfiles": [
     "main.js"
   ],
   "lines": {
     "html": 25,
-    "js": 124
+    "js": 132
   }
 }

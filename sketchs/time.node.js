@@ -6,10 +6,14 @@ fs.readFile('dir.txt', 'utf8', function(err, contents) {
   arr = arr.filter(e => e.includes("<DIR>"));
   var arrT = arr.map(e => {
     var t = e.substr(0,17).split('  ');
-    t[0] = t[0].split('.').reverse().join('-');
+    // t[0] = t[0].split('.').reverse().join('-');
+    var americanTime = t[0].split('/');
+    var isoTime = [americanTime[2], americanTime[0], americanTime[1]];
+    t[0] = isoTime.join('-');
     return new Date(t.join('T')+":00").getTime()/1000;
   } );
   var arrN = arr.map(e => e.substr(36).replace("\r",''));
+  console.log(arrT);
 
   for (var i = 0; i < arrN.length; i++) {
     let t = i;
